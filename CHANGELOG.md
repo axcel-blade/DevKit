@@ -5,6 +5,31 @@ All notable changes to DevKit are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.4.0] - 2026-07-25
+
+### Added
+
+- `gradle` plugin: latest Gradle binary ZIP from services.gradle.org (`GRADLE_HOME` + PATH)
+- `php` plugin: latest Windows NTS x64 ZIP from downloads.php.net; system wrappers on Unix
+- `mysql` plugin: MySQL Community Server 8.4.10 LTS portable archives (`MYSQL_HOME` + PATH)
+- `node` plugin: latest Node.js LTS from nodejs.org (`NODE_HOME` + PATH; includes npm/npx)
+- `android` plugin: Android SDK cmdline-tools (`ANDROID_HOME` / `ANDROID_SDK_ROOT`; Flutter helper)
+- `install --version` / `--channel` for Flutter; `install --version` for JDK feature lines
+- Shared download progress bar (`devkit.progress`) for large SDK downloads
+- Windows CI smoke job that admin-extracts the Mono MSI and verifies `mono.exe` layout
+- Nested Mono MSI layout unit tests (Program Files / Mono / bin variants)
+
+### Changed
+
+- Documentation, wiki, SECURITY, SUPPORT, ROADMAP, and TODO updated for 0.4.0
+- CI runs unit tests with `-m "not smoke"`; dedicated Windows job for Mono MSI smoke
+
+### Removed
+
+- Unused `assets/`, `scripts/dev.py`, and duplicate root `requirements*.txt` leftovers
+
 ## [0.3.0] - 2026-07-25
 
 ### Added
@@ -47,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.4.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.2.0
 [0.1.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.1.0

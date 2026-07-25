@@ -17,6 +17,7 @@ from devkit.plugin import (
     Plugin,
     PluginStatus,
 )
+from devkit.progress import download_progress
 
 MONO_VERSION = "6.12.0.206"
 MONO_WINDOWS_URL = (
@@ -133,7 +134,13 @@ class MonoPlugin(Plugin):
 
     def _install_windows(self, ctx: InstallContext) -> InstallResult:
         print(f"Downloading Mono {MONO_VERSION} (Windows x64 MSI) ...")
-        msi = download_file(MONO_WINDOWS_URL, filename=f"mono-{MONO_VERSION}-x64.msi")
+        progress = download_progress("Downloading Mono")
+        msi = download_file(
+            MONO_WINDOWS_URL,
+            filename=f"mono-{MONO_VERSION}-x64.msi",
+            progress=progress,
+        )
+        progress.done()
         print(f"Extracting MSI into {ctx.install_dir} ...")
         extract_msi_admin(msi, ctx.install_dir)
         binary = _mono_binary(ctx)
@@ -150,10 +157,13 @@ class MonoPlugin(Plugin):
 
     def _install_macos(self, ctx: InstallContext) -> InstallResult:
         print(f"Downloading Mono {MONO_VERSION} (macOS PKG) ...")
+        progress = download_progress("Downloading Mono")
         pkg = download_file(
             MONO_MACOS_URL,
             filename=f"MonoFramework-MDK-{MONO_VERSION}.pkg",
+            progress=progress,
         )
+        progress.done()
         print(f"Extracting PKG into {ctx.install_dir} ...")
         extract_pkg(pkg, ctx.install_dir)
         binary = _mono_binary(ctx)

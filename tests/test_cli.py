@@ -55,3 +55,40 @@ def test_cli_install_uninstall(monkeypatch, tmp_path: Path, capsys):
 
 def test_cli_unknown_plugin():
     assert main(["install", "does-not-exist"]) == 1
+
+
+def test_cli_install_accepts_version_channel(monkeypatch, tmp_path: Path):
+    monkeypatch.setenv("DEVKIT_HOME", str(tmp_path / "dev"))
+
+    class FakeEnv:
+        def apply(self, spec: EnvSpec) -> None:
+            return None
+
+        def revert(self, spec: EnvSpec) -> None:
+            return None
+
+        def check(self, spec: EnvSpec) -> dict[str, bool]:
+            return {}
+
+    monkeypatch.setattr("devkit.cli.EnvManager", FakeEnv)
+
+    captured: dict = {}
+
+    def fake_install(self, ctx):
+        from devkit.platform import is_windows
+        from devkit.plugin import InstallResult
+
+        captured["version"] = ctx.version
+        captured["channel"] = ctx.channel
+        ctx.install_dir.mkdir(parents=True, exist_ok=True)
+        (ctx.install_dir / "bin").mkdir(exist_ok=True)
+        bin_name = "flutter.bat" if is_windows() else "flutter"
+        (ctx.install_dir / "bin" / bin_name).write_text("x", encoding="utf-8")
+        return InstallResult(ctx.install_dir, message="ok")
+
+    monkeypatch.setattr(
+        "devkit.plugins.flutter.FlutterPlugin.install",
+        fake_install,
+    )
+    assert main(["install", "flutter", "--channel", "beta", "--version", "3.24.0"]) == 0
+    assert captured == {"version": "3.24.0", "channel": "beta"}

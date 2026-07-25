@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "DevKit"
-version = "0.3.0"
+version = "0.4.0"
 description = "DevKit application — install developer SDKs and configure environment variables"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -26,6 +26,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "smoke: optional integration/smoke tests (network + heavy downloads)",
+]
 
 [tool.coverage.run]
 source_pkgs = ["devkit"]
