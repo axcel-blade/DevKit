@@ -5,6 +5,19 @@ All notable changes to DevKit are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-25
+
+### Added
+
+- `git` plugin: MinGit (Git for Windows) portable ZIP on Windows
+- System Git wrapper registration on macOS/Linux for the `git` plugin
+- `GIT_HOME` environment variable when Git is installed via DevKit
+
+### Changed
+
+- Documentation and wiki updated for version 0.3.0 and the Git plugin
+- Roadmap / TODO adjusted (Git plugin completed)
+
 ## [0.2.0] - 2026-07-25
 
 ### Added
@@ -34,5 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.3.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.2.0
 [0.1.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.1.0
