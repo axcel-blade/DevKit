@@ -1,9 +1,10 @@
 # Plugins
 
-DevKit **0.2.0** ships these built-in plugins:
+DevKit **0.3.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
+| `git` | MinGit ZIP on Windows; system Git wrappers on macOS/Linux |
 | `flutter` | Latest stable from Flutter release JSON |
 | `composer` | `composer.phar` + wrapper; needs PHP on PATH |
 | `jdk` | Eclipse Temurin JDK 21 via Adoptium API |

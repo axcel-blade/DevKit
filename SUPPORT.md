@@ -16,7 +16,7 @@
 
 ## What to include in a bug report
 
-- DevKit version (`python main.py --version`)
+- DevKit version (`python main.py --version`) — current is **0.3.0**
 - OS and architecture
 - Command you ran
 - Full error output
