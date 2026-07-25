@@ -4,7 +4,8 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.3.x   | Yes |
+| 0.4.x   | Yes |
+| 0.3.x   | Security fixes only |
 | 0.2.x   | Security fixes only |
 | < 0.2   | No |
 
@@ -27,7 +28,7 @@ time for investigation before any public disclosure.
 
 ## Security notes for users
 
-- DevKit downloads third-party SDK archives (Flutter, Temurin, Mono, Composer, Git for Windows / MinGit).
+- DevKit downloads third-party SDK archives (Flutter, Temurin, Mono, Composer, Git for Windows / MinGit, Gradle, PHP, MySQL, Node.js, Android cmdline-tools).
   Only use trusted networks when installing.
 - Plugins may modify **user** environment variables (Windows registry or shell profiles).
 - Review plugin code before running `install` on untrusted forks.
