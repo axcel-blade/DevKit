@@ -61,8 +61,10 @@ See [docs/plugins.md](docs/plugins.md).
 ## Commit messages
 
 - Use clear, imperative subjects (e.g. `Add Node.js plugin`).
-- Do **not** add AI or bot co-author trailers.
+- Do **not** add AI or bot co-author trailers (`Co-authored-by: Cursor`, etc.).
 - Keep commits focused; update docs when behavior changes.
+- Bump version in `VERSION`, `pyproject.toml`, `src/devkit/__init__.py`,
+  `tests/test_version.py`, and all user-facing markdown for releases.
 
 ## Pull requests
 

@@ -1,3 +1,4 @@
 """DevKit — developer environment setup application."""
 
-__version__ = "0.3.0"
+# Keep in sync with VERSION, pyproject.toml, and tests/test_version.py.
+__version__ = "0.4.0"

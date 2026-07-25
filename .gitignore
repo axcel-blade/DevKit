@@ -15,3 +15,5 @@ build/
 .vscode/
 *.ipynb_checkpoints/
 pytest-cache-files-*/
+# Accidental nested clones / local clutter
+/DevKit/

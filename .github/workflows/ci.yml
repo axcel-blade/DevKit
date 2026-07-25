@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, develop]
   pull_request:
 
 jobs:
@@ -23,6 +23,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
       - name: Test
-        run: pytest -q --cov=devkit
+        run: pytest -q --cov=devkit -m "not smoke"
       - name: App smoke (main.py)
         run: python main.py doctor
+
+  mono-msi-smoke:
+    name: Mono MSI layout (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Extract Mono MSI and verify layout
+        run: pytest -q tests/test_mono_msi_smoke.py -m smoke
+        env:
+          DEVKIT_MONO_MSI_SMOKE: "1"
