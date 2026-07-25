@@ -33,12 +33,26 @@ chmod +x devkit.sh
 
 ```bash
 python main.py install git
+python main.py install gradle
+python main.py install node
+python main.py install php
+python main.py install mysql
+python main.py install android
 python main.py install jdk
 python main.py install flutter
-python main.py status git
+python main.py status gradle
 ```
 
 After install, **open a new terminal** so PATH and env vars reload.
+
+### Flutter / JDK options
+
+```bash
+python main.py install flutter --channel beta
+python main.py install flutter --channel stable --version 3.24
+python main.py install jdk --version 17
+python main.py install jdk --version 21
+```
 
 ### Environment backends
 

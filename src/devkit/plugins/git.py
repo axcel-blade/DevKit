@@ -24,6 +24,7 @@ from devkit.plugin import (
     Plugin,
     PluginStatus,
 )
+from devkit.progress import download_progress
 
 # Git for Windows publishes portable MinGit ZIP assets (easy to extract).
 _GFW_LATEST = "https://api.github.com/repos/git-for-windows/git/releases/latest"
@@ -87,17 +88,6 @@ def resolve_mingit_url() -> tuple[str, str]:
     # Prefer the first match (API order is stable enough for a given release).
     chosen = matches[0]
     return str(chosen["browser_download_url"]), tag
-
-
-def _print_progress(downloaded: int, total: int | None) -> None:
-    if total and total > 0:
-        pct = min(100, downloaded * 100 // total)
-        mb = downloaded / (1024 * 1024)
-        total_mb = total / (1024 * 1024)
-        print(f"\rDownloading Git... {pct}% ({mb:.1f}/{total_mb:.1f} MiB)", end="", flush=True)
-    else:
-        mb = downloaded / (1024 * 1024)
-        print(f"\rDownloading Git... {mb:.1f} MiB", end="", flush=True)
 
 
 def _write_unix_wrappers(install_dir: Path, system_git: Path) -> None:
@@ -166,13 +156,14 @@ class GitPlugin(Plugin):
         print(f"Git for Windows MinGit {version}")
         print(f"URL: {url}")
         # MinGit ZIP lays out cmd/, mingw64/, etc. at the archive root.
+        progress = download_progress("Downloading Git")
         install_archive_from_url(
             url,
             ctx.install_dir,
             strip_top_level=False,
-            progress=_print_progress,
+            progress=progress,
         )
-        print()
+        progress.done()
         binary = _git_binary(ctx)
         if not binary:
             raise RuntimeError(

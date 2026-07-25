@@ -22,15 +22,22 @@ from devkit.platform import pick_for_os
 ProgressCallback = Callable[[int, int | None], None]
 
 
-def download_json(url: str) -> dict:
-    """Download a JSON document and return it as a dict."""
+def download_json_value(url: str) -> object:
+    """Download a JSON document and return the parsed value (object or array).
+
+    Node.js ``index.json`` is a top-level array; most other DevKit indexes are objects.
+    """
     try:
         with urllib.request.urlopen(url) as resp:
             raw = resp.read().decode("utf-8")
     except urllib.error.URLError as exc:
         raise RuntimeError(f"Failed to download JSON {url}: {exc}") from exc
+    return json.loads(raw)
 
-    data = json.loads(raw)
+
+def download_json(url: str) -> dict:
+    """Download a JSON document and return it as a dict."""
+    data = download_json_value(url)
     if not isinstance(data, dict):
         raise TypeError(f"Expected JSON object from {url}")
     return data

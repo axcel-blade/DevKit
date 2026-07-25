@@ -18,9 +18,19 @@ from devkit.plugin import InstallContext, InstallState
 from devkit.registry import default_registry
 
 
-def _context(plugin_id: str) -> InstallContext:
+def _context(
+    plugin_id: str,
+    *,
+    version: str | None = None,
+    channel: str | None = None,
+) -> InstallContext:
     ensure_home()
-    return InstallContext(install_dir=plugin_install_dir(plugin_id), home=home())
+    return InstallContext(
+        install_dir=plugin_install_dir(plugin_id),
+        home=home(),
+        version=version,
+        channel=channel,
+    )
 
 
 def cmd_list(_: argparse.Namespace) -> int:
@@ -46,12 +56,27 @@ def cmd_install(args: argparse.Namespace) -> int:
         print(str(exc), file=sys.stderr)
         return 1
 
-    ctx = _context(plugin.id)
+    ctx = _context(
+        plugin.id,
+        version=getattr(args, "sdk_version", None),
+        channel=getattr(args, "channel", None),
+    )
     status = plugin.status(ctx)
     if status.state == InstallState.INSTALLED and not args.force:
         print(f"{plugin.id} is already installed at {status.install_dir}")
         print("Use --force to reinstall.")
         return 0
+
+    if ctx.channel and plugin.id != "flutter":
+        print(
+            f"Note: --channel is used by the flutter plugin; ignored for {plugin.id}.",
+            file=sys.stderr,
+        )
+    if ctx.version and plugin.id not in {"flutter", "jdk"}:
+        print(
+            f"Note: --version is used by flutter/jdk; ignored for {plugin.id}.",
+            file=sys.stderr,
+        )
 
     print(f"Installing {plugin.name} ({plugin.id}) into {ctx.install_dir} ...")
     result = plugin.install(ctx)
@@ -156,6 +181,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="Reinstall even if already installed",
+    )
+    # Subcommand --version is SDK selection; top-level --version prints DevKit.
+    p_install.add_argument(
+        "--version",
+        dest="sdk_version",
+        metavar="VER",
+        help="SDK version (flutter release, or JDK feature like 17/21)",
+    )
+    p_install.add_argument(
+        "--channel",
+        metavar="NAME",
+        help="Release channel for flutter (stable, beta, or dev)",
     )
     p_install.set_defaults(func=cmd_install)
 
