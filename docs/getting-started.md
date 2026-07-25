@@ -32,9 +32,10 @@ chmod +x devkit.sh
 ## Install a tool
 
 ```bash
+python main.py install git
 python main.py install jdk
 python main.py install flutter
-python main.py status jdk
+python main.py status git
 ```
 
 After install, **open a new terminal** so PATH and env vars reload.

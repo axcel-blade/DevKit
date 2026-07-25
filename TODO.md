@@ -1,6 +1,6 @@
 # TODO
 
-Track near-term tasks for DevKit **0.2.x / 0.3.0**.
+Track near-term tasks for DevKit **0.3.x / 0.4.0**.
 
 ## In progress / next
 
@@ -12,7 +12,6 @@ Track near-term tasks for DevKit **0.2.x / 0.3.0**.
 ## Backlog
 
 - [ ] Node.js / npm plugin
-- [ ] Git plugin (official builds)
 - [ ] Android SDK / cmdline-tools helper for Flutter
 - [ ] Dry-run mode (`install --dry-run`)
 - [ ] Export/import of installed plugin manifest
@@ -22,6 +21,10 @@ Track near-term tasks for DevKit **0.2.x / 0.3.0**.
 
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
+
+## Done (0.3.0)
+
+- [x] `git` plugin (MinGit on Windows; system wrappers on Unix)
 
 ## Done (0.2.0)
 
