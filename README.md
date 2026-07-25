@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.3.0
+**Version:** 0.4.0
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -19,6 +19,11 @@ It is **not** a PyPI library. Run it from this repository.
 devkit.bat doctor
 devkit.bat list
 devkit.bat install git
+devkit.bat install gradle
+devkit.bat install php
+devkit.bat install mysql
+devkit.bat install node
+devkit.bat install android
 devkit.bat install jdk
 devkit.bat install flutter
 ```
@@ -45,9 +50,14 @@ python main.py install mono
 | Plugin | Installs | Environment |
 |--------|----------|-------------|
 | `git` | MinGit (Windows); system Git wrappers (macOS/Linux) | `PATH`, `GIT_HOME` |
-| `flutter` | Latest stable Flutter SDK | `PATH`, `FLUTTER_ROOT` |
+| `gradle` | Latest Gradle binary ZIP (all platforms) | `PATH`, `GRADLE_HOME` |
+| `node` | Latest Node.js LTS (npm / npx included) | `PATH`, `NODE_HOME` |
+| `php` | Latest PHP NTS x64 ZIP (Windows); system wrappers (Unix) | `PATH`, `PHP_HOME` |
+| `mysql` | MySQL Community Server 8.4 LTS portable archive | `PATH`, `MYSQL_HOME` |
+| `android` | Android SDK cmdline-tools (Flutter helper) | `PATH`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` |
+| `flutter` | Latest stable Flutter SDK (`--channel` / `--version`) | `PATH`, `FLUTTER_ROOT` |
 | `composer` | Composer (`composer.phar` + wrapper) | `PATH`, `COMPOSER_HOME` (needs PHP) |
-| `jdk` | Eclipse Temurin JDK 21 (LTS) | `PATH`, `JAVA_HOME` |
+| `jdk` | Eclipse Temurin JDK (default 21; `--version` for feature) | `PATH`, `JAVA_HOME` |
 | `mono` | Mono 6.12 (Win/macOS); Linux wraps system Mono | `PATH`, `MONO_HOME` |
 | `hello` | Demo ZIP install | `PATH`, `DEVKIT_HELLO_ROOT` |
 

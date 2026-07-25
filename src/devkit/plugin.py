@@ -36,10 +36,14 @@ class InstallContext:
     Attributes:
         install_dir: Target folder, e.g. ``C:\\dev\\flutter``.
         home: Machine ``dev`` root, e.g. ``C:\\dev`` (see ``DEVKIT_HOME``).
+        version: Optional SDK version / feature request from ``install --version``.
+        channel: Optional release channel from ``install --channel`` (e.g. Flutter).
     """
 
     install_dir: Path
     home: Path
+    version: str | None = None
+    channel: str | None = None
 
 
 @dataclass(frozen=True)
