@@ -1,3 +1,3 @@
 #!/usr/bin/env python
-"""Developer helper scripts live here."""
-print("myapp scripts")
+"""Optional helpers for contributors."""
+print("DevKit — run the app with: python main.py doctor")
