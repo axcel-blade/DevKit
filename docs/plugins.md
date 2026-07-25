@@ -1,13 +1,18 @@
 # Plugins
 
-DevKit **0.3.0** ships these built-in plugins:
+DevKit **0.4.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
 | `git` | MinGit ZIP on Windows; system Git wrappers on macOS/Linux |
-| `flutter` | Latest stable from Flutter release JSON |
+| `gradle` | Latest Gradle `-bin.zip` from services.gradle.org (all OS) |
+| `node` | Latest Node.js LTS from nodejs.org dist index (npm / npx included) |
+| `php` | Latest NTS x64 ZIP from downloads.php.net (Windows); system wrappers (Unix) |
+| `mysql` | MySQL Community 8.4 LTS portable ZIP/tar (binaries only; no server init) |
+| `android` | Android SDK cmdline-tools ZIP; sets `ANDROID_HOME` (no licenses / packages) |
+| `flutter` | Flutter release JSON; `--channel` (stable/beta/dev) and `--version` |
 | `composer` | `composer.phar` + wrapper; needs PHP on PATH |
-| `jdk` | Eclipse Temurin JDK 21 via Adoptium API |
+| `jdk` | Eclipse Temurin via Adoptium; `--version` selects feature (default 21) |
 | `mono` | Windows MSI / macOS PKG; Linux wraps system Mono |
 | `hello` | Offline demo of ZIP → `dev` folder → env |
 
@@ -66,5 +71,6 @@ The registry auto-discovers `Plugin` subclasses under `devkit.plugins`.
 ## Helpers
 
 - `devkit.download.install_archive_from_url` / `install_archive_from_urls`
+- `devkit.progress.download_progress` (shared progress bar for large downloads)
 - `devkit.installers.extract_msi_admin` / `extract_pkg` (Windows/macOS installers)
 - `devkit.platform.pick_for_os`, `cpu_arch`, `adoptium_os`

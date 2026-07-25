@@ -15,9 +15,28 @@ from devkit.plugin import (
     Plugin,
     PluginStatus,
 )
+from devkit.progress import download_progress
 
-# Current LTS line. Override later if DevKit grows a --version flag.
+# Default LTS line when ``install jdk`` is run without ``--version``.
 JDK_FEATURE_VERSION = 21
+
+
+def parse_jdk_feature(version: str | None) -> int:
+    """Parse a feature version from ``--version`` (``21`` or ``21.0.2`` → 21)."""
+    if version is None or not str(version).strip():
+        return JDK_FEATURE_VERSION
+    raw = str(version).strip().lower()
+    if raw.startswith("jdk"):
+        raw = raw[3:].lstrip("-")
+    major = raw.split(".", 1)[0]
+    if not major.isdigit():
+        raise RuntimeError(
+            f"Invalid JDK version '{version}'. Use a feature number like 17 or 21."
+        )
+    feature = int(major)
+    if feature < 8:
+        raise RuntimeError(f"Unsupported JDK feature version: {feature}")
+    return feature
 
 
 def temurin_download_url(feature: int = JDK_FEATURE_VERSION) -> str:
@@ -38,25 +57,14 @@ def _java_bin(ctx: InstallContext) -> Path:
     return ctx.install_dir / "bin" / "java"
 
 
-def _print_progress(downloaded: int, total: int | None) -> None:
-    if total and total > 0:
-        pct = min(100, downloaded * 100 // total)
-        mb = downloaded / (1024 * 1024)
-        total_mb = total / (1024 * 1024)
-        print(f"\rDownloading JDK... {pct}% ({mb:.1f}/{total_mb:.1f} MiB)", end="", flush=True)
-    else:
-        mb = downloaded / (1024 * 1024)
-        print(f"\rDownloading JDK... {mb:.1f} MiB", end="", flush=True)
-
-
 class JdkPlugin(Plugin):
     """Install Eclipse Temurin JDK into the machine ``dev`` folder."""
 
     id = "jdk"
     name = "JDK"
     description = (
-        f"Download Eclipse Temurin JDK {JDK_FEATURE_VERSION} (LTS) "
-        "and set JAVA_HOME / PATH."
+        f"Download Eclipse Temurin JDK (default {JDK_FEATURE_VERSION} LTS; "
+        "optional --version for feature line) and set JAVA_HOME / PATH."
     )
 
     def status(self, ctx: InstallContext) -> PluginStatus:
@@ -76,22 +84,24 @@ class JdkPlugin(Plugin):
         return PluginStatus(state=InstallState.NOT_INSTALLED, install_dir=ctx.install_dir)
 
     def install(self, ctx: InstallContext) -> InstallResult:
-        url = temurin_download_url()
-        print(f"Temurin JDK {JDK_FEATURE_VERSION}")
+        feature = parse_jdk_feature(ctx.version)
+        url = temurin_download_url(feature)
+        print(f"Temurin JDK {feature}")
         print(f"URL: {url}")
+        progress = download_progress("Downloading JDK")
         install_archive_from_url(
             url,
             ctx.install_dir,
             strip_top_level=True,
-            progress=_print_progress,
+            progress=progress,
         )
-        print()
+        progress.done()
         java = _java_bin(ctx)
         if not java.is_file():
             raise RuntimeError(f"JDK extracted but java not found at {java}")
         return InstallResult(
             install_dir=ctx.install_dir,
-            message=f"Temurin JDK {JDK_FEATURE_VERSION} installed at {ctx.install_dir}",
+            message=f"Temurin JDK {feature} installed at {ctx.install_dir}",
         )
 
     def uninstall(self, ctx: InstallContext) -> None:

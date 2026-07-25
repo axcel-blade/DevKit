@@ -1,4 +1,4 @@
-"""Flutter SDK plugin — download latest stable into the machine ``dev`` folder."""
+"""Flutter SDK plugin — download a channel/version into the machine ``dev`` folder."""
 
 from __future__ import annotations
 
@@ -15,8 +15,10 @@ from devkit.plugin import (
     Plugin,
     PluginStatus,
 )
+from devkit.progress import download_progress
 
 _RELEASES_BASE = "https://storage.googleapis.com/flutter_infra_release/releases"
+FLUTTER_CHANNELS = ("stable", "beta", "dev")
 
 
 def _releases_platform() -> str:
@@ -53,13 +55,34 @@ def _score_archive(archive: str) -> int:
     return score
 
 
-def resolve_stable_flutter_url() -> tuple[str, str]:
-    """Return ``(download_url, version)`` for the current OS stable channel."""
+def _normalize_channel(channel: str | None) -> str:
+    value = (channel or "stable").strip().lower()
+    if value not in FLUTTER_CHANNELS:
+        known = ", ".join(FLUTTER_CHANNELS)
+        raise RuntimeError(f"Unknown Flutter channel '{channel}'. Use one of: {known}")
+    return value
+
+
+def _match_version(release_version: str, requested: str) -> bool:
+    """Exact match, or prefix match (``3.24`` matches ``3.24.5``)."""
+    rv = release_version.strip()
+    req = requested.strip()
+    if rv == req:
+        return True
+    return rv.startswith(req + ".")
+
+
+def resolve_flutter_url(
+    *,
+    channel: str = "stable",
+    version: str | None = None,
+) -> tuple[str, str]:
+    """Return ``(download_url, version)`` for a Flutter channel (and optional version)."""
+    channel = _normalize_channel(channel)
     plat = _releases_platform()
     meta = download_json(f"{_RELEASES_BASE}/releases_{plat}.json")
     base_url = str(meta.get("base_url", _RELEASES_BASE)).rstrip("/")
     current = meta.get("current_release") or {}
-    stable_hash = current.get("stable")
     releases = meta.get("releases") or []
     if not isinstance(releases, list):
         raise TypeError("Unexpected Flutter releases metadata")
@@ -67,19 +90,36 @@ def resolve_stable_flutter_url() -> tuple[str, str]:
     candidates = [
         r
         for r in releases
-        if isinstance(r, dict) and r.get("channel") == "stable" and r.get("archive")
+        if isinstance(r, dict) and r.get("channel") == channel and r.get("archive")
     ]
-    if stable_hash:
-        matched = [r for r in candidates if r.get("hash") == stable_hash]
-        if matched:
-            candidates = matched
     if not candidates:
-        raise RuntimeError("No stable Flutter release found in metadata")
+        raise RuntimeError(f"No Flutter releases found for channel '{channel}'")
+
+    if version:
+        matched = [
+            r for r in candidates if _match_version(str(r.get("version") or ""), version)
+        ]
+        if not matched:
+            raise RuntimeError(
+                f"No Flutter {channel} release matching version '{version}'"
+            )
+        candidates = matched
+    else:
+        channel_hash = current.get(channel)
+        if channel_hash:
+            hashed = [r for r in candidates if r.get("hash") == channel_hash]
+            if hashed:
+                candidates = hashed
 
     best = max(candidates, key=lambda r: _score_archive(str(r["archive"])))
     archive = str(best["archive"])
-    version = str(best.get("version", "unknown"))
-    return f"{base_url}/{archive}", version
+    resolved = str(best.get("version", "unknown"))
+    return f"{base_url}/{archive}", resolved
+
+
+def resolve_stable_flutter_url() -> tuple[str, str]:
+    """Return ``(download_url, version)`` for the current OS stable channel."""
+    return resolve_flutter_url(channel="stable")
 
 
 def _flutter_bin(ctx: InstallContext):
@@ -88,23 +128,15 @@ def _flutter_bin(ctx: InstallContext):
     return ctx.install_dir / "bin" / "flutter"
 
 
-def _print_progress(downloaded: int, total: int | None) -> None:
-    if total and total > 0:
-        pct = min(100, downloaded * 100 // total)
-        mb = downloaded / (1024 * 1024)
-        total_mb = total / (1024 * 1024)
-        print(f"\rDownloading Flutter... {pct}% ({mb:.1f}/{total_mb:.1f} MiB)", end="", flush=True)
-    else:
-        mb = downloaded / (1024 * 1024)
-        print(f"\rDownloading Flutter... {mb:.1f} MiB", end="", flush=True)
-
-
 class FlutterPlugin(Plugin):
     """Install the Flutter SDK for Windows, macOS, or Linux."""
 
     id = "flutter"
     name = "Flutter"
-    description = "Download latest stable Flutter SDK into the machine dev folder."
+    description = (
+        "Download Flutter SDK into the machine dev folder "
+        "(optional --channel / --version)."
+    )
 
     def status(self, ctx: InstallContext) -> PluginStatus:
         binary = _flutter_bin(ctx)
@@ -123,16 +155,18 @@ class FlutterPlugin(Plugin):
         return PluginStatus(state=InstallState.NOT_INSTALLED, install_dir=ctx.install_dir)
 
     def install(self, ctx: InstallContext) -> InstallResult:
-        url, version = resolve_stable_flutter_url()
-        print(f"Flutter stable {version}")
+        channel = _normalize_channel(ctx.channel)
+        url, version = resolve_flutter_url(channel=channel, version=ctx.version)
+        print(f"Flutter {channel} {version}")
         print(f"URL: {url}")
+        progress = download_progress("Downloading Flutter")
         install_archive_from_url(
             url,
             ctx.install_dir,
             strip_top_level=True,
-            progress=_print_progress,
+            progress=progress,
         )
-        print()  # newline after progress
+        progress.done()
         binary = _flutter_bin(ctx)
         if not binary.is_file():
             raise RuntimeError(
@@ -140,7 +174,7 @@ class FlutterPlugin(Plugin):
             )
         return InstallResult(
             install_dir=ctx.install_dir,
-            message=f"Flutter {version} installed at {ctx.install_dir}",
+            message=f"Flutter {channel} {version} installed at {ctx.install_dir}",
         )
 
     def uninstall(self, ctx: InstallContext) -> None:
