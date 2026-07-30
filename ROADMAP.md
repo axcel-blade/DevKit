@@ -1,6 +1,6 @@
 # Roadmap
 
-High-level plans for DevKit after **0.6.0**.
+High-level plans for DevKit after **0.6.1**.
 
 ## 0.7.0 — Helpers & polish
 
@@ -21,6 +21,7 @@ High-level plans for DevKit after **0.6.0**.
 
 ## Completed
 
+- **0.6.1** — Mono MSI extract reliability on Windows CI
 - **0.6.0** — Docker image/Compose + `docker` CLI plugin
 - **0.5.0** — python/go/rust/dotnet/cmake/ninja/maven/postgresql/sqlite/kubectl/terraform/pnpm/deno/bun/platform-tools
 - **0.4.0** — `gradle`, `php`, `mysql`, `node`, `android`; install flags; progress UI; Mono MSI smoke

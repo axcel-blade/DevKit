@@ -5,33 +5,87 @@ Used by plugins such as Mono that ship platform installers instead of plain ZIP/
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
 
+def _windows_path(path: Path) -> str:
+    """Return an absolute Windows path with backslashes for msiexec."""
+    text = str(path.resolve())
+    if os.name == "nt":
+        return text.replace("/", "\\")
+    return text
+
+
 def extract_msi_admin(msi_path: Path | str, dest: Path | str) -> Path:
-    """Extract a Windows MSI into ``dest`` via ``msiexec /a`` (no full install)."""
-    msi_path = Path(msi_path)
-    dest = Path(dest)
+    """Extract a Windows MSI into ``dest`` via ``msiexec /a`` (no full install).
+
+    GitHub Actions and other CI hosts often return opaque exit 1603 when paths use
+    forward slashes or when ``TARGETDIR`` is poorly quoted. We normalize paths,
+    write a verbose log, and wait for msiexec via PowerShell ``Start-Process``.
+    """
+    msi_path = Path(msi_path).resolve()
+    dest = Path(dest).resolve()
+    if not msi_path.is_file():
+        raise FileNotFoundError(f"MSI not found: {msi_path}")
+
     if dest.exists():
         shutil.rmtree(dest)
-    dest.mkdir(parents=True, exist_ok=True)
+    # Parent only — let Windows Installer create TARGETDIR itself.
+    dest.parent.mkdir(parents=True, exist_ok=True)
 
-    # Administrative install copies payload files under TARGETDIR.
-    cmd = [
-        "msiexec",
-        "/a",
-        str(msi_path),
-        "/qn",
-        f"TARGETDIR={dest}",
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    msi_arg = _windows_path(msi_path)
+    # Trailing backslash required by many MSIs; keep it out of PS single-quotes.
+    dest_arg = _windows_path(dest).rstrip("\\") + "\\"
+    log_path = dest.parent / f"{dest.name}.msiexec.log"
+    if log_path.exists():
+        log_path.unlink()
+    log_arg = _windows_path(log_path)
+
+    # Build ArgumentList in PowerShell so a trailing '\' cannot break quoting.
+    ps_script = f"""
+$ErrorActionPreference = 'Stop'
+$msi = '{msi_arg.replace("'", "''")}'
+$dest = '{dest_arg.rstrip(chr(92)).replace("'", "''")}' + [char]92
+$log = '{log_arg.replace("'", "''")}'
+$argList = @('/a', $msi, '/qn', '/norestart', ('TARGETDIR=' + $dest), '/l*v', $log)
+$p = Start-Process -FilePath 'msiexec.exe' -ArgumentList $argList -Wait -PassThru
+if ($null -eq $p) {{ exit 1 }}
+exit $p.ExitCode
+"""
+    result = subprocess.run(
+        [
+            "powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            ps_script,
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if result.returncode != 0:
+        log_tail = ""
+        if log_path.is_file():
+            try:
+                text = log_path.read_text(encoding="utf-8", errors="replace")
+                log_tail = text[-4000:]
+            except OSError:
+                log_tail = "(could not read msiexec log)"
         raise RuntimeError(
             "msiexec failed to extract MSI "
-            f"(exit {result.returncode}): {result.stderr or result.stdout}"
+            f"(exit {result.returncode}): {result.stderr or result.stdout}\n"
+            f"Log ({log_path}):\n{log_tail}"
+        )
+    if not dest.exists() or not any(dest.iterdir()):
+        raise RuntimeError(
+            f"msiexec reported success but TARGETDIR is empty: {dest}"
         )
     return dest
 

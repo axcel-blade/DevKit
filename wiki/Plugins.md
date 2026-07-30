@@ -1,6 +1,6 @@
 # Plugins
 
-Built-in plugins in **0.6.0**: run `python main.py list` for the full set.
+Built-in plugins in **0.6.1**: run `python main.py list` for the full set.
 
 Highlights:
 
