@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.4.0
+**Version:** 0.5.0
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -18,12 +18,9 @@ It is **not** a PyPI library. Run it from this repository.
 ```bat
 devkit.bat doctor
 devkit.bat list
-devkit.bat install git
-devkit.bat install gradle
-devkit.bat install php
-devkit.bat install mysql
+devkit.bat install python
+devkit.bat install go
 devkit.bat install node
-devkit.bat install android
 devkit.bat install jdk
 devkit.bat install flutter
 ```
@@ -34,31 +31,46 @@ devkit.bat install flutter
 chmod +x devkit.sh
 ./devkit.sh doctor
 ./devkit.sh list
-./devkit.sh install jdk
+./devkit.sh install python
 ```
 
 **Any OS**
 
 ```bash
 python main.py doctor
-python main.py install composer
-python main.py install mono
+python main.py install cmake
+python main.py install kubectl
 ```
 
 ## Built-in plugins
 
 | Plugin | Installs | Environment |
 |--------|----------|-------------|
-| `git` | MinGit (Windows); system Git wrappers (macOS/Linux) | `PATH`, `GIT_HOME` |
-| `gradle` | Latest Gradle binary ZIP (all platforms) | `PATH`, `GRADLE_HOME` |
-| `node` | Latest Node.js LTS (npm / npx included) | `PATH`, `NODE_HOME` |
-| `php` | Latest PHP NTS x64 ZIP (Windows); system wrappers (Unix) | `PATH`, `PHP_HOME` |
-| `mysql` | MySQL Community Server 8.4 LTS portable archive | `PATH`, `MYSQL_HOME` |
-| `android` | Android SDK cmdline-tools (Flutter helper) | `PATH`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` |
-| `flutter` | Latest stable Flutter SDK (`--channel` / `--version`) | `PATH`, `FLUTTER_ROOT` |
-| `composer` | Composer (`composer.phar` + wrapper) | `PATH`, `COMPOSER_HOME` (needs PHP) |
-| `jdk` | Eclipse Temurin JDK (default 21; `--version` for feature) | `PATH`, `JAVA_HOME` |
-| `mono` | Mono 6.12 (Win/macOS); Linux wraps system Mono | `PATH`, `MONO_HOME` |
+| `python` | Portable CPython (python-build-standalone) | `PATH`, `PYTHON_HOME` |
+| `go` | Latest stable Go toolchain | `PATH`, `GOROOT` |
+| `rust` | Rust stable via rustup | `PATH`, `CARGO_HOME`, `RUSTUP_HOME` |
+| `dotnet` | .NET SDK 8.0 LTS | `PATH`, `DOTNET_ROOT` |
+| `node` | Latest Node.js LTS (npm / npx) | `PATH`, `NODE_HOME` |
+| `pnpm` | Latest pnpm standalone | `PATH`, `PNPM_HOME` |
+| `deno` | Latest Deno runtime | `PATH`, `DENO_INSTALL` |
+| `bun` | Latest Bun runtime | `PATH`, `BUN_INSTALL` |
+| `jdk` | Eclipse Temurin JDK (default 21; `--version`) | `PATH`, `JAVA_HOME` |
+| `maven` | Latest Apache Maven | `PATH`, `MAVEN_HOME` |
+| `gradle` | Latest Gradle binary ZIP | `PATH`, `GRADLE_HOME` |
+| `cmake` | Latest CMake binary | `PATH`, `CMAKE_HOME` |
+| `ninja` | Latest Ninja binary | `PATH`, `NINJA_HOME` |
+| `git` | MinGit (Windows); system wrappers (Unix) | `PATH`, `GIT_HOME` |
+| `php` | PHP NTS (Windows); system wrappers (Unix) | `PATH`, `PHP_HOME` |
+| `composer` | Composer PHAR + wrapper | `PATH`, `COMPOSER_HOME` |
+| `mysql` | MySQL 8.4 LTS portable | `PATH`, `MYSQL_HOME` |
+| `postgresql` | EDB Windows binaries; system wrappers (Unix) | `PATH`, `POSTGRESQL_HOME` |
+| `sqlite` | Official sqlite-tools CLI | `PATH`, `SQLITE_HOME` |
+| `android` | Android SDK cmdline-tools | `PATH`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` |
+| `platform-tools` | Android platform-tools (`adb`) | `PATH`, `ANDROID_PLATFORM_TOOLS` |
+| `flutter` | Flutter SDK (`--channel` / `--version`) | `PATH`, `FLUTTER_ROOT` |
+| `kubectl` | Latest stable kubectl | `PATH`, `KUBECTL_HOME` |
+| `terraform` | Latest Terraform | `PATH`, `TERRAFORM_HOME` |
+| `mono` | Mono 6.12 (Win/macOS); system wrappers (Linux) | `PATH`, `MONO_HOME` |
 | `hello` | Demo ZIP install | `PATH`, `DEVKIT_HELLO_ROOT` |
 
 Default install root:
