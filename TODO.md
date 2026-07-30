@@ -1,6 +1,6 @@
 # TODO
 
-Track near-term tasks for DevKit **0.6.0 / 1.0.0**.
+Track near-term tasks for DevKit **0.7.0 / 1.0.0**.
 
 ## In progress / next
 
@@ -13,12 +13,19 @@ _(none — see Backlog)_
 - [ ] Signed release binaries (PyInstaller / platform packages)
 - [ ] Optional MySQL/PostgreSQL data-dir init / Android `sdkmanager` license helpers
 - [ ] Shared download checksum verification
-- [ ] Redis / Docker CLI / Yarn plugins (optional)
+- [ ] Redis / Yarn plugins (optional)
+- [ ] Docker Compose helper that wires `DOCKER_HOST` for remote engines
 
 ## Docs
 
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
+
+## Done (0.6.0)
+
+- [x] Docker image + Compose for running DevKit
+- [x] `docker` plugin (static CLI client)
+- [x] docs/docker.md
 
 ## Done (0.5.0)
 
