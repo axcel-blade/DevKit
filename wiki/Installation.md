@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 0.5.0**
+**DevKit 0.6.0**
 
 Clone the repository, then from the root:
 
@@ -19,3 +19,11 @@ python main.py install jdk --version 17
 ```
 
 See [docs/getting-started.md](../docs/getting-started.md) for full details.
+
+Docker image:
+
+```bash
+docker compose run --rm devkit doctor
+```
+
+See [docs/docker.md](../docs/docker.md).

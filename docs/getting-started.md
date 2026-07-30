@@ -45,6 +45,15 @@ python main.py status gradle
 
 After install, **open a new terminal** so PATH and env vars reload.
 
+### Run via Docker
+
+```bash
+docker compose run --rm devkit doctor
+docker compose run --rm devkit install hello
+```
+
+See [docker.md](docker.md).
+
 ### Flutter / JDK options
 
 ```bash
