@@ -65,6 +65,7 @@ See [docs/plugins.md](docs/plugins.md).
 - Keep commits focused; update docs when behavior changes.
 - Bump version in `VERSION`, `pyproject.toml`, `src/devkit/__init__.py`,
   `tests/test_version.py`, and all user-facing markdown for releases.
+  Prefer the plain `VERSION` file (not `VERSION.md`).
 
 ## Pull requests
 
