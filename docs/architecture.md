@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.6.0** is a CLI application with a plugin pipeline.
+DevKit **0.6.1** is a CLI application with a plugin pipeline.
 
 ```text
 main.py / devkit.bat / devkit.sh
@@ -34,4 +34,4 @@ Uninstall reverses those entries, then deletes the install directory.
 
 ## Plugins
 
-Plugins are plain Python classes. No separate package index in 0.6.0 — add modules under `src/devkit/plugins/`.
+Plugins are plain Python classes. No separate package index in 0.6.1 — add modules under `src/devkit/plugins/`.
