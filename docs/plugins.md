@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.5.0** ships these built-in plugins:
+DevKit **0.6.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -27,6 +27,7 @@ DevKit **0.5.0** ships these built-in plugins:
 | `platform-tools` | Android `adb` / fastboot ZIP |
 | `flutter` | `--channel` (stable/beta/dev) and `--version` |
 | `kubectl` | Latest stable from dl.k8s.io |
+| `docker` | Official static Docker CLI (client only; no engine) |
 | `terraform` | Latest from HashiCorp releases |
 | `mono` | Windows MSI / macOS PKG; Linux system wrappers |
 | `hello` | Offline demo of ZIP → `dev` folder → env |
