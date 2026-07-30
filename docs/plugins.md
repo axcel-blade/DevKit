@@ -1,19 +1,34 @@
 # Plugins
 
-DevKit **0.4.0** ships these built-in plugins:
+DevKit **0.5.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
-| `git` | MinGit ZIP on Windows; system Git wrappers on macOS/Linux |
-| `gradle` | Latest Gradle `-bin.zip` from services.gradle.org (all OS) |
-| `node` | Latest Node.js LTS from nodejs.org dist index (npm / npx included) |
-| `php` | Latest NTS x64 ZIP from downloads.php.net (Windows); system wrappers (Unix) |
-| `mysql` | MySQL Community 8.4 LTS portable ZIP/tar (binaries only; no server init) |
-| `android` | Android SDK cmdline-tools ZIP; sets `ANDROID_HOME` (no licenses / packages) |
-| `flutter` | Flutter release JSON; `--channel` (stable/beta/dev) and `--version` |
-| `composer` | `composer.phar` + wrapper; needs PHP on PATH |
-| `jdk` | Eclipse Temurin via Adoptium; `--version` selects feature (default 21) |
-| `mono` | Windows MSI / macOS PKG; Linux wraps system Mono |
+| `python` | Portable CPython via python-build-standalone |
+| `go` | Latest stable from go.dev/dl JSON |
+| `rust` | rustup stable into `CARGO_HOME` / `RUSTUP_HOME` |
+| `dotnet` | .NET SDK 8.0 LTS ZIP from Microsoft release metadata |
+| `node` | Latest Node.js LTS (npm / npx) |
+| `pnpm` | Latest pnpm standalone ZIP/tar from GitHub |
+| `deno` | Latest Deno ZIP from GitHub |
+| `bun` | Latest Bun ZIP from GitHub |
+| `jdk` | Temurin via Adoptium; `--version` selects feature (default 21) |
+| `maven` | Latest Apache Maven 3.x binary ZIP |
+| `gradle` | Latest Gradle `-bin.zip` |
+| `cmake` | Latest Kitware CMake binary |
+| `ninja` | Latest ninja-build binary ZIP |
+| `git` | MinGit on Windows; system wrappers on Unix |
+| `php` | Windows NTS ZIP; system wrappers on Unix |
+| `composer` | `composer.phar` + wrapper; needs PHP |
+| `mysql` | MySQL 8.4 LTS portable (binaries only) |
+| `postgresql` | EDB Windows binaries; system client wrappers on Unix |
+| `sqlite` | Official sqlite-tools from sqlite.org |
+| `android` | Android SDK cmdline-tools |
+| `platform-tools` | Android `adb` / fastboot ZIP |
+| `flutter` | `--channel` (stable/beta/dev) and `--version` |
+| `kubectl` | Latest stable from dl.k8s.io |
+| `terraform` | Latest from HashiCorp releases |
+| `mono` | Windows MSI / macOS PKG; Linux system wrappers |
 | `hello` | Offline demo of ZIP → `dev` folder → env |
 
 ## Authoring a plugin
@@ -72,5 +87,6 @@ The registry auto-discovers `Plugin` subclasses under `devkit.plugins`.
 
 - `devkit.download.install_archive_from_url` / `install_archive_from_urls`
 - `devkit.progress.download_progress` (shared progress bar for large downloads)
+- `devkit.plugin_utils.github_latest_release` / `pick_release_asset` / `binary_status`
 - `devkit.installers.extract_msi_admin` / `extract_pkg` (Windows/macOS installers)
 - `devkit.platform.pick_for_os`, `cpu_arch`, `adoptium_os`

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-30
+
+### Added
+
+- Plugins: `python`, `go`, `rust`, `dotnet`, `cmake`, `ninja`, `maven`
+- Plugins: `postgresql`, `sqlite`, `kubectl`, `terraform`, `pnpm`, `deno`, `bun`
+- Plugin: `platform-tools` (Android `adb` / fastboot companion)
+- Shared `devkit.plugin_utils` helpers for GitHub releases and binary status
+
+### Changed
+
+- Documentation, wiki, SECURITY, SUPPORT, ROADMAP, and TODO updated for 0.5.0
+- Restored plain `VERSION` file as the canonical version source (not `VERSION.md`)
+
 ## [0.4.0] - 2026-07-25
 
 ### Added
@@ -72,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.5.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.5.0
 [0.4.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.3.0
 [0.2.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.2.0

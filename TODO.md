@@ -1,6 +1,6 @@
 # TODO
 
-Track near-term tasks for DevKit **0.5.0 / 1.0.0**.
+Track near-term tasks for DevKit **0.6.0 / 1.0.0**.
 
 ## In progress / next
 
@@ -11,13 +11,21 @@ _(none — see Backlog)_
 - [ ] Dry-run mode (`install --dry-run`)
 - [ ] Export/import of installed plugin manifest
 - [ ] Signed release binaries (PyInstaller / platform packages)
-- [ ] Optional MySQL data-dir init / license accept helpers for Android `sdkmanager`
+- [ ] Optional MySQL/PostgreSQL data-dir init / Android `sdkmanager` license helpers
 - [ ] Shared download checksum verification
+- [ ] Redis / Docker CLI / Yarn plugins (optional)
 
 ## Docs
 
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
+
+## Done (0.5.0)
+
+- [x] `python`, `go`, `rust`, `dotnet`, `cmake`, `ninja`, `maven`
+- [x] `postgresql`, `sqlite`, `kubectl`, `terraform`
+- [x] `pnpm`, `deno`, `bun`, `platform-tools`
+- [x] Shared `devkit.plugin_utils` helpers
 
 ## Done (0.4.0)
 

@@ -1,14 +1,16 @@
 # Plugins
 
-Built-in plugins in **0.4.0**: `git`, `gradle`, `node`, `php`, `mysql`, `android`, `flutter`, `composer`, `jdk`, `mono`, `hello`.
+Built-in plugins in **0.5.0**: run `python main.py list` for the full set.
+
+Highlights:
 
 ```bash
-python main.py list
-python main.py install node
-python main.py install android
-python main.py install php
-python main.py install mysql
-python main.py install git
+python main.py install python
+python main.py install go
+python main.py install rust
+python main.py install cmake
+python main.py install platform-tools
+python main.py install kubectl
 ```
 
 Authoring guide: [docs/plugins.md](../docs/plugins.md).
