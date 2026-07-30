@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-30
+
+### Added
+
+- Docker packaging: `Dockerfile`, `docker-compose.yml`, `.dockerignore`, and [docs/docker.md](docs/docker.md)
+- `docker` plugin: official static Docker CLI client (`DOCKER_HOME` + PATH)
+
+### Changed
+
+- Documentation, wiki, SECURITY, SUPPORT, ROADMAP, and TODO updated for 0.6.0
+
 ## [0.5.0] - 2026-07-30
 
 ### Added
@@ -86,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.6.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.6.0
 [0.5.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.5.0
 [0.4.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.3.0

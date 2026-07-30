@@ -1,15 +1,16 @@
 # Roadmap
 
-High-level plans for DevKit after **0.5.0**.
+High-level plans for DevKit after **0.6.0**.
 
-## 0.6.0 — Helpers & polish
+## 0.7.0 — Helpers & polish
 
 - Shared download checksum verification
 - Optional MySQL/PostgreSQL data-dir init helper after binary install
 - Android `sdkmanager` license helper
 - `devkit doctor flutter` deep checks (wraps `flutter doctor` when installed)
 - Mirror / offline cache documentation
-- Optional Redis / Docker CLI plugins
+- Optional Redis / Yarn plugins
+- Docker Compose helper that wires `DOCKER_HOST` for remote engines
 
 ## 1.0.0 — Stable application
 
@@ -20,6 +21,7 @@ High-level plans for DevKit after **0.5.0**.
 
 ## Completed
 
+- **0.6.0** — Docker image/Compose + `docker` CLI plugin
 - **0.5.0** — python/go/rust/dotnet/cmake/ninja/maven/postgresql/sqlite/kubectl/terraform/pnpm/deno/bun/platform-tools
 - **0.4.0** — `gradle`, `php`, `mysql`, `node`, `android`; install flags; progress UI; Mono MSI smoke
 - **0.3.0** — Git plugin (MinGit / system wrappers)
