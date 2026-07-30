@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.5.0
+**Version:** 0.6.0
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -40,7 +40,18 @@ chmod +x devkit.sh
 python main.py doctor
 python main.py install cmake
 python main.py install kubectl
+python main.py install docker
 ```
+
+### Docker
+
+```bash
+docker build -t devkit .
+docker run --rm -e DEVKIT_HOME=/devkit -v devkit-data:/devkit devkit doctor
+docker compose run --rm devkit list
+```
+
+See [docs/docker.md](docs/docker.md).
 
 ## Built-in plugins
 
@@ -69,6 +80,7 @@ python main.py install kubectl
 | `platform-tools` | Android platform-tools (`adb`) | `PATH`, `ANDROID_PLATFORM_TOOLS` |
 | `flutter` | Flutter SDK (`--channel` / `--version`) | `PATH`, `FLUTTER_ROOT` |
 | `kubectl` | Latest stable kubectl | `PATH`, `KUBECTL_HOME` |
+| `docker` | Official static Docker CLI (client only) | `PATH`, `DOCKER_HOME` |
 | `terraform` | Latest Terraform | `PATH`, `TERRAFORM_HOME` |
 | `mono` | Mono 6.12 (Win/macOS); system wrappers (Linux) | `PATH`, `MONO_HOME` |
 | `hello` | Demo ZIP install | `PATH`, `DEVKIT_HELLO_ROOT` |
@@ -85,6 +97,7 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 | Doc | Purpose |
 |-----|---------|
 | [docs/getting-started.md](docs/getting-started.md) | Run and install tools |
+| [docs/docker.md](docs/docker.md) | Run DevKit in Docker / install Docker CLI |
 | [docs/plugins.md](docs/plugins.md) | Write a plugin |
 | [docs/architecture.md](docs/architecture.md) | How DevKit works |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
