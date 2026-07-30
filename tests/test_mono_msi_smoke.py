@@ -17,12 +17,24 @@ from devkit.progress import download_progress
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform != "win32", reason="Mono MSI smoke is Windows-only")
 def test_mono_msi_admin_extract_layout(tmp_path: Path):
-    """Real msiexec /a extract — run on windows-latest in CI."""
+    """Real msiexec /a extract — run on windows-latest in CI.
+
+    Uses a short path under RUNNER_TEMP (or the drive temp root) because long
+    pytest tmp paths under AppData have caused msiexec exit 1603 on Actions.
+    """
     if os.environ.get("DEVKIT_MONO_MSI_SMOKE") != "1":
         pytest.skip("Set DEVKIT_MONO_MSI_SMOKE=1 to run Mono MSI smoke")
 
-    # Point DevKit cache at tmp so we do not pollute the runner home.
-    os.environ["DEVKIT_HOME"] = str(tmp_path / "dev")
+    # Prefer short CI paths; fall back to pytest tmp for local runs.
+    root = Path(os.environ.get("RUNNER_TEMP") or os.environ.get("TEMP") or tmp_path)
+    work = root / "devkit-mono-msi-smoke"
+    if work.exists():
+        import shutil
+
+        shutil.rmtree(work)
+    work.mkdir(parents=True)
+
+    os.environ["DEVKIT_HOME"] = str(work / "dev")
 
     progress = download_progress("Downloading Mono MSI (smoke)")
     msi = download_file(
@@ -33,7 +45,7 @@ def test_mono_msi_admin_extract_layout(tmp_path: Path):
     progress.done()
     assert msi.is_file() and msi.stat().st_size > 1_000_000
 
-    dest = tmp_path / "mono-extract"
+    dest = work / "extract"
     extract_msi_admin(msi, dest)
     bin_dir = _find_mono_bin_dir(dest)
     assert bin_dir is not None, f"mono.exe not found under {dest}"
