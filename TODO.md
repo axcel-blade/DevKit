@@ -21,6 +21,12 @@ _(none — see Backlog)_
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.6.1)
+
+- [x] Harden Mono MSI `msiexec` extract for Windows CI
+- [x] Short smoke work dir under `RUNNER_TEMP` / `TEMP`
+- [x] Unit tests for MSI path helpers
+
 ## Done (0.6.0)
 
 - [x] Docker image + Compose for running DevKit
