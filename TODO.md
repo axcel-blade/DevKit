@@ -1,6 +1,6 @@
 # TODO
 
-Track near-term tasks for DevKit **0.8.0 / 1.0.0**.
+Track near-term tasks for DevKit **0.9.0 / 1.0.0**.
 
 ## In progress / next
 
@@ -21,15 +21,21 @@ _(none — see Backlog)_
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.8.0)
+
+- [x] `devkit menu` — interactive install/uninstall picker
+- [x] `devkit.bat` / `devkit.sh` auto-bootstrap a Rust toolchain via rustup
+      (with an internet check first) when `cargo` isn't already on PATH
+- [x] Internet connectivity check before any plugin download
+- [x] Docker packaging removed (`Dockerfile`, `docker-compose.yml`,
+      `docs/docker.md`); `.pre-commit-config.yaml` removed
+
 ## Done (0.7.0)
 
 - [x] Full rewrite from Python to Rust — same CLI, same plugin behavior
 - [x] All 27 plugins ported to the `Plugin` trait
 - [x] `cargo test` unit + integration suite replacing `pytest`
 - [x] CI matrix on `cargo fmt` / `clippy` / `test` (Windows/macOS/Linux)
-- [x] `devkit menu` — interactive install/uninstall picker
-- [x] `devkit.bat` / `devkit.sh` auto-bootstrap a Rust toolchain via rustup
-      (with an internet check first) when `cargo` isn't already on PATH
 
 ## Done (0.6.1)
 
