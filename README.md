@@ -8,14 +8,22 @@ It is **not** a published crate. Run it from this repository.
 
 ## Requirements
 
-- Rust toolchain (`cargo`) — install via [rustup.rs](https://rustup.rs)
 - Windows, macOS, or Linux
+- A Rust toolchain (`cargo`) — `devkit.bat` / `devkit.sh` install one for you
+  automatically via [rustup](https://rustup.rs) if `cargo` isn't already on
+  PATH (checking for internet access first); install manually beforehand if
+  you'd rather control that yourself.
 
 ## Quick start
+
+Running either launcher with **no arguments** opens an interactive menu
+listing every plugin with its install status — pick a number to install or
+uninstall it, `q` to quit.
 
 **Windows**
 
 ```bat
+devkit.bat
 devkit.bat doctor
 devkit.bat list
 devkit.bat install python
@@ -29,6 +37,7 @@ devkit.bat install flutter
 
 ```bash
 chmod +x devkit.sh
+./devkit.sh
 ./devkit.sh doctor
 ./devkit.sh list
 ./devkit.sh install python

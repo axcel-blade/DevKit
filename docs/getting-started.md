@@ -2,8 +2,11 @@
 
 ## Requirements
 
-- Rust toolchain (`cargo`) — install via [rustup.rs](https://rustup.rs)
-- Network access for SDK downloads
+- A Rust toolchain (`cargo`). If you use `devkit.bat` / `devkit.sh`, they'll
+  check for internet access and install one for you via
+  [rustup](https://rustup.rs) when `cargo` isn't already on PATH; running
+  `cargo run` directly requires one already installed.
+- Network access for SDK downloads (and for the Rust bootstrap above, if needed)
 - Write access to the `dev` install root (or set `DEVKIT_HOME`)
 
 ## Run DevKit
@@ -16,17 +19,25 @@ cargo run --release -- doctor
 cargo run --release -- list
 ```
 
-Windows shortcut:
+Windows shortcut (bootstraps Rust via rustup if `cargo` isn't found):
 
 ```bat
 devkit.bat doctor
 ```
 
-macOS / Linux:
+macOS / Linux (same bootstrap behavior):
 
 ```bash
 chmod +x devkit.sh
 ./devkit.sh doctor
+```
+
+Either launcher run with **no arguments** opens an interactive menu instead —
+lists every plugin with its status and lets you pick a number to install or
+uninstall it:
+
+```bash
+./devkit.sh        # or: devkit.bat
 ```
 
 ## Install a tool
