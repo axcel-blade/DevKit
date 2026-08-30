@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 
 /// Fetch the latest GitHub release JSON for `owner/repo`.
 pub fn github_latest_release(owner: &str, repo: &str) -> Result<Value> {
+    crate::download::ensure_internet_access()?;
     let url = format!("https://api.github.com/repos/{owner}/{repo}/releases/latest");
     let resp = ureq::get(&url)
         .set("User-Agent", "DevKit")
@@ -102,6 +103,7 @@ pub fn find_files_named(root: &Path, name: &str) -> Vec<PathBuf> {
 
 /// Download a small text document (e.g. kubectl stable.txt).
 pub fn read_text_url(url: &str) -> Result<String> {
+    crate::download::ensure_internet_access()?;
     let resp = ureq::get(url)
         .set("User-Agent", "DevKit")
         .call()

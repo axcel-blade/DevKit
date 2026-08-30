@@ -7,12 +7,54 @@ use crate::platform::pick_for_os;
 use anyhow::{bail, Context, Result};
 use std::fs;
 use std::io::Read;
+use std::net::{TcpStream, ToSocketAddrs};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 pub type ProgressCallback<'a> = &'a mut dyn FnMut(u64, Option<u64>);
 
+/// Well-known, highly-available hosts to probe for connectivity. Several are
+/// tried (rather than just one) so a single blocked or momentarily-slow host
+/// doesn't produce a false "offline" result.
+const CONNECTIVITY_PROBES: &[(&str, u16)] =
+    &[("github.com", 443), ("1.1.1.1", 443), ("8.8.8.8", 443)];
+
+const CONNECTIVITY_TIMEOUT: Duration = Duration::from_secs(2);
+
+/// Return whether the network appears reachable, without downloading
+/// anything. Used to fail fast with a clear message before a plugin's real
+/// download attempt fails deep in the stack with a cryptic I/O error.
+pub fn has_internet_access() -> bool {
+    for (host, port) in CONNECTIVITY_PROBES {
+        let Ok(mut addrs) = (*host, *port).to_socket_addrs() else {
+            continue;
+        };
+        if let Some(addr) = addrs.next() {
+            if TcpStream::connect_timeout(&addr, CONNECTIVITY_TIMEOUT).is_ok() {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+/// Check connectivity and return a friendly error if the network is
+/// unreachable. Call this before any function in this module that hits the
+/// network, so plugin installs fail fast with an actionable message instead
+/// of a raw connection-refused/timeout error from deep inside a download.
+pub fn ensure_internet_access() -> Result<()> {
+    if has_internet_access() {
+        return Ok(());
+    }
+    bail!(
+        "No internet connection detected. Installing SDKs downloads files over \
+         the network — check your connection and try again."
+    )
+}
+
 /// Download a JSON document and return the parsed value (object or array).
 pub fn download_json_value(url: &str) -> Result<serde_json::Value> {
+    ensure_internet_access()?;
     let resp = ureq::get(url)
         .set("User-Agent", "DevKit")
         .call()
@@ -72,6 +114,7 @@ pub fn download_file(
     mut progress: Option<ProgressCallback>,
 ) -> Result<PathBuf> {
     ensure_home()?;
+    ensure_internet_access()?;
     let resp = ureq::get(url)
         .set("User-Agent", "DevKit")
         .call()
@@ -334,6 +377,23 @@ pub fn install_zip_file(zip_path: &Path, dest: &Path, strip_top_level: bool) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn has_internet_access_does_not_panic() {
+        // Result depends on the test runner's network access, so this only
+        // exercises the code path rather than asserting a specific outcome.
+        let _ = has_internet_access();
+    }
+
+    #[test]
+    fn ensure_internet_access_error_message_is_actionable() {
+        // Can't force an offline result without mocking the network, but a
+        // failing check must produce a clear, non-empty message.
+        if !has_internet_access() {
+            let err = ensure_internet_access().unwrap_err();
+            assert!(err.to_string().contains("internet"));
+        }
+    }
 
     #[test]
     fn unique_top_level_detects_common_root() {

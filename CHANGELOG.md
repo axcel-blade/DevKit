@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Internet connectivity check before any plugin download. `download_file`,
+  `download_json`/`download_json_value`, `plugin_utils::github_latest_release`,
+  and `plugin_utils::read_text_url` now probe a few well-known hosts first and
+  fail fast with a clear "No internet connection detected" message instead of
+  a raw connection error deep inside a plugin's install step. `devkit doctor`
+  now also reports an `Internet: yes/no` line (advisory only — doesn't fail
+  the command, since `doctor` is still useful offline).
+
 ## [0.7.0] - 2026-08-30
 
 ### Changed

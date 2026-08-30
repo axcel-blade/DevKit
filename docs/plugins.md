@@ -93,6 +93,9 @@ runtime module scan, so every plugin is listed explicitly there.
 ## Helpers
 
 - `crate::download::install_archive_from_url` / `install_archive_from_urls`
+- `crate::download::ensure_internet_access` / `has_internet_access` (call before
+  any custom network request that doesn't already go through `download`/
+  `plugin_utils` — see below)
 - `crate::progress::download_progress` (shared progress bar for large downloads)
 - `crate::plugin_utils::github_latest_release` / `pick_release_asset` / `binary_status` / `find_files_named`
 - `crate::installers::extract_msi_admin` / `extract_pkg` (Windows/macOS installers)
