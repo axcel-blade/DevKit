@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python **3.12+**
+- Rust toolchain (`cargo`) — install via [rustup.rs](https://rustup.rs)
 - Network access for SDK downloads
 - Write access to the `dev` install root (or set `DEVKIT_HOME`)
 
@@ -11,9 +11,9 @@
 From the repository root:
 
 ```bash
-python main.py --version
-python main.py doctor
-python main.py list
+cargo run --release -- --version
+cargo run --release -- doctor
+cargo run --release -- list
 ```
 
 Windows shortcut:
@@ -32,15 +32,15 @@ chmod +x devkit.sh
 ## Install a tool
 
 ```bash
-python main.py install git
-python main.py install gradle
-python main.py install node
-python main.py install php
-python main.py install mysql
-python main.py install android
-python main.py install jdk
-python main.py install flutter
-python main.py status gradle
+cargo run --release -- install git
+cargo run --release -- install gradle
+cargo run --release -- install node
+cargo run --release -- install php
+cargo run --release -- install mysql
+cargo run --release -- install android
+cargo run --release -- install jdk
+cargo run --release -- install flutter
+cargo run --release -- status gradle
 ```
 
 After install, **open a new terminal** so PATH and env vars reload.
@@ -57,10 +57,10 @@ See [docker.md](docker.md).
 ### Flutter / JDK options
 
 ```bash
-python main.py install flutter --channel beta
-python main.py install flutter --channel stable --version 3.24
-python main.py install jdk --version 17
-python main.py install jdk --version 21
+cargo run --release -- install flutter --channel beta
+cargo run --release -- install flutter --channel stable --version 3.24
+cargo run --release -- install jdk --version 17
+cargo run --release -- install jdk --version 21
 ```
 
 ### Environment backends
@@ -76,17 +76,17 @@ python main.py install jdk --version 21
 ```bash
 # Windows PowerShell
 $env:DEVKIT_HOME = "D:\dev"
-python main.py install hello
+cargo run --release -- install hello
 
 # Unix
 export DEVKIT_HOME="$HOME/my-dev"
-python main.py install hello
+cargo run --release -- install hello
 ```
 
 ## Uninstall
 
 ```bash
-python main.py uninstall hello
+cargo run --release -- uninstall hello
 ```
 
 Removes files under the `dev` folder and reverses PATH/env entries DevKit added.

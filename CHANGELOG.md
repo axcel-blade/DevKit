@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-30
+
+### Changed
+
+- **Rewrote DevKit from Python to Rust.** Same CLI (`list`/`install`/`uninstall`/
+  `status`/`doctor`), same plugin behavior, same install layout — now a single
+  `cargo build --release` binary instead of a `python main.py` script. All 27
+  plugins ported 1:1; `devkit.bat` / `devkit.sh` now build-and-forward to the
+  compiled binary; Dockerfile is a multi-stage Rust build; CI runs
+  `cargo fmt` / `clippy` / `test` across the OS matrix instead of `pytest`.
+- Replaced the Python packaging files (`pyproject.toml`, `main.py`, `src/devkit/`,
+  the `pytest` suite) with a single Cargo crate (`Cargo.toml`, `src/`, `tests/`).
+
 ## [0.6.1] - 2026-07-30
 
 ### Fixed
@@ -108,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.7.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.7.0
 [0.6.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.6.1
 [0.6.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.6.0
 [0.5.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.5.0

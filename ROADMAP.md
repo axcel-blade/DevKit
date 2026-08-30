@@ -1,8 +1,8 @@
 # Roadmap
 
-High-level plans for DevKit after **0.6.1**.
+High-level plans for DevKit after **0.7.0**.
 
-## 0.7.0 — Helpers & polish
+## 0.8.0 — Helpers & polish
 
 - Shared download checksum verification
 - Optional MySQL/PostgreSQL data-dir init helper after binary install
@@ -21,6 +21,7 @@ High-level plans for DevKit after **0.6.1**.
 
 ## Completed
 
+- **0.7.0** — Full rewrite from Python to Rust (same CLI, same plugin behavior)
 - **0.6.1** — Mono MSI extract reliability on Windows CI
 - **0.6.0** — Docker image/Compose + `docker` CLI plugin
 - **0.5.0** — python/go/rust/dotnet/cmake/ninja/maven/postgresql/sqlite/kubectl/terraform/pnpm/deno/bun/platform-tools
