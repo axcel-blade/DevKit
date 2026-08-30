@@ -20,7 +20,7 @@ Include:
 
 - Description of the issue
 - Steps to reproduce
-- Affected version (`python main.py --version`)
+- Affected version (`cargo run --release -- --version`)
 - Impact assessment if known
 
 You should receive an acknowledgment within a reasonable time. Please allow

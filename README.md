@@ -1,14 +1,14 @@
 # DevKit
 
-**Version:** 0.6.1
+**Version:** 0.7.0
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
-It is **not** a PyPI library. Run it from this repository.
+It is **not** a published crate. Run it from this repository.
 
 ## Requirements
 
-- Python 3.12+
+- Rust toolchain (`cargo`) — install via [rustup.rs](https://rustup.rs)
 - Windows, macOS, or Linux
 
 ## Quick start
@@ -37,10 +37,10 @@ chmod +x devkit.sh
 **Any OS**
 
 ```bash
-python main.py doctor
-python main.py install cmake
-python main.py install kubectl
-python main.py install docker
+cargo run --release -- doctor
+cargo run --release -- install cmake
+cargo run --release -- install kubectl
+cargo run --release -- install docker
 ```
 
 ### Docker
@@ -107,9 +107,10 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 ## Development
 
 ```bash
-python -m pip install -e ".[dev]"
-pytest
-ruff check src tests
+cargo build
+cargo test
+cargo clippy --all-targets -- -D warnings
+cargo fmt --all
 ```
 
 Git Flow branches: `main`, `develop`, `feature/*`, `release/*`, `hotfix/*`.

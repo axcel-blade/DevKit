@@ -6,8 +6,8 @@
 2. Run diagnostics:
 
    ```bash
-   python main.py doctor
-   python main.py status <plugin>
+   cargo run --release -- doctor
+   cargo run --release -- status <plugin>
    ```
 
 3. Search [existing issues](https://github.com/axcel-blade/DevKit/issues).
@@ -16,7 +16,7 @@
 
 ## What to include in a bug report
 
-- DevKit version (`python main.py --version`) — current is **0.6.1**
+- DevKit version (`cargo run --release -- --version`) — current is **0.7.0**
 - OS and architecture
 - Command you ran
 - Full error output

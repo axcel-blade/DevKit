@@ -31,7 +31,8 @@ keeps downloaded SDKs across runs.
 
 ### Notes
 
-- The image uses Python 3.12 slim and the repo `main.py` entrypoint.
+- The image is a multi-stage build: `rust:1-slim` compiles the `devkit`
+  binary, then it's copied into a minimal `debian:bookworm-slim` runtime.
 - Host env mutation (Windows registry / shell profiles) from plugins applies
   **inside** the container, not on your host OS. Prefer mounting `/devkit` and
   using tools from that volume when working in Docker.
@@ -40,7 +41,7 @@ keeps downloaded SDKs across runs.
 ## Install Docker CLI via DevKit (host)
 
 ```bash
-python main.py install docker
+cargo run --release -- install docker
 ```
 
 This installs the official **static Docker client** only. You still need Docker
