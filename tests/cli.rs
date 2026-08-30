@@ -63,6 +63,32 @@ fn install_reports_unknown_plugin() {
 }
 
 #[test]
+fn menu_lists_plugins_and_quits_on_q() {
+    let tmp = tempfile::tempdir().unwrap();
+    // No subcommand at all — a bare `devkit` should fall through to the menu
+    // rather than clap's "a subcommand is required" usage error.
+    devkit()
+        .env("DEVKIT_HOME", tmp.path())
+        .write_stdin("q\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("plugin menu"))
+        .stdout(predicate::str::contains("hello"));
+}
+
+#[test]
+fn menu_via_explicit_subcommand_quits_on_eof() {
+    let tmp = tempfile::tempdir().unwrap();
+    // Closed stdin (EOF) must exit cleanly instead of hanging or erroring.
+    devkit()
+        .arg("menu")
+        .env("DEVKIT_HOME", tmp.path())
+        .write_stdin("")
+        .assert()
+        .success();
+}
+
+#[test]
 fn version_flag_reports_package_version() {
     devkit()
         .arg("--version")

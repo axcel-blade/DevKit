@@ -16,6 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   a raw connection error deep inside a plugin's install step. `devkit doctor`
   now also reports an `Internet: yes/no` line (advisory only — doesn't fail
   the command, since `doctor` is still useful offline).
+- `devkit menu` (also the default when `devkit`/`devkit.bat`/`devkit.sh` is
+  run with no arguments): an interactive text menu listing every plugin with
+  its status — pick a number to install or uninstall it, `q` to quit.
+- `devkit.bat` / `devkit.sh` now bootstrap a Rust toolchain automatically: if
+  `cargo` isn't found on PATH, they check for internet access and then
+  download and run `rustup-init` the same way the built-in `rust` plugin
+  does (same host-triple URL, `-y --default-toolchain stable --profile
+  default`), installing into the standard `~/.cargo` location before
+  building and forwarding to the compiled binary.
+
+### Fixed
+
+- Restored `Dockerfile`, `docker-compose.yml`, and `.pre-commit-config.yaml`,
+  which were unintentionally deleted (rather than rewritten) in the 0.7.0
+  rewrite commit.
+
+### Removed
+
+- `.dockerignore` and `.editorconfig` (unneeded).
 
 ## [0.7.0] - 2026-08-30
 

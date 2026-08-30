@@ -6,7 +6,7 @@
 use crate::env::EnvManager;
 use crate::paths::{ensure_home, home, plugin_install_dir};
 use crate::platform::os_label;
-use crate::plugin::{InstallContext, InstallState};
+use crate::plugin::{InstallContext, InstallState, Plugin};
 use crate::registry::default_registry;
 use clap::{Parser, Subcommand};
 
@@ -15,8 +15,11 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[derive(Parser)]
 #[command(name = "devkit", about = "DevKit - developer environment setup application.", version = VERSION)]
 struct Cli {
+    // Optional so a bare `devkit` (e.g. double-clicked from Explorer, or run
+    // via devkit.bat/devkit.sh with no arguments) falls through to the
+    // interactive menu instead of clap erroring "a subcommand is required".
     #[command(subcommand)]
-    command: Command,
+    command: Option<Command>,
 }
 
 #[derive(Subcommand)]
@@ -49,6 +52,8 @@ enum Command {
     },
     /// Check DevKit environment health
     Doctor,
+    /// Interactive menu to install/uninstall plugins
+    Menu,
 }
 
 fn context(
@@ -85,6 +90,40 @@ fn cmd_list() -> anyhow::Result<i32> {
         );
     }
     Ok(0)
+}
+
+/// Run a plugin's install step and apply its env_spec. Shared by `cmd_install`
+/// (explicit `devkit install <id>`) and `cmd_menu` (interactive picker) so
+/// both go through one code path.
+fn perform_install(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<()> {
+    println!(
+        "Installing {} ({}) into {} ...",
+        plugin.name(),
+        plugin.id(),
+        ctx.install_dir.display()
+    );
+    let result = plugin.install(ctx)?;
+    let spec = plugin.env_spec(ctx);
+    EnvManager::new().apply(&spec)?;
+    let msg = if result.message.is_empty() {
+        "done".to_string()
+    } else {
+        result.message
+    };
+    println!("Installed {}: {}", plugin.id(), msg);
+    println!("Environment updated. Open a new terminal for PATH/env changes to take effect.");
+    Ok(())
+}
+
+/// Revert a plugin's env_spec and run its uninstall step. Shared by
+/// `cmd_uninstall` and `cmd_menu`.
+fn perform_uninstall(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<()> {
+    let spec = plugin.env_spec(ctx);
+    EnvManager::new().revert(&spec)?;
+    plugin.uninstall(ctx)?;
+    println!("Uninstalled {}.", plugin.id());
+    println!("Environment updated. Open a new terminal for PATH/env changes to take effect.");
+    Ok(())
 }
 
 fn cmd_install(
@@ -130,22 +169,7 @@ fn cmd_install(
         );
     }
 
-    println!(
-        "Installing {} ({}) into {} ...",
-        plugin.name(),
-        plugin.id(),
-        ctx.install_dir.display()
-    );
-    let result = plugin.install(&ctx)?;
-    let spec = plugin.env_spec(&ctx);
-    EnvManager::new().apply(&spec)?;
-    let msg = if result.message.is_empty() {
-        "done".to_string()
-    } else {
-        result.message
-    };
-    println!("Installed {}: {}", plugin.id(), msg);
-    println!("Environment updated. Open a new terminal for PATH/env changes to take effect.");
+    perform_install(plugin, &ctx)?;
     Ok(0)
 }
 
@@ -166,11 +190,7 @@ fn cmd_uninstall(plugin_id: &str) -> anyhow::Result<i32> {
         return Ok(0);
     }
 
-    let spec = plugin.env_spec(&ctx);
-    EnvManager::new().revert(&spec)?;
-    plugin.uninstall(&ctx)?;
-    println!("Uninstalled {}.", plugin.id());
-    println!("Environment updated. Open a new terminal for PATH/env changes to take effect.");
+    perform_uninstall(plugin, &ctx)?;
     Ok(0)
 }
 
@@ -267,21 +287,98 @@ fn cmd_doctor() -> anyhow::Result<i32> {
     Ok(0)
 }
 
+/// Interactive text menu: lists every plugin with its current status, lets
+/// the user pick one by number, and toggles install/uninstall on it —
+/// installs if missing/partial, uninstalls if already installed. Loops until
+/// the user quits. This is what a bare `devkit` (no subcommand) runs, so
+/// double-clicking `devkit.bat`/`devkit.sh` gives a usable menu instead of a
+/// clap usage error.
+fn cmd_menu() -> anyhow::Result<i32> {
+    use std::io::{self, Write};
+
+    let registry = default_registry();
+    let plugins = registry.all();
+    if plugins.is_empty() {
+        println!("No plugins registered.");
+        return Ok(0);
+    }
+
+    loop {
+        println!();
+        println!("DevKit {VERSION} — plugin menu");
+        println!("{:<4} {:<16} {:<20} STATUS", "#", "ID", "NAME");
+        println!("{}", "-".repeat(54));
+
+        // Re-check status every loop so the menu reflects what the last
+        // action actually did, and remember which are installed so the
+        // chosen action (install vs uninstall) doesn't need a second lookup.
+        let mut installed = Vec::with_capacity(plugins.len());
+        for (i, plugin) in plugins.iter().enumerate() {
+            let ctx = context(plugin.id(), None, None)?;
+            let status = plugin.status(&ctx);
+            println!(
+                "{:<4} {:<16} {:<20} {}",
+                i + 1,
+                plugin.id(),
+                plugin.name(),
+                status.state.as_str()
+            );
+            installed.push(status.state == InstallState::Installed);
+        }
+
+        println!();
+        print!("Enter a number to install/uninstall, or 'q' to quit: ");
+        io::stdout().flush()?;
+
+        let mut line = String::new();
+        // read_line returns Ok(0) on EOF (piped/closed stdin) — exit instead
+        // of spinning forever on empty reads in a non-interactive run.
+        if io::stdin().read_line(&mut line)? == 0 {
+            break;
+        }
+        let input = line.trim();
+        if input.is_empty() || input.eq_ignore_ascii_case("q") {
+            break;
+        }
+
+        let choice: usize = match input.parse() {
+            Ok(n) if n >= 1 && n <= plugins.len() => n,
+            _ => {
+                println!("Invalid choice: {input}");
+                continue;
+            }
+        };
+        let plugin = plugins[choice - 1];
+        let ctx = context(plugin.id(), None, None)?;
+
+        let outcome = if installed[choice - 1] {
+            perform_uninstall(plugin, &ctx)
+        } else {
+            perform_install(plugin, &ctx)
+        };
+        if let Err(e) = outcome {
+            eprintln!("Error: {e}");
+        }
+    }
+    Ok(0)
+}
+
 pub fn main(argv: Option<Vec<String>>) -> anyhow::Result<i32> {
     let cli = match argv {
         Some(args) => Cli::parse_from(args),
         None => Cli::parse(),
     };
     match cli.command {
-        Command::List => cmd_list(),
-        Command::Install {
+        Some(Command::List) => cmd_list(),
+        Some(Command::Install {
             plugin,
             force,
             sdk_version,
             channel,
-        } => cmd_install(&plugin, force, sdk_version, channel),
-        Command::Uninstall { plugin } => cmd_uninstall(&plugin),
-        Command::Status { plugin } => cmd_status(&plugin),
-        Command::Doctor => cmd_doctor(),
+        }) => cmd_install(&plugin, force, sdk_version, channel),
+        Some(Command::Uninstall { plugin }) => cmd_uninstall(&plugin),
+        Some(Command::Status { plugin }) => cmd_status(&plugin),
+        Some(Command::Doctor) => cmd_doctor(),
+        Some(Command::Menu) | None => cmd_menu(),
     }
 }
