@@ -27,7 +27,9 @@ _(none — see Backlog)_
 - [x] All 27 plugins ported to the `Plugin` trait
 - [x] `cargo test` unit + integration suite replacing `pytest`
 - [x] CI matrix on `cargo fmt` / `clippy` / `test` (Windows/macOS/Linux)
-- [x] Multi-stage Rust `Dockerfile`
+- [x] `devkit menu` — interactive install/uninstall picker
+- [x] `devkit.bat` / `devkit.sh` auto-bootstrap a Rust toolchain via rustup
+      (with an internet check first) when `cargo` isn't already on PATH
 
 ## Done (0.6.1)
 

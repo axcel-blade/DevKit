@@ -26,15 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default`), installing into the standard `~/.cargo` location before
   building and forwarding to the compiled binary.
 
-### Fixed
-
-- Restored `Dockerfile`, `docker-compose.yml`, and `.pre-commit-config.yaml`,
-  which were unintentionally deleted (rather than rewritten) in the 0.7.0
-  rewrite commit.
-
 ### Removed
 
-- `.dockerignore` and `.editorconfig` (unneeded).
+- Docker support: `Dockerfile`, `docker-compose.yml`, `.dockerignore`,
+  `docs/docker.md` (unneeded — the `docker` CLI plugin, which installs the
+  Docker client as one of DevKit's SDKs, is unaffected and unrelated).
+- `.pre-commit-config.yaml`, `.editorconfig` (unneeded).
 
 ## [0.7.0] - 2026-08-30
 
@@ -44,8 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `status`/`doctor`), same plugin behavior, same install layout — now a single
   `cargo build --release` binary instead of a `python main.py` script. All 27
   plugins ported 1:1; `devkit.bat` / `devkit.sh` now build-and-forward to the
-  compiled binary; Dockerfile is a multi-stage Rust build; CI runs
-  `cargo fmt` / `clippy` / `test` across the OS matrix instead of `pytest`.
+  compiled binary; CI runs `cargo fmt` / `clippy` / `test` across the OS
+  matrix instead of `pytest`.
 - Replaced the Python packaging files (`pyproject.toml`, `main.py`, `src/devkit/`,
   the `pytest` suite) with a single Cargo crate (`Cargo.toml`, `src/`, `tests/`).
 

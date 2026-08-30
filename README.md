@@ -52,16 +52,6 @@ cargo run --release -- install kubectl
 cargo run --release -- install docker
 ```
 
-### Docker
-
-```bash
-docker build -t devkit .
-docker run --rm -e DEVKIT_HOME=/devkit -v devkit-data:/devkit devkit doctor
-docker compose run --rm devkit list
-```
-
-See [docs/docker.md](docs/docker.md).
-
 ## Built-in plugins
 
 | Plugin | Installs | Environment |
@@ -106,7 +96,6 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 | Doc | Purpose |
 |-----|---------|
 | [docs/getting-started.md](docs/getting-started.md) | Run and install tools |
-| [docs/docker.md](docs/docker.md) | Run DevKit in Docker / install Docker CLI |
 | [docs/plugins.md](docs/plugins.md) | Write a plugin |
 | [docs/architecture.md](docs/architecture.md) | How DevKit works |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |

@@ -10,7 +10,12 @@ cargo run --release -- list
 ```
 
 No separate install step is required — `cargo run` builds the binary on first
-use. A Rust toolchain (`cargo`) must be on PATH; get one from [rustup.rs](https://rustup.rs).
+use. A Rust toolchain (`cargo`) must be on PATH for `cargo run`; or just use
+`devkit.bat` / `devkit.sh`, which install one via rustup automatically (after
+checking for internet access) if `cargo` isn't found.
+
+Running either launcher with no arguments opens an interactive menu to pick
+plugins to install/uninstall instead of needing to know their ids up front.
 
 Optional flags for selected plugins:
 
@@ -20,11 +25,3 @@ cargo run --release -- install jdk --version 17
 ```
 
 See [docs/getting-started.md](../docs/getting-started.md) for full details.
-
-Docker image:
-
-```bash
-docker compose run --rm devkit doctor
-```
-
-See [docs/docker.md](../docs/docker.md).
