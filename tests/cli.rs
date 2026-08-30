@@ -12,8 +12,34 @@
 
 use assert_cmd::Command;
 use predicates::prelude::*;
+use std::sync::Once;
+
+static WARMUP: Once = Once::new();
 
 fn devkit() -> Command {
+    // Some macOS CI runners transiently fail to exec a binary immediately
+    // after it's built ("Permission denied" — a Gatekeeper/AMFI check
+    // settling, not a real permissions problem; see e.g.
+    // rust-lang/cargo#5045 and similar reports across the Rust ecosystem).
+    // Warm the binary up once, retrying briefly, before any test's real
+    // assertions run against it.
+    WARMUP.call_once(|| {
+        for attempt in 0..10u32 {
+            match Command::cargo_bin("devkit")
+                .unwrap()
+                .arg("--version")
+                .output()
+            {
+                Ok(_) => break,
+                Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied => {
+                    std::thread::sleep(std::time::Duration::from_millis(
+                        100 * (attempt as u64 + 1),
+                    ));
+                }
+                Err(_) => break,
+            }
+        }
+    });
     Command::cargo_bin("devkit").unwrap()
 }
 

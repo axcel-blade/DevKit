@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mono MSI extract failing with `ERROR_INSTALL_PACKAGE_OPEN_FAILED` (1619).**
+  `paths::home()` (and everything built on it — every plugin's install dir)
+  used `Path::canonicalize()`, which always returns Windows' `\\?\`-prefixed
+  extended-length path form; `msiexec` doesn't understand that form and
+  rejects it. Added `paths::to_absolute()`, which canonicalizes and then
+  strips the prefix, and used it in `paths::home()`/`expand_and_resolve()`
+  and `installers::extract_msi_admin`'s own internal path resolution.
+- CI failing to compile on Linux/macOS: `installers.rs` unconditionally
+  imported `anyhow::Context`, `std::fs`, and `std::process::Command`, but
+  they're only used inside the `#[cfg(windows)]`/`#[cfg(target_os =
+  "macos")]` real implementations — unused (and `-D warnings`-fatal) on
+  Linux, where only the `bail!`-only stubs compile. Gated the imports the
+  same way. (This class of bug had never been caught locally — this
+  session's `cargo build`/`clippy`/`test` runs were all on Windows only.)
+- Flaky macOS CI integration test failure (`Permission denied` executing the
+  freshly-built binary — a known transient Gatekeeper/AMFI-settling issue,
+  not a real permissions problem). `tests/cli.rs` now does a one-time warm-up
+  run of the binary, retrying briefly on that specific error, before any
+  test's real assertions execute against it.
+
 ## [0.8.0] - 2026-08-30
 
 ### Added
