@@ -36,6 +36,7 @@ fn doctor_reports_dev_root_and_plugins() {
         .assert()
         .success()
         .stdout(predicate::str::contains("Dev root"))
+        .stdout(predicate::str::contains("Internet:"))
         .stdout(predicate::str::contains("hello"));
 }
 

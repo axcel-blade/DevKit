@@ -241,6 +241,14 @@ fn cmd_doctor() -> anyhow::Result<i32> {
         }
     }
 
+    // Advisory only — doesn't fail the command, since doctor is still useful
+    // offline (e.g. checking the install root or env backend).
+    if crate::download::has_internet_access() {
+        println!("Internet:     yes");
+    } else {
+        println!("Internet:     no (SDK downloads need network access)");
+    }
+
     println!("Env backend:  {}", EnvManager::new().backend_description());
     if !crate::platform::is_windows() {
         println!("             Open a new terminal (or `source ~/.devkit/env.sh`) after install.");
