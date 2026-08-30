@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.7.0
+**Version:** 0.8.0
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 

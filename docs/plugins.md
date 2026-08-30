@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.7.0** ships these built-in plugins:
+DevKit **0.8.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
