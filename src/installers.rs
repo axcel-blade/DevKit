@@ -2,9 +2,17 @@
 //!
 //! Used by plugins such as Mono that ship platform installers instead of plain ZIP/tar.
 
-use anyhow::{bail, Context, Result};
-use std::fs;
+use anyhow::{bail, Result};
 use std::path::{Path, PathBuf};
+// Only the Windows (extract_msi_admin) and macOS (extract_pkg) real
+// implementations shell out or touch the filesystem beyond what `Path`
+// itself provides — on other platforms only the `bail!`-only stubs below
+// compile, which don't need these.
+#[cfg(any(windows, target_os = "macos"))]
+use anyhow::Context;
+#[cfg(any(windows, target_os = "macos"))]
+use std::fs;
+#[cfg(any(windows, target_os = "macos"))]
 use std::process::Command;
 
 /// Extract a Windows MSI into `dest` via `msiexec /a` (no full install).
@@ -14,13 +22,15 @@ use std::process::Command;
 /// write a verbose log, and wait for msiexec via PowerShell `Start-Process`.
 #[cfg(windows)]
 pub fn extract_msi_admin(msi_path: &Path, dest: &Path) -> Result<PathBuf> {
-    let msi_path = msi_path
-        .canonicalize()
-        .with_context(|| format!("MSI not found: {}", msi_path.display()))?;
-    let dest = dest
-        .parent()
-        .map(|_| dest.to_path_buf())
-        .unwrap_or_else(|| dest.to_path_buf());
+    if !msi_path.is_file() {
+        bail!("MSI not found: {}", msi_path.display());
+    }
+    // `Path::canonicalize()` always returns Windows' `\\?\`-prefixed
+    // extended-length form, which msiexec doesn't understand and rejects
+    // with ERROR_INSTALL_PACKAGE_OPEN_FAILED (1619) — use the stripped form
+    // both tools and msiexec agree on (see `paths::to_absolute`'s doc).
+    let msi_path = crate::paths::to_absolute(msi_path);
+    let dest = dest.to_path_buf();
 
     if dest.exists() {
         fs::remove_dir_all(&dest)?;

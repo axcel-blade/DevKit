@@ -84,7 +84,7 @@ pub fn home() -> PathBuf {
         }
     }
     let root = default_dev_root();
-    root.canonicalize().unwrap_or(root)
+    to_absolute(&root)
 }
 
 fn expand_and_resolve(path: &Path) -> PathBuf {
@@ -95,7 +95,29 @@ fn expand_and_resolve(path: &Path) -> PathBuf {
     } else {
         path.to_path_buf()
     };
-    expanded.canonicalize().unwrap_or(expanded)
+    to_absolute(&expanded)
+}
+
+/// Canonicalize `path`, then strip Windows' `\\?\` extended-length prefix.
+/// `canonicalize()` always adds that prefix on success, but external tools
+/// DevKit shells out to (notably `msiexec`, used by the mono plugin) don't
+/// understand the verbatim form and fail with cryptic errors like
+/// `ERROR_INSTALL_PACKAGE_OPEN_FAILED` when handed one. DevKit's install
+/// paths are always short — that's the point of the machine `dev` folder —
+/// so the >260-char case the prefix exists for never applies here.
+pub fn to_absolute(path: &Path) -> PathBuf {
+    let canon = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    #[cfg(windows)]
+    {
+        // `Path::strip_prefix` operates on parsed `Component`s, and Windows
+        // treats the whole `\\?\C:` as one atomic prefix component — it
+        // won't match against the bare `\\?\` marker. Strip it as a string
+        // instead.
+        if let Some(stripped) = canon.to_string_lossy().strip_prefix(r"\\?\") {
+            return PathBuf::from(stripped);
+        }
+    }
+    canon
 }
 
 /// Return the download cache under the dev root.
@@ -136,7 +158,7 @@ mod tests {
         std::env::set_var("DEVKIT_HOME", &tmp);
         let h = home();
         std::env::remove_var("DEVKIT_HOME");
-        assert_eq!(h, tmp.canonicalize().unwrap());
+        assert_eq!(h, to_absolute(&tmp));
     }
 
     #[test]
@@ -147,6 +169,14 @@ mod tests {
         std::env::set_var("DEVKIT_HOME", &tmp);
         let dir = plugin_install_dir("hello");
         std::env::remove_var("DEVKIT_HOME");
-        assert_eq!(dir, tmp.canonicalize().unwrap().join("hello"));
+        assert_eq!(dir, to_absolute(&tmp).join("hello"));
+    }
+
+    #[test]
+    fn to_absolute_strips_windows_extended_prefix() {
+        let tmp = std::env::temp_dir().join("devkit_test_to_absolute");
+        std::fs::create_dir_all(&tmp).unwrap();
+        let abs = to_absolute(&tmp);
+        assert!(!abs.display().to_string().starts_with(r"\\?\"));
     }
 }

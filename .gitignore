@@ -2,5 +2,6 @@
 **/*.rs.bk
 .idea/
 .vscode/
+.claude/
 # Accidental nested clones / local clutter
 /DevKit/
