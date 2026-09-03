@@ -74,7 +74,8 @@ fn java_available() -> bool {
 
 fn write_wrappers(install_dir: &Path) -> Result<()> {
     if is_windows() {
-        let content = "@echo off\r\njava -jar \"%~dp0junit-platform-console-standalone.jar\" %*\r\n";
+        let content =
+            "@echo off\r\njava -jar \"%~dp0junit-platform-console-standalone.jar\" %*\r\n";
         std::fs::write(install_dir.join("junit.cmd"), content)?;
         std::fs::write(install_dir.join("junit.bat"), content)?;
     } else {
@@ -158,7 +159,10 @@ impl Plugin for JunitPlugin {
         )?;
         progress.done();
         if !dest.is_file() {
-            bail!("JUnit download finished but jar not found at {}", dest.display());
+            bail!(
+                "JUnit download finished but jar not found at {}",
+                dest.display()
+            );
         }
         write_wrappers(&ctx.install_dir)?;
         std::fs::write(ctx.install_dir.join(MARKER), format!("{version}\n"))?;

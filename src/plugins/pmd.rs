@@ -103,7 +103,10 @@ impl Plugin for PmdPlugin {
         progress.done();
         let binary = pmd_bin(ctx);
         if !binary.is_file() {
-            bail!("PMD extracted but launcher not found at {}", binary.display());
+            bail!(
+                "PMD extracted but launcher not found at {}",
+                binary.display()
+            );
         }
         std::fs::write(ctx.install_dir.join(MARKER), format!("{version}\n"))?;
         Ok(InstallResult::new(

@@ -263,8 +263,7 @@ fn rust_toolchain_line(bin_name: &str) -> String {
             format!("{ver}  ({})", path.display())
         }
         None => {
-            "not found  (run the launcher to install Rust into the machine dev folder)"
-                .to_string()
+            "not found  (run the launcher to install Rust into the machine dev folder)".to_string()
         }
     }
 }
