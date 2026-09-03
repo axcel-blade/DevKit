@@ -1,8 +1,8 @@
 # Roadmap
 
-High-level plans for DevKit after **0.6.1**.
+High-level plans for DevKit after **0.8.3**.
 
-## 0.7.0 — Helpers & polish
+## 0.9.0 — Helpers & polish
 
 - Shared download checksum verification
 - Optional MySQL/PostgreSQL data-dir init helper after binary install
@@ -21,6 +21,14 @@ High-level plans for DevKit after **0.6.1**.
 
 ## Completed
 
+- **0.8.3** — `pmd` plugin; Unix writability probe so `list` does not fail on `/opt`
+- **0.8.2** — `junit` plugin (console standalone + wrappers); doctor reports Rustc/Cargo
+- **0.8.1** — Launchers check internet first, then install rustup into the
+  machine `dev` folder (`CARGO_HOME` / `RUSTUP_HOME`) before building DevKit
+- **0.8.0** — Interactive `devkit menu`; `devkit.bat`/`devkit.sh` auto-bootstrap
+  Rust via rustup (with an internet check first); internet check before plugin
+  downloads; Docker packaging removed
+- **0.7.0** — Full rewrite from Python to Rust (same CLI, same plugin behavior)
 - **0.6.1** — Mono MSI extract reliability on Windows CI
 - **0.6.0** — Docker image/Compose + `docker` CLI plugin
 - **0.5.0** — python/go/rust/dotnet/cmake/ninja/maven/postgresql/sqlite/kubectl/terraform/pnpm/deno/bun/platform-tools
