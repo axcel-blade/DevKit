@@ -5,10 +5,11 @@
 
 use crate::env::EnvManager;
 use crate::paths::{ensure_home, home, plugin_install_dir};
-use crate::platform::os_label;
+use crate::platform::{is_windows, os_label};
 use crate::plugin::{InstallContext, InstallState, Plugin};
 use crate::registry::default_registry;
 use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -33,7 +34,7 @@ enum Command {
         /// Reinstall even if already installed
         #[arg(long)]
         force: bool,
-        /// SDK version (flutter release, or JDK feature like 17/21)
+        /// SDK version (flutter, JDK feature, JUnit, or PMD release)
         #[arg(long = "version", value_name = "VER")]
         sdk_version: Option<String>,
         /// Release channel for flutter (stable, beta, or dev)
@@ -162,9 +163,9 @@ fn cmd_install(
             plugin.id()
         );
     }
-    if ctx.version.is_some() && !matches!(plugin.id(), "flutter" | "jdk") {
+    if ctx.version.is_some() && !matches!(plugin.id(), "flutter" | "jdk" | "junit" | "pmd") {
         eprintln!(
-            "Note: --version is used by flutter/jdk; ignored for {}.",
+            "Note: --version is used by flutter/jdk/junit/pmd; ignored for {}.",
             plugin.id()
         );
     }
@@ -231,10 +232,50 @@ fn cmd_status(plugin_id: &str) -> anyhow::Result<i32> {
     })
 }
 
+/// Locate `cargo`/`rustc` the way `where` (Windows) / `which` (Unix) would,
+/// then fall back to the machine `dev` folder toolchain (`<dev>/rust/cargo/bin`).
+/// Returns a single doctor line: version plus the resolved path.
+fn rust_toolchain_line(bin_name: &str) -> String {
+    let from_path = which::which(bin_name).ok();
+    let from_dev = {
+        let exe = if is_windows() {
+            format!("{bin_name}.exe")
+        } else {
+            bin_name.to_string()
+        };
+        let candidate = plugin_install_dir("rust")
+            .join("cargo")
+            .join("bin")
+            .join(exe);
+        candidate.is_file().then_some(candidate)
+    };
+    let path: Option<PathBuf> = from_path.or(from_dev);
+    match path {
+        Some(path) => {
+            let ver = std::process::Command::new(&path)
+                .arg("--version")
+                .output()
+                .ok()
+                .and_then(|o| String::from_utf8(o.stdout).ok())
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .unwrap_or_else(|| format!("{bin_name} (version unknown)"));
+            format!("{ver}  ({})", path.display())
+        }
+        None => {
+            "not found  (run the launcher to install Rust into the machine dev folder)"
+                .to_string()
+        }
+    }
+}
+
 fn cmd_doctor() -> anyhow::Result<i32> {
     let root = home();
     println!("DevKit {VERSION}");
     println!("Platform:     {} ({})", os_label(), std::env::consts::OS);
+    // Replaces the old Python-app `Python: <sys.version>` / `where python` line.
+    println!("Rustc:        {}", rust_toolchain_line("rustc"));
+    println!("Cargo:        {}", rust_toolchain_line("cargo"));
     println!(
         "Dev root:     {}  (override with DEVKIT_HOME)",
         root.display()

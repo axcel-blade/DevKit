@@ -16,6 +16,7 @@ pub mod go;
 pub mod gradle;
 pub mod hello;
 pub mod jdk;
+pub mod junit;
 pub mod kubectl;
 pub mod maven;
 pub mod mono;
@@ -24,6 +25,7 @@ pub mod ninja;
 pub mod node;
 pub mod php;
 pub mod platform_tools;
+pub mod pmd;
 pub mod pnpm;
 pub mod postgresql;
 pub mod python;
@@ -49,6 +51,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(gradle::GradlePlugin),
         Box::new(hello::HelloPlugin),
         Box::new(jdk::JdkPlugin),
+        Box::new(junit::JunitPlugin),
         Box::new(kubectl::KubectlPlugin),
         Box::new(maven::MavenPlugin),
         Box::new(mono::MonoPlugin),
@@ -57,6 +60,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(node::NodePlugin),
         Box::new(php::PhpPlugin),
         Box::new(platform_tools::PlatformToolsPlugin),
+        Box::new(pmd::PmdPlugin),
         Box::new(pnpm::PnpmPlugin),
         Box::new(postgresql::PostgresqlPlugin),
         Box::new(python::PythonPlugin),

@@ -21,6 +21,16 @@ _(none — see Backlog)_
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.8.3)
+
+- [x] `pmd` plugin (PMD Source Code Analyzer from GitHub releases)
+- [x] Fix Unix `/opt/dev` writability probe so `devkit list` works on CI
+
+## Done (0.8.2)
+
+- [x] `junit` plugin (JUnit Platform Console Standalone from Maven Central)
+- [x] `devkit doctor` reports Rustc/Cargo instead of Python
+
 ## Done (0.8.1)
 
 - [x] Launchers require internet first; error if offline

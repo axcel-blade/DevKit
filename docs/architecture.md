@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.8.1** is a CLI application with a plugin pipeline.
+DevKit **0.8.3** is a CLI application with a plugin pipeline.
 
 ```text
 target/release/devkit (binary) / devkit.bat / devkit.sh
@@ -31,6 +31,8 @@ Each plugin installs to `<home>/<plugin-id>`.
 2. Resolve the same `dev` root as `paths::home()` (`DEVKIT_HOME` or the OS default).
 3. Look for `cargo` under `<dev>/rust/cargo/bin`. If missing, download rustup-init and install the stable toolchain into `<dev>/rust` (`CARGO_HOME` / `RUSTUP_HOME`, `--no-modify-path`).
 4. `cargo build --release` if `target/release/devkit` is missing, then exec the binary.
+
+`devkit doctor` reports `Rustc` and `Cargo` the same way `where rustc` / `where cargo` would (PATH first, then `<dev>/rust/cargo/bin`).
 
 ## Environment
 

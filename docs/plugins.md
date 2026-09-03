@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.8.1** ships these built-in plugins:
+DevKit **0.8.3** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -15,6 +15,8 @@ DevKit **0.8.1** ships these built-in plugins:
 | `jdk` | Temurin via Adoptium; `--version` selects feature (default 21) |
 | `maven` | Latest Apache Maven 3.x binary ZIP |
 | `gradle` | Latest Gradle `-bin.zip` |
+| `junit` | JUnit Platform Console Standalone JAR + wrapper; `--version` optional |
+| `pmd` | PMD Source Code Analyzer binary ZIP from GitHub; `--version` optional |
 | `cmake` | Latest Kitware CMake binary |
 | `ninja` | Latest ninja-build binary ZIP |
 | `git` | MinGit on Windows; system wrappers on Unix |

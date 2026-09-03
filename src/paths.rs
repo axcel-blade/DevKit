@@ -31,17 +31,13 @@ fn is_creatable(path: &Path) -> bool {
     false
 }
 
-#[cfg(unix)]
+/// Probe whether the current user can create a file in `path`.
+///
+/// Checking the owner-write mode bit is not enough: `/opt` is typically
+/// `0755` (owner-write set) but owned by root, so a CI or desktop user
+/// still gets `Permission denied` creating `/opt/dev`. Always try a
+/// throwaway file instead.
 fn can_write(path: &Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-    std::fs::metadata(path)
-        .map(|m| m.permissions().mode() & 0o200 != 0)
-        .unwrap_or(false)
-}
-
-#[cfg(not(unix))]
-fn can_write(path: &Path) -> bool {
-    // No cheap ACL check on Windows; probe with a throwaway temp file.
     if !path.is_dir() {
         return false;
     }
@@ -178,5 +174,21 @@ mod tests {
         std::fs::create_dir_all(&tmp).unwrap();
         let abs = to_absolute(&tmp);
         assert!(!abs.display().to_string().starts_with(r"\\?\"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn is_creatable_rejects_unwritable_parent() {
+        use std::os::unix::fs::PermissionsExt;
+        let tmp = tempfile::tempdir().unwrap();
+        let parent = tmp.path().join("locked");
+        std::fs::create_dir(&parent).unwrap();
+        let mut perms = std::fs::metadata(&parent).unwrap().permissions();
+        perms.set_mode(0o555);
+        std::fs::set_permissions(&parent, perms).unwrap();
+        assert!(!is_creatable(&parent.join("dev")));
+        let mut perms = std::fs::metadata(&parent).unwrap().permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&parent, perms).unwrap();
     }
 }
