@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.8.1
+**Version:** 0.8.3
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -31,6 +31,10 @@ devkit.bat install python
 devkit.bat install go
 devkit.bat install node
 devkit.bat install jdk
+devkit.bat install maven
+devkit.bat install gradle
+devkit.bat install junit
+devkit.bat install pmd
 devkit.bat install flutter
 ```
 
@@ -68,6 +72,8 @@ cargo run --release -- install docker
 | `jdk` | Eclipse Temurin JDK (default 21; `--version`) | `PATH`, `JAVA_HOME` |
 | `maven` | Latest Apache Maven | `PATH`, `MAVEN_HOME` |
 | `gradle` | Latest Gradle binary ZIP | `PATH`, `GRADLE_HOME` |
+| `junit` | JUnit Platform Console Standalone (`--version`) | `PATH`, `JUNIT_HOME` |
+| `pmd` | PMD Source Code Analyzer binary (`--version`) | `PATH`, `PMD_HOME` |
 | `cmake` | Latest CMake binary | `PATH`, `CMAKE_HOME` |
 | `ninja` | Latest Ninja binary | `PATH`, `NINJA_HOME` |
 | `git` | MinGit (Windows); system wrappers (Unix) | `PATH`, `GIT_HOME` |

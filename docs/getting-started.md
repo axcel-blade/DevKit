@@ -47,6 +47,9 @@ uninstall it:
 ```bash
 cargo run --release -- install git
 cargo run --release -- install gradle
+cargo run --release -- install maven
+cargo run --release -- install junit
+cargo run --release -- install pmd
 cargo run --release -- install node
 cargo run --release -- install php
 cargo run --release -- install mysql
@@ -58,13 +61,15 @@ cargo run --release -- status gradle
 
 After install, **open a new terminal** so PATH and env vars reload.
 
-### Flutter / JDK options
+### Flutter / JDK / JUnit / PMD options
 
 ```bash
 cargo run --release -- install flutter --channel beta
 cargo run --release -- install flutter --channel stable --version 3.24
 cargo run --release -- install jdk --version 17
 cargo run --release -- install jdk --version 21
+cargo run --release -- install junit --version 1.11.4
+cargo run --release -- install pmd --version 7.26.0
 ```
 
 ### Environment backends

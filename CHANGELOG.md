@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-09-04
+
+### Fixed
+
+- `devkit list` (and any command that calls `ensure_home()` without
+  `DEVKIT_HOME`) failed on macOS/Linux CI with `Permission denied (os error
+  13)`. Unix used to treat `/opt` as writable whenever the owner-write bit
+  was set, even when the current user is not that owner. Writability is now
+  probed with a throwaway file, so the root falls back to `~/dev`.
+
+### Added
+
+- `pmd` plugin: PMD Source Code Analyzer binary ZIP from GitHub releases
+  (`pmd-dist-*-bin.zip`, with a fallback to older `pmd-bin-*.zip`). Optional
+  `--version` uses the `pmd_releases/<ver>` tag. Sets `PMD_HOME` and PATH.
+  Needs Java (use the `jdk` plugin).
+
+## [0.8.2] - 2026-09-04
+
+### Added
+
+- `junit` plugin: JUnit Platform Console Standalone JAR from Maven Central
+  (optional `--version`), plus `junit` / `junit.cmd` wrappers that run
+  `java -jar`. Sets `JUNIT_HOME` and PATH. Works with the existing `jdk`,
+  `gradle`, and `maven` plugins.
+
+### Changed
+
+- `devkit doctor` reports `Rustc` / `Cargo` (PATH or the machine `dev` folder
+  toolchain) instead of the old Python interpreter line.
+
 ## [0.8.1] - 2026-09-04
 
 ### Changed
@@ -182,6 +213,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.8.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.3
+[0.8.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.2
 [0.8.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.0
 [0.7.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.7.0
