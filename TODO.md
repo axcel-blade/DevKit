@@ -21,6 +21,12 @@ _(none — see Backlog)_
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.8.1)
+
+- [x] Launchers require internet first; error if offline
+- [x] Install / reuse Rust in the machine `dev` folder (not `~/.cargo`)
+      before building and running the Rust binary
+
 ## Done (0.8.0)
 
 - [x] `devkit menu` — interactive install/uninstall picker

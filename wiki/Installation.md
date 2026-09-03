@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 0.8.0**
+**DevKit 0.8.1**
 
 Clone the repository, then from the root:
 
@@ -10,9 +10,9 @@ cargo run --release -- list
 ```
 
 No separate install step is required — `cargo run` builds the binary on first
-use. A Rust toolchain (`cargo`) must be on PATH for `cargo run`; or just use
-`devkit.bat` / `devkit.sh`, which install one via rustup automatically (after
-checking for internet access) if `cargo` isn't found.
+use. Prefer `devkit.bat` / `devkit.sh`: they require an internet connection,
+then install rustup stable into the machine `dev` folder (`C:\dev\rust`,
+`/opt/dev/rust`, or `~/dev/rust`) if `cargo` is not already there.
 
 Running either launcher with no arguments opens an interactive menu to pick
 plugins to install/uninstall instead of needing to know their ids up front.

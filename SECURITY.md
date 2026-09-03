@@ -4,10 +4,10 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.6.x   | Yes |
-| 0.5.x   | Security fixes only |
-| 0.4.x   | Security fixes only |
-| < 0.4   | No |
+| 0.8.x   | Yes |
+| 0.7.x   | Security fixes only |
+| 0.6.x   | Security fixes only |
+| < 0.6   | No |
 
 ## Reporting a vulnerability
 
