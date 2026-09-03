@@ -2,12 +2,14 @@
 
 ## Requirements
 
-- A Rust toolchain (`cargo`). If you use `devkit.bat` / `devkit.sh`, they'll
-  check for internet access and install one for you via
-  [rustup](https://rustup.rs) when `cargo` isn't already on PATH; running
-  `cargo run` directly requires one already installed.
-- Network access for SDK downloads (and for the Rust bootstrap above, if needed)
-- Write access to the `dev` install root (or set `DEVKIT_HOME`)
+- An internet connection. The launchers exit with an error if the network is
+  unreachable (needed for rustup, crates.io, and later SDK downloads).
+- A Rust toolchain in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`,
+  or `~/dev/rust`; override the root with `DEVKIT_HOME`). `devkit.bat` /
+  `devkit.sh` install rustup stable there when `cargo` is missing. Running
+  `cargo run` yourself still needs a toolchain on PATH (the one in `dev/rust`
+  works if you export `CARGO_HOME` / `RUSTUP_HOME` first).
+- Write access to the `dev` install root
 
 ## Run DevKit
 
@@ -19,7 +21,7 @@ cargo run --release -- doctor
 cargo run --release -- list
 ```
 
-Windows shortcut (bootstraps Rust via rustup if `cargo` isn't found):
+Windows shortcut (internet check, then rustup into `C:\dev\rust` if needed):
 
 ```bat
 devkit.bat doctor

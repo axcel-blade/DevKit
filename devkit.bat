@@ -1,67 +1,68 @@
 @echo off
 REM DevKit application launcher (Windows).
 REM
-REM DevKit itself is built with Rust, so before anything else this makes
-REM sure a Rust toolchain is available: if `cargo` isn't found, it checks
-REM for internet access, then downloads and runs rustup-init the same way
-REM the built-in `rust` plugin does (same host-triple URL, `-y --default-
-REM toolchain stable --profile default`) — except into the *standard*
-REM ~/.cargo location, since this Rust install is what builds DevKit, not
-REM an SDK DevKit is managing for someone else.
-REM
-REM Once cargo is available, it builds the release binary on first run (or
-REM after source changes) and forwards all arguments to it. Running with no
-REM arguments launches the interactive plugin menu (see `devkit menu`).
+REM 1. Require an internet connection (needed to fetch rustup / crates).
+REM 2. Use Rust from the machine `dev` folder (`C:\dev\rust`, or DEVKIT_HOME\rust).
+REM    If cargo is missing there, install rustup stable into that folder
+REM    (same rustup-init flags as the rust plugin: -y --no-modify-path).
+REM 3. Build the release binary if needed, then run it.
 setlocal EnableDelayedExpansion
 
 set "ROOT=%~dp0"
 set "BIN=%ROOT%target\release\devkit.exe"
-set "CARGO_EXE="
 
-where cargo >nul 2>nul
-if %ERRORLEVEL% EQU 0 set "CARGO_EXE=cargo"
-if not defined CARGO_EXE if exist "%USERPROFILE%\.cargo\bin\cargo.exe" (
-    set "CARGO_EXE=%USERPROFILE%\.cargo\bin\cargo.exe"
+REM Step 1: fail fast if we cannot reach rustup's CDN (HTTPS/443).
+echo Checking internet connection...
+powershell -NoProfile -NonInteractive -Command ^
+    "try { $c = New-Object Net.Sockets.TcpClient; $c.Connect('static.rust-lang.org', 443); $c.Close() } catch { exit 1 }"
+if errorlevel 1 (
+    echo Error: no internet connection. Connect to the internet and try again.
+    exit /b 1
 )
 
-if not defined CARGO_EXE (
-    echo DevKit needs a Rust toolchain ^(cargo^) to build itself — none found.
-    echo Checking internet connection...
+REM Step 2: same machine `dev` root as paths::home() (DEVKIT_HOME or C:\dev).
+if defined DEVKIT_HOME (
+    set "DEVROOT=%DEVKIT_HOME%"
+) else (
+    if not defined SystemDrive set "SystemDrive=C:"
+    set "DEVROOT=%SystemDrive%\dev"
+)
 
-    powershell -NoProfile -NonInteractive -Command ^
-        "try { $c = New-Object Net.Sockets.TcpClient; $c.Connect('static.rust-lang.org', 443); $c.Close() } catch { exit 1 }"
-    if errorlevel 1 (
-        echo No internet connection detected.
-        echo Install Rust manually from https://rustup.rs and re-run this script.
-        exit /b 1
-    )
+set "CARGO_HOME=%DEVROOT%\rust\cargo"
+set "RUSTUP_HOME=%DEVROOT%\rust\rustup"
+set "CARGO_EXE=%CARGO_HOME%\bin\cargo.exe"
+
+if not exist "%CARGO_EXE%" (
+    echo Rust is not installed in %DEVROOT%\rust.
+    echo Installing Rust ^(rustup, stable^) into the machine dev folder...
 
     set "TRIPLE=x86_64-pc-windows-msvc"
     if /I "%PROCESSOR_ARCHITECTURE%"=="ARM64" set "TRIPLE=aarch64-pc-windows-msvc"
 
-    echo Installing Rust ^(rustup, stable^) for !TRIPLE! ...
+    mkdir "%DEVROOT%\rust" >nul 2>nul
     set "RUSTUP_INIT=%TEMP%\devkit-rustup-init.exe"
     if exist "!RUSTUP_INIT!" del /f /q "!RUSTUP_INIT!" >nul 2>nul
     powershell -NoProfile -NonInteractive -Command ^
         "Invoke-WebRequest -UseBasicParsing -Uri 'https://static.rust-lang.org/rustup/dist/!TRIPLE!/rustup-init.exe' -OutFile '!RUSTUP_INIT!'"
     if not exist "!RUSTUP_INIT!" (
-        echo Failed to download rustup-init.
+        echo Failed to download rustup-init. Check your internet connection and try again.
         exit /b 1
     )
 
-    "!RUSTUP_INIT!" -y --default-toolchain stable --profile default
+    set "CARGO_HOME=%DEVROOT%\rust\cargo"
+    set "RUSTUP_HOME=%DEVROOT%\rust\rustup"
+    "!RUSTUP_INIT!" -y --no-modify-path --default-toolchain stable --profile default
     if errorlevel 1 (
         echo rustup-init failed.
         exit /b 1
     )
     del /f /q "!RUSTUP_INIT!" >nul 2>nul
 
-    set "CARGO_EXE=%USERPROFILE%\.cargo\bin\cargo.exe"
-    if not exist "!CARGO_EXE!" (
-        echo Rust install finished but cargo.exe was not found at !CARGO_EXE!.
+    if not exist "%CARGO_EXE%" (
+        echo Rust install finished but cargo.exe was not found at %CARGO_EXE%.
         exit /b 1
     )
-    echo Rust installed. Future terminals will have 'cargo' on PATH automatically.
+    echo Rust installed at %DEVROOT%\rust.
 )
 
 if not exist "%BIN%" (

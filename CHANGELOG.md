@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-09-04
+
+### Changed
+
+- `devkit.bat` / `devkit.sh` now **check the internet first**, then look for
+  Rust in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`, or
+  `~/dev/rust`; override with `DEVKIT_HOME`). If `cargo` is missing there,
+  they install rustup stable into that folder (`CARGO_HOME` / `RUSTUP_HOME`,
+  `--no-modify-path`) before building and running DevKit. Offline runs stop
+  with a clear "connect to the internet" error.
+
 ### Fixed
 
 - **Mono MSI extract failing with `ERROR_INSTALL_PACKAGE_OPEN_FAILED` (1619).**
@@ -171,6 +182,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.8.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.1
 [0.8.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.0
 [0.7.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.7.0
 [0.6.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.6.1

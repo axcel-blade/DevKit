@@ -1,6 +1,6 @@
 # Roadmap
 
-High-level plans for DevKit after **0.8.0**.
+High-level plans for DevKit after **0.8.1**.
 
 ## 0.9.0 — Helpers & polish
 
@@ -21,6 +21,8 @@ High-level plans for DevKit after **0.8.0**.
 
 ## Completed
 
+- **0.8.1** — Launchers check internet first, then install rustup into the
+  machine `dev` folder (`CARGO_HOME` / `RUSTUP_HOME`) before building DevKit
 - **0.8.0** — Interactive `devkit menu`; `devkit.bat`/`devkit.sh` auto-bootstrap
   Rust via rustup (with an internet check first); internet check before plugin
   downloads; Docker packaging removed
