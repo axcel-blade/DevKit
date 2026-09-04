@@ -38,23 +38,25 @@ git merge --no-ff release/0.x.0
 ## Development setup
 
 ```bash
-python -m pip install -e ".[dev]"
-pytest
-ruff check src tests
+cargo build
+cargo test
+cargo clippy --all-targets -- -D warnings
+cargo fmt --all
 ```
 
-Run the app without packaging:
+Run the app without a separate build step:
 
 ```bash
-python main.py doctor
+cargo run --release -- doctor
 ```
 
 ## Adding a plugin
 
-1. Create `src/devkit/plugins/<name>.py` with a `Plugin` subclass and unique `id`.
+1. Create `src/plugins/<name>.rs` with a struct implementing the `Plugin` trait and a unique `id()`.
 2. Implement `status`, `install`, `uninstall`, and `env_spec`.
-3. Add tests under `tests/`.
-4. Document the plugin in `README.md` and `docs/plugins.md`.
+3. Register the plugin in `crate::plugins::all()` (`src/plugins/mod.rs`).
+4. Add tests in a `#[cfg(test)] mod tests` block at the bottom of the file.
+5. Document the plugin in `README.md` and `docs/plugins.md`.
 
 See [docs/plugins.md](docs/plugins.md).
 
@@ -63,15 +65,14 @@ See [docs/plugins.md](docs/plugins.md).
 - Use clear, imperative subjects (e.g. `Add Node.js plugin`).
 - Do **not** add AI or bot co-author trailers (`Co-authored-by: Cursor`, etc.).
 - Keep commits focused; update docs when behavior changes.
-- Bump version in `VERSION`, `pyproject.toml`, `src/devkit/__init__.py`,
-  `tests/test_version.py`, and all user-facing markdown for releases.
-  Prefer the plain `VERSION` file (not `VERSION.md`).
+- Bump version in `VERSION` and `Cargo.toml`, and all user-facing markdown
+  for releases. Prefer the plain `VERSION` file (not `VERSION.md`).
 
 ## Pull requests
 
 - Target `develop` for features; `main` only for hotfixes/releases.
 - Fill out the PR template.
-- Ensure CI (pytest + `python main.py doctor`) passes.
+- Ensure CI (`cargo test` + `cargo run --release -- doctor`) passes.
 
 ## Code of conduct
 

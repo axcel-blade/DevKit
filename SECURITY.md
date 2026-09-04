@@ -4,10 +4,10 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.6.x   | Yes |
-| 0.5.x   | Security fixes only |
-| 0.4.x   | Security fixes only |
-| < 0.4   | No |
+| 0.8.x   | Yes |
+| 0.7.x   | Security fixes only |
+| 0.6.x   | Security fixes only |
+| < 0.6   | No |
 
 ## Reporting a vulnerability
 
@@ -20,7 +20,7 @@ Include:
 
 - Description of the issue
 - Steps to reproduce
-- Affected version (`python main.py --version`)
+- Affected version (`cargo run --release -- --version`)
 - Impact assessment if known
 
 You should receive an acknowledgment within a reasonable time. Please allow
@@ -28,7 +28,7 @@ time for investigation before any public disclosure.
 
 ## Security notes for users
 
-- DevKit downloads third-party SDK archives (Flutter, Temurin, Mono, Composer, Git for Windows / MinGit, Gradle, PHP, MySQL, Node.js, Android cmdline-tools / platform-tools, Python, Go, Rust, .NET, CMake, Ninja, Maven, PostgreSQL, SQLite, kubectl, Terraform, pnpm, Deno, Bun, Docker CLI).
+- DevKit downloads third-party SDK archives (Flutter, Temurin, Mono, Composer, Git for Windows / MinGit, Gradle, JUnit, PMD, PHP, MySQL, Node.js, Android cmdline-tools / platform-tools, Python, Go, Rust, .NET, CMake, Ninja, Maven, PostgreSQL, SQLite, kubectl, Terraform, pnpm, Deno, Bun, Docker CLI).
   Only use trusted networks when installing.
 - Plugins may modify **user** environment variables (Windows registry or shell profiles).
 - Review plugin code before running `install` on untrusted forks.

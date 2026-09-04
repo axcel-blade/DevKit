@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.6.1** ships these built-in plugins:
+DevKit **0.8.3** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -15,6 +15,8 @@ DevKit **0.6.1** ships these built-in plugins:
 | `jdk` | Temurin via Adoptium; `--version` selects feature (default 21) |
 | `maven` | Latest Apache Maven 3.x binary ZIP |
 | `gradle` | Latest Gradle `-bin.zip` |
+| `junit` | JUnit Platform Console Standalone JAR + wrapper; `--version` optional |
+| `pmd` | PMD Source Code Analyzer binary ZIP from GitHub; `--version` optional |
 | `cmake` | Latest Kitware CMake binary |
 | `ninja` | Latest ninja-build binary ZIP |
 | `git` | MinGit on Windows; system wrappers on Unix |
@@ -34,60 +36,69 @@ DevKit **0.6.1** ships these built-in plugins:
 
 ## Authoring a plugin
 
-Create `src/devkit/plugins/<name>.py`:
+Create `src/plugins/<name>.rs`:
 
-```python
-from devkit.download import install_archive_from_urls
-from devkit.plugin import (
-    EnvSpec,
-    InstallContext,
-    InstallResult,
-    InstallState,
-    Plugin,
-    PluginStatus,
-)
+```rust
+use crate::download::install_archive_from_urls;
+use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
+use anyhow::Result;
 
+pub struct ExamplePlugin;
 
-class ExamplePlugin(Plugin):
-    id = "example"
-    name = "Example"
-    description = "Sample SDK installer"
+impl Plugin for ExamplePlugin {
+    fn id(&self) -> &'static str { "example" }
+    fn name(&self) -> &'static str { "Example" }
+    fn description(&self) -> &'static str { "Sample SDK installer" }
 
-    def status(self, ctx: InstallContext) -> PluginStatus:
-        marker = ctx.install_dir / "bin" / "tool"
-        if marker.exists():
-            return PluginStatus(InstallState.INSTALLED, ctx.install_dir)
-        return PluginStatus(InstallState.NOT_INSTALLED, ctx.install_dir)
+    fn status(&self, ctx: &InstallContext) -> PluginStatus {
+        let marker = ctx.install_dir.join("bin").join("tool");
+        if marker.is_file() {
+            PluginStatus::new(InstallState::Installed, Some(ctx.install_dir.clone()))
+        } else {
+            PluginStatus::new(InstallState::NotInstalled, Some(ctx.install_dir.clone()))
+        }
+    }
 
-    def install(self, ctx: InstallContext) -> InstallResult:
+    fn install(&self, ctx: &InstallContext) -> Result<InstallResult> {
         install_archive_from_urls(
-            {
-                "windows": "https://example.com/tool-win.zip",
-                "macos": "https://example.com/tool-mac.zip",
-                "linux": "https://example.com/tool-linux.tar.xz",
-            },
-            ctx.install_dir,
-        )
-        return InstallResult(ctx.install_dir, message="ok")
+            &[
+                ("windows", "https://example.com/tool-win.zip"),
+                ("macos", "https://example.com/tool-mac.zip"),
+                ("linux", "https://example.com/tool-linux.tar.xz"),
+            ],
+            &ctx.install_dir,
+            true,
+            None,
+        )?;
+        Ok(InstallResult::new(ctx.install_dir.clone(), "ok"))
+    }
 
-    def uninstall(self, ctx: InstallContext) -> None:
-        import shutil
-        if ctx.install_dir.exists():
-            shutil.rmtree(ctx.install_dir)
+    fn uninstall(&self, ctx: &InstallContext) -> Result<()> {
+        if ctx.install_dir.exists() {
+            std::fs::remove_dir_all(&ctx.install_dir)?;
+        }
+        Ok(())
+    }
 
-    def env_spec(self, ctx: InstallContext) -> EnvSpec:
-        return EnvSpec(
-            paths=[ctx.install_dir / "bin"],
-            vars={"EXAMPLE_HOME": str(ctx.install_dir.resolve())},
-        )
+    fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
+        EnvSpec {
+            paths: vec![ctx.install_dir.join("bin")],
+            vars: vec![("EXAMPLE_HOME".to_string(), ctx.install_dir.display().to_string())],
+        }
+    }
+}
 ```
 
-The registry auto-discovers `Plugin` subclasses under `devkit.plugins`.
+Register it in `crate::plugins::all()` (`src/plugins/mod.rs`) — Rust has no
+runtime module scan, so every plugin is listed explicitly there.
 
 ## Helpers
 
-- `devkit.download.install_archive_from_url` / `install_archive_from_urls`
-- `devkit.progress.download_progress` (shared progress bar for large downloads)
-- `devkit.plugin_utils.github_latest_release` / `pick_release_asset` / `binary_status`
-- `devkit.installers.extract_msi_admin` / `extract_pkg` (Windows/macOS installers)
-- `devkit.platform.pick_for_os`, `cpu_arch`, `adoptium_os`
+- `crate::download::install_archive_from_url` / `install_archive_from_urls`
+- `crate::download::ensure_internet_access` / `has_internet_access` (call before
+  any custom network request that doesn't already go through `download`/
+  `plugin_utils` — see below)
+- `crate::progress::download_progress` (shared progress bar for large downloads)
+- `crate::plugin_utils::github_latest_release` / `pick_release_asset` / `binary_status` / `find_files_named`
+- `crate::installers::extract_msi_admin` / `extract_pkg` (Windows/macOS installers)
+- `crate::platform::pick_for_os`, `cpu_arch`, `adoptium_os`

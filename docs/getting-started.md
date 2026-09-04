@@ -2,65 +2,74 @@
 
 ## Requirements
 
-- Python **3.12+**
-- Network access for SDK downloads
-- Write access to the `dev` install root (or set `DEVKIT_HOME`)
+- An internet connection. The launchers exit with an error if the network is
+  unreachable (needed for rustup, crates.io, and later SDK downloads).
+- A Rust toolchain in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`,
+  or `~/dev/rust`; override the root with `DEVKIT_HOME`). `devkit.bat` /
+  `devkit.sh` install rustup stable there when `cargo` is missing. Running
+  `cargo run` yourself still needs a toolchain on PATH (the one in `dev/rust`
+  works if you export `CARGO_HOME` / `RUSTUP_HOME` first).
+- Write access to the `dev` install root
 
 ## Run DevKit
 
 From the repository root:
 
 ```bash
-python main.py --version
-python main.py doctor
-python main.py list
+cargo run --release -- --version
+cargo run --release -- doctor
+cargo run --release -- list
 ```
 
-Windows shortcut:
+Windows shortcut (internet check, then rustup into `C:\dev\rust` if needed):
 
 ```bat
 devkit.bat doctor
 ```
 
-macOS / Linux:
+macOS / Linux (same bootstrap behavior):
 
 ```bash
 chmod +x devkit.sh
 ./devkit.sh doctor
 ```
 
+Either launcher run with **no arguments** opens an interactive menu instead —
+lists every plugin with its status and lets you pick a number to install or
+uninstall it:
+
+```bash
+./devkit.sh        # or: devkit.bat
+```
+
 ## Install a tool
 
 ```bash
-python main.py install git
-python main.py install gradle
-python main.py install node
-python main.py install php
-python main.py install mysql
-python main.py install android
-python main.py install jdk
-python main.py install flutter
-python main.py status gradle
+cargo run --release -- install git
+cargo run --release -- install gradle
+cargo run --release -- install maven
+cargo run --release -- install junit
+cargo run --release -- install pmd
+cargo run --release -- install node
+cargo run --release -- install php
+cargo run --release -- install mysql
+cargo run --release -- install android
+cargo run --release -- install jdk
+cargo run --release -- install flutter
+cargo run --release -- status gradle
 ```
 
 After install, **open a new terminal** so PATH and env vars reload.
 
-### Run via Docker
+### Flutter / JDK / JUnit / PMD options
 
 ```bash
-docker compose run --rm devkit doctor
-docker compose run --rm devkit install hello
-```
-
-See [docker.md](docker.md).
-
-### Flutter / JDK options
-
-```bash
-python main.py install flutter --channel beta
-python main.py install flutter --channel stable --version 3.24
-python main.py install jdk --version 17
-python main.py install jdk --version 21
+cargo run --release -- install flutter --channel beta
+cargo run --release -- install flutter --channel stable --version 3.24
+cargo run --release -- install jdk --version 17
+cargo run --release -- install jdk --version 21
+cargo run --release -- install junit --version 1.11.4
+cargo run --release -- install pmd --version 7.26.0
 ```
 
 ### Environment backends
@@ -76,17 +85,17 @@ python main.py install jdk --version 21
 ```bash
 # Windows PowerShell
 $env:DEVKIT_HOME = "D:\dev"
-python main.py install hello
+cargo run --release -- install hello
 
 # Unix
 export DEVKIT_HOME="$HOME/my-dev"
-python main.py install hello
+cargo run --release -- install hello
 ```
 
 ## Uninstall
 
 ```bash
-python main.py uninstall hello
+cargo run --release -- uninstall hello
 ```
 
 Removes files under the `dev` folder and reverses PATH/env entries DevKit added.
