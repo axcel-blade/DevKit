@@ -8,7 +8,7 @@ assignees: ""
 
 ## DevKit version
 
-<!-- `python main.py --version` -->
+<!-- `devkit --version` (or `cargo run --release -- --version`) -->
 
 ## OS
 
@@ -19,7 +19,7 @@ assignees: ""
 ## Command
 
 ```text
-python main.py ...
+devkit ...
 ```
 
 ## Expected behavior
@@ -31,4 +31,4 @@ python main.py ...
 ## Extra context
 
 - `DEVKIT_HOME`:
-- Output of `python main.py doctor`:
+- Output of `devkit doctor`:

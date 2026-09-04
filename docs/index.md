@@ -1,11 +1,10 @@
 # Documentation
 
-DevKit **0.6.1** documentation index.
+DevKit **0.8.3** documentation index.
 
 | Page | Description |
 |------|-------------|
 | [getting-started.md](getting-started.md) | Install requirements and run the app |
-| [docker.md](docker.md) | Docker image / Compose / Docker CLI plugin |
 | [plugins.md](plugins.md) | Built-in plugins and how to write your own |
 | [architecture.md](architecture.md) | Internals: registry, env, downloads |
 

@@ -11,14 +11,15 @@
 
 ## Checklist
 
-- [ ] Version updated if this is a release (`VERSION`, `pyproject.toml`, `__version__`, tests, CHANGELOG)
+- [ ] Version updated if this is a release (`VERSION`, `Cargo.toml`, CHANGELOG)
 - [ ] Docs updated when behavior changes
-- [ ] `pytest` passes
-- [ ] `ruff check src tests` passes
+- [ ] `cargo test` passes
+- [ ] `cargo clippy --all-targets -- -D warnings` passes
+- [ ] `cargo fmt --all -- --check` passes
 - [ ] No AI/bot co-author trailers on commits
 
 ## Test plan
 
-- [ ] `python main.py doctor`
-- [ ] `python main.py list`
+- [ ] `cargo run --release -- doctor`
+- [ ] `cargo run --release -- list`
 - [ ] Relevant `install` / `status` smoke for touched plugins

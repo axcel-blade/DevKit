@@ -1,27 +1,40 @@
 # DevKit
 
-**Version:** 0.6.1
+**Version:** 0.8.3
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
-It is **not** a PyPI library. Run it from this repository.
+It is **not** a published crate. Run it from this repository.
 
 ## Requirements
 
-- Python 3.12+
 - Windows, macOS, or Linux
+- An internet connection (the launchers exit with an error if the network is
+  unreachable)
+- A Rust toolchain in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`,
+  or `~/dev/rust`; override the root with `DEVKIT_HOME`). `devkit.bat` /
+  `devkit.sh` install rustup stable there if `cargo` is missing.
 
 ## Quick start
+
+Running either launcher with **no arguments** opens an interactive menu
+listing every plugin with its install status — pick a number to install or
+uninstall it, `q` to quit.
 
 **Windows**
 
 ```bat
+devkit.bat
 devkit.bat doctor
 devkit.bat list
 devkit.bat install python
 devkit.bat install go
 devkit.bat install node
 devkit.bat install jdk
+devkit.bat install maven
+devkit.bat install gradle
+devkit.bat install junit
+devkit.bat install pmd
 devkit.bat install flutter
 ```
 
@@ -29,6 +42,7 @@ devkit.bat install flutter
 
 ```bash
 chmod +x devkit.sh
+./devkit.sh
 ./devkit.sh doctor
 ./devkit.sh list
 ./devkit.sh install python
@@ -37,21 +51,11 @@ chmod +x devkit.sh
 **Any OS**
 
 ```bash
-python main.py doctor
-python main.py install cmake
-python main.py install kubectl
-python main.py install docker
+cargo run --release -- doctor
+cargo run --release -- install cmake
+cargo run --release -- install kubectl
+cargo run --release -- install docker
 ```
-
-### Docker
-
-```bash
-docker build -t devkit .
-docker run --rm -e DEVKIT_HOME=/devkit -v devkit-data:/devkit devkit doctor
-docker compose run --rm devkit list
-```
-
-See [docs/docker.md](docs/docker.md).
 
 ## Built-in plugins
 
@@ -68,6 +72,8 @@ See [docs/docker.md](docs/docker.md).
 | `jdk` | Eclipse Temurin JDK (default 21; `--version`) | `PATH`, `JAVA_HOME` |
 | `maven` | Latest Apache Maven | `PATH`, `MAVEN_HOME` |
 | `gradle` | Latest Gradle binary ZIP | `PATH`, `GRADLE_HOME` |
+| `junit` | JUnit Platform Console Standalone (`--version`) | `PATH`, `JUNIT_HOME` |
+| `pmd` | PMD Source Code Analyzer binary (`--version`) | `PATH`, `PMD_HOME` |
 | `cmake` | Latest CMake binary | `PATH`, `CMAKE_HOME` |
 | `ninja` | Latest Ninja binary | `PATH`, `NINJA_HOME` |
 | `git` | MinGit (Windows); system wrappers (Unix) | `PATH`, `GIT_HOME` |
@@ -97,7 +103,6 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 | Doc | Purpose |
 |-----|---------|
 | [docs/getting-started.md](docs/getting-started.md) | Run and install tools |
-| [docs/docker.md](docs/docker.md) | Run DevKit in Docker / install Docker CLI |
 | [docs/plugins.md](docs/plugins.md) | Write a plugin |
 | [docs/architecture.md](docs/architecture.md) | How DevKit works |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
@@ -107,9 +112,10 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 ## Development
 
 ```bash
-python -m pip install -e ".[dev]"
-pytest
-ruff check src tests
+cargo build
+cargo test
+cargo clippy --all-targets -- -D warnings
+cargo fmt --all
 ```
 
 Git Flow branches: `main`, `develop`, `feature/*`, `release/*`, `hotfix/*`.
