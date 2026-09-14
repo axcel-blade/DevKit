@@ -20,6 +20,11 @@ Track near-term tasks for DevKit **0.9.0 / 1.0.0**.
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.8.5)
+
+- [x] `EnvManager` now manages one shared PATH; per-tool `*_HOME` vars
+      (`PYTHON_HOME`, `GOROOT`, etc.) are no longer written
+
 ## Done (0.8.4)
 
 - [x] `msys2` plugin (portable MSYS2 base runtime, Windows only)
