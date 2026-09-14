@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.4] - 2026-09-14
+
+### Added
+
+- `msys2` plugin: portable MSYS2 base runtime (Windows only), extracted
+  from the official `msys2-installer` GitHub releases. Adds `usr/bin`
+  (bash, pacman, etc.) to PATH; run `pacman -Syu` once after install.
+- `qemu` plugin: silent NSIS install on Windows (`/S /D=<dir>`), with
+  system QEMU registered as-is on macOS (Homebrew) and Linux
+  (apt/dnf/pacman) when already installed.
+
 ## [0.8.3] - 2026-09-04
 
 ### Fixed
@@ -213,6 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.8.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.3
 [0.8.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.2
 [0.8.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.1

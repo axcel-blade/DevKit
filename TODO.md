@@ -21,6 +21,11 @@ _(none — see Backlog)_
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.8.4)
+
+- [x] `msys2` plugin (portable MSYS2 base runtime, Windows only)
+- [x] `qemu` plugin (silent NSIS install on Windows; system wrappers on macOS/Linux)
+
 ## Done (0.8.3)
 
 - [x] `pmd` plugin (PMD Source Code Analyzer from GitHub releases)
