@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 0.8.3**
+**DevKit 0.8.5**
 
 Clone the repository, then from the root:
 
