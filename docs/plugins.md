@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.8.3** ships these built-in plugins:
+DevKit **0.8.4** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -32,6 +32,8 @@ DevKit **0.8.3** ships these built-in plugins:
 | `docker` | Official static Docker CLI (client only; no engine) |
 | `terraform` | Latest from HashiCorp releases |
 | `mono` | Windows MSI / macOS PKG; Linux system wrappers |
+| `msys2` | Portable MSYS2 base runtime (Windows only) |
+| `qemu` | Silent NSIS install (Windows); system QEMU wrappers on macOS/Linux |
 | `hello` | Offline demo of ZIP → `dev` folder → env |
 
 ## Authoring a plugin

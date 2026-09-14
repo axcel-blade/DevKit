@@ -20,6 +20,7 @@ pub mod junit;
 pub mod kubectl;
 pub mod maven;
 pub mod mono;
+pub mod msys2;
 pub mod mysql;
 pub mod ninja;
 pub mod node;
@@ -29,6 +30,7 @@ pub mod pmd;
 pub mod pnpm;
 pub mod postgresql;
 pub mod python;
+pub mod qemu;
 pub mod rust;
 pub mod sqlite;
 pub mod terraform;
@@ -55,6 +57,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(kubectl::KubectlPlugin),
         Box::new(maven::MavenPlugin),
         Box::new(mono::MonoPlugin),
+        Box::new(msys2::Msys2Plugin),
         Box::new(mysql::MysqlPlugin),
         Box::new(ninja::NinjaPlugin),
         Box::new(node::NodePlugin),
@@ -64,6 +67,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(pnpm::PnpmPlugin),
         Box::new(postgresql::PostgresqlPlugin),
         Box::new(python::PythonPlugin),
+        Box::new(qemu::QemuPlugin),
         Box::new(rust::RustPlugin),
         Box::new(sqlite::SqlitePlugin),
         Box::new(terraform::TerraformPlugin),
