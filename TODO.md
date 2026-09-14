@@ -4,7 +4,7 @@ Track near-term tasks for DevKit **0.9.0 / 1.0.0**.
 
 ## In progress / next
 
-_(none — see Backlog)_
+- [ ] Shared download checksum verification
 
 ## Backlog
 
@@ -12,7 +12,6 @@ _(none — see Backlog)_
 - [ ] Export/import of installed plugin manifest
 - [ ] Signed release binaries (`cargo build --release` artifacts per platform)
 - [ ] Optional MySQL/PostgreSQL data-dir init / Android `sdkmanager` license helpers
-- [ ] Shared download checksum verification
 - [ ] Redis / Yarn plugins (optional)
 - [ ] Docker Compose helper that wires `DOCKER_HOST` for remote engines
 
@@ -20,6 +19,16 @@ _(none — see Backlog)_
 
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
+
+## Done (0.8.5)
+
+- [x] `EnvManager` now manages one shared PATH; per-tool `*_HOME` vars
+      (`PYTHON_HOME`, `GOROOT`, etc.) are no longer written
+
+## Done (0.8.4)
+
+- [x] `msys2` plugin (portable MSYS2 base runtime, Windows only)
+- [x] `qemu` plugin (silent NSIS install on Windows; system wrappers on macOS/Linux)
 
 ## Done (0.8.3)
 

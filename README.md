@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.8.3
+**Version:** 0.8.5
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -59,37 +59,42 @@ cargo run --release -- install docker
 
 ## Built-in plugins
 
-| Plugin | Installs | Environment |
-|--------|----------|-------------|
-| `python` | Portable CPython (python-build-standalone) | `PATH`, `PYTHON_HOME` |
-| `go` | Latest stable Go toolchain | `PATH`, `GOROOT` |
-| `rust` | Rust stable via rustup | `PATH`, `CARGO_HOME`, `RUSTUP_HOME` |
-| `dotnet` | .NET SDK 8.0 LTS | `PATH`, `DOTNET_ROOT` |
-| `node` | Latest Node.js LTS (npm / npx) | `PATH`, `NODE_HOME` |
-| `pnpm` | Latest pnpm standalone | `PATH`, `PNPM_HOME` |
-| `deno` | Latest Deno runtime | `PATH`, `DENO_INSTALL` |
-| `bun` | Latest Bun runtime | `PATH`, `BUN_INSTALL` |
-| `jdk` | Eclipse Temurin JDK (default 21; `--version`) | `PATH`, `JAVA_HOME` |
-| `maven` | Latest Apache Maven | `PATH`, `MAVEN_HOME` |
-| `gradle` | Latest Gradle binary ZIP | `PATH`, `GRADLE_HOME` |
-| `junit` | JUnit Platform Console Standalone (`--version`) | `PATH`, `JUNIT_HOME` |
-| `pmd` | PMD Source Code Analyzer binary (`--version`) | `PATH`, `PMD_HOME` |
-| `cmake` | Latest CMake binary | `PATH`, `CMAKE_HOME` |
-| `ninja` | Latest Ninja binary | `PATH`, `NINJA_HOME` |
-| `git` | MinGit (Windows); system wrappers (Unix) | `PATH`, `GIT_HOME` |
-| `php` | PHP NTS (Windows); system wrappers (Unix) | `PATH`, `PHP_HOME` |
-| `composer` | Composer PHAR + wrapper | `PATH`, `COMPOSER_HOME` |
-| `mysql` | MySQL 8.4 LTS portable | `PATH`, `MYSQL_HOME` |
-| `postgresql` | EDB Windows binaries; system wrappers (Unix) | `PATH`, `POSTGRESQL_HOME` |
-| `sqlite` | Official sqlite-tools CLI | `PATH`, `SQLITE_HOME` |
-| `android` | Android SDK cmdline-tools | `PATH`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` |
-| `platform-tools` | Android platform-tools (`adb`) | `PATH`, `ANDROID_PLATFORM_TOOLS` |
-| `flutter` | Flutter SDK (`--channel` / `--version`) | `PATH`, `FLUTTER_ROOT` |
-| `kubectl` | Latest stable kubectl | `PATH`, `KUBECTL_HOME` |
-| `docker` | Official static Docker CLI (client only) | `PATH`, `DOCKER_HOME` |
-| `terraform` | Latest Terraform | `PATH`, `TERRAFORM_HOME` |
-| `mono` | Mono 6.12 (Win/macOS); system wrappers (Linux) | `PATH`, `MONO_HOME` |
-| `hello` | Demo ZIP install | `PATH`, `DEVKIT_HELLO_ROOT` |
+Every plugin below is added to the same shared user `PATH` — DevKit does not
+set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
+
+| Plugin | Installs |
+|--------|----------|
+| `python` | Portable CPython (python-build-standalone) |
+| `go` | Latest stable Go toolchain |
+| `rust` | Rust stable via rustup |
+| `dotnet` | .NET SDK 8.0 LTS |
+| `node` | Latest Node.js LTS (npm / npx) |
+| `pnpm` | Latest pnpm standalone |
+| `deno` | Latest Deno runtime |
+| `bun` | Latest Bun runtime |
+| `jdk` | Eclipse Temurin JDK (default 21; `--version`) |
+| `maven` | Latest Apache Maven |
+| `gradle` | Latest Gradle binary ZIP |
+| `junit` | JUnit Platform Console Standalone (`--version`) |
+| `pmd` | PMD Source Code Analyzer binary (`--version`) |
+| `cmake` | Latest CMake binary |
+| `ninja` | Latest Ninja binary |
+| `git` | MinGit (Windows); system wrappers (Unix) |
+| `php` | PHP NTS (Windows); system wrappers (Unix) |
+| `composer` | Composer PHAR + wrapper |
+| `mysql` | MySQL 8.4 LTS portable |
+| `postgresql` | EDB Windows binaries; system wrappers (Unix) |
+| `sqlite` | Official sqlite-tools CLI |
+| `android` | Android SDK cmdline-tools |
+| `platform-tools` | Android platform-tools (`adb`) |
+| `flutter` | Flutter SDK (`--channel` / `--version`) |
+| `kubectl` | Latest stable kubectl |
+| `docker` | Official static Docker CLI (client only) |
+| `terraform` | Latest Terraform |
+| `mono` | Mono 6.12 (Win/macOS); system wrappers (Linux) |
+| `msys2` | Portable MSYS2 base runtime (Windows only) |
+| `qemu` | Silent NSIS install (Windows); system wrappers (macOS/Linux) |
+| `hello` | Demo ZIP install |
 
 Default install root:
 
