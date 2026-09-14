@@ -1,6 +1,6 @@
 # Roadmap
 
-High-level plans for DevKit after **0.8.3**.
+High-level plans for DevKit after **0.8.4**.
 
 ## 0.9.0 — Helpers & polish
 
@@ -21,6 +21,8 @@ High-level plans for DevKit after **0.8.3**.
 
 ## Completed
 
+- **0.8.4** — `msys2` plugin (portable base runtime, Windows); `qemu` plugin
+  (silent NSIS install on Windows, system wrappers on macOS/Linux)
 - **0.8.3** — `pmd` plugin; Unix writability probe so `list` does not fail on `/opt`
 - **0.8.2** — `junit` plugin (console standalone + wrappers); doctor reports Rustc/Cargo
 - **0.8.1** — Launchers check internet first, then install rustup into the
