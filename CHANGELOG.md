@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-09-14
+
+### Changed
+
+- `EnvManager` now manages a single shared user `PATH` only. Plugins no
+  longer get a per-tool `*_HOME` variable written to the environment
+  (`PYTHON_HOME`, `GOROOT`, `CARGO_HOME`/`RUSTUP_HOME`, etc.) — each
+  plugin's `EnvSpec::vars` is accepted for backward compatibility but is
+  no longer applied, checked, or reverted; only `EnvSpec::paths` entries
+  are written to `PATH`.
+
 ## [0.8.4] - 2026-09-14
 
 ### Added
@@ -224,6 +235,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.8.5]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.5
 [0.8.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.3
 [0.8.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.2

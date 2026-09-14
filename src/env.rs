@@ -1,4 +1,8 @@
-//! User environment PATH and variable management.
+//! User environment PATH management.
+//!
+//! DevKit manages a single shared PATH for every installed tool instead of a
+//! separate `*_HOME` variable per plugin (`PYTHON_HOME`, `GOROOT`, etc.) —
+//! `EnvSpec::vars` is intentionally ignored here.
 //!
 //! - Windows: user environment via the registry
 //! - macOS / Linux: `~/.devkit/env.sh` plus a source line in the user shell profile
@@ -177,10 +181,6 @@ impl EnvManager {
             }
         }
         self.write_user_env("Path", &join_paths(&parts))?;
-
-        for (name, value) in &spec.vars {
-            self.write_user_env(name, value)?;
-        }
         self.broadcast_env_change();
         Ok(())
     }
@@ -198,10 +198,6 @@ impl EnvManager {
             .filter(|p| !path_entries.contains(&p.to_lowercase()))
             .collect();
         self.write_user_env("Path", &join_paths(&parts))?;
-
-        for (name, _) in &spec.vars {
-            self.delete_user_env(name)?;
-        }
         self.broadcast_env_change();
         Ok(())
     }
@@ -217,10 +213,6 @@ impl EnvManager {
         for p in &spec.paths {
             let key = format!("PATH:{}", norm_path(p));
             result.insert(key, lower_parts.contains(&norm_path(p).to_lowercase()));
-        }
-        for (name, value) in &spec.vars {
-            let actual = self.read_user_env(name);
-            result.insert(name.clone(), actual.as_deref() == Some(value.as_str()));
         }
         Ok(result)
     }
@@ -292,8 +284,6 @@ impl EnvManager {
             None => return Ok(()),
         };
         let path_targets: Vec<String> = spec.paths.iter().map(|p| norm_path(p)).collect();
-        let var_names: Vec<&str> = spec.vars.iter().map(|(k, _)| k.as_str()).collect();
-        let export_re = regex::Regex::new(r"^export\s+([A-Za-z_][A-Za-z0-9_]*)=").unwrap();
 
         let kept: Vec<&str> = block
             .lines()
@@ -301,11 +291,7 @@ impl EnvManager {
                 let path_hit = path_targets.iter().any(|p| {
                     line.contains(&format!("PATH=\"{p}:")) || line.contains(&format!("PATH={p}:"))
                 });
-                let var_hit = export_re
-                    .captures(line)
-                    .map(|c| var_names.contains(&c.get(1).unwrap().as_str()))
-                    .unwrap_or(false);
-                !(path_hit || var_hit)
+                !path_hit
             })
             .collect();
         let new_block = kept.join("\n").trim().to_string();
@@ -337,15 +323,6 @@ impl EnvManager {
             let np = norm_path(p);
             result.insert(format!("PATH:{np}"), text.contains(&np));
         }
-        for (name, value) in &spec.vars {
-            let pattern = regex::Regex::new(&format!(
-                r#"(?m)^export\s+{}="{}"\s*$"#,
-                regex::escape(name),
-                regex::escape(value)
-            ))
-            .unwrap();
-            result.insert(name.clone(), pattern.is_match(&text));
-        }
         Ok(result)
     }
 
@@ -354,10 +331,6 @@ impl EnvManager {
         for p in &spec.paths {
             let np = norm_path(p);
             lines.push(format!(r#"export PATH="{np}:$PATH""#));
-        }
-        for (name, value) in &spec.vars {
-            let safe = value.replace('"', "\\\"");
-            lines.push(format!(r#"export {name}="{safe}""#));
         }
         lines.push(ENV_SH_END.to_string());
         lines.join("\n") + "\n"
@@ -477,7 +450,9 @@ mod tests {
             assert!(env_sh.is_file());
             let text = std::fs::read_to_string(&env_sh).unwrap();
             assert!(text.contains(&norm_path(&install)));
-            assert!(text.contains(r#"export DEVKIT_TEST="yes""#));
+            // EnvSpec::vars (per-tool *_HOME) is intentionally not written —
+            // DevKit only manages the shared PATH.
+            assert!(!text.contains("DEVKIT_TEST"));
 
             let profile = std::fs::read_to_string(primary_shell_profile()).unwrap();
             assert!(profile.contains(".devkit/env.sh"));
@@ -488,7 +463,6 @@ mod tests {
             mgr.revert(&spec).unwrap();
             let text_after = std::fs::read_to_string(&env_sh).unwrap();
             assert!(!text_after.contains(&norm_path(&install)));
-            assert!(!text_after.contains("DEVKIT_TEST"));
         });
     }
 
@@ -515,8 +489,8 @@ mod tests {
             let text = std::fs::read_to_string(home.join(".devkit").join("env.sh")).unwrap();
             assert!(text.contains(&norm_path(&a)));
             assert!(text.contains(&norm_path(&b)));
-            assert!(text.contains(r#"export A="1""#));
-            assert!(text.contains(r#"export B="2""#));
+            assert!(!text.contains(r#"export A="1""#));
+            assert!(!text.contains(r#"export B="2""#));
         });
     }
 }

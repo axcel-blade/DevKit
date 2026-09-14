@@ -1,6 +1,6 @@
 # Roadmap
 
-High-level plans for DevKit after **0.8.4**.
+High-level plans for DevKit after **0.8.5**.
 
 ## 0.9.0 — Helpers & polish
 
@@ -21,6 +21,7 @@ High-level plans for DevKit after **0.8.4**.
 
 ## Completed
 
+- **0.8.5** — Single shared PATH; per-tool `*_HOME` variables no longer set
 - **0.8.4** — `msys2` plugin (portable base runtime, Windows); `qemu` plugin
   (silent NSIS install on Windows, system wrappers on macOS/Linux)
 - **0.8.3** — `pmd` plugin; Unix writability probe so `list` does not fail on `/opt`

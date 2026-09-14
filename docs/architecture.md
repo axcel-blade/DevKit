@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.8.4** is a CLI application with a plugin pipeline.
+DevKit **0.8.5** is a CLI application with a plugin pipeline.
 
 ```text
 target/release/devkit (binary) / devkit.bat / devkit.sh
