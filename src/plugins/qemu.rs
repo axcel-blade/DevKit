@@ -1,12 +1,19 @@
 //! QEMU plugin — official Windows NSIS installer run silently into a
 //! private folder; system QEMU registered as-is on macOS/Linux.
 
-use crate::download::download_file;
 use crate::platform::{current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
-use crate::progress::download_progress;
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
 use std::path::PathBuf;
+// Only the Windows install path downloads and runs the NSIS installer;
+// gate these imports the same way installers.rs gates its Windows/macOS
+// extractors, so `-D warnings` doesn't fail unused-import on other OSes.
+#[cfg(windows)]
+use crate::download::download_file;
+#[cfg(windows)]
+use crate::progress::download_progress;
+#[cfg(windows)]
+use anyhow::Context;
 
 const MARKER: &str = ".devkit-qemu";
 const QEMU_VERSION: &str = "8.2.2";
