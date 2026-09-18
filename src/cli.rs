@@ -116,12 +116,7 @@ fn perform_install(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<
     } else {
         result.message
     };
-    println!(
-        "{} {}: {}",
-        theme::green("Installed"),
-        plugin.id(),
-        msg
-    );
+    println!("{} {}: {}", theme::green("Installed"), plugin.id(), msg);
     println!(
         "{}",
         theme::dim("Environment updated. Open a new terminal for PATH/env changes to take effect.")
@@ -224,7 +219,10 @@ fn cmd_status(plugin_id: &str) -> anyhow::Result<i32> {
     let ctx = context(plugin.id(), None, None)?;
     let status = plugin.status(&ctx);
     println!("Plugin:      {} ({})", plugin.id(), plugin.name());
-    println!("State:       {}", theme::status_label(status.state.as_str()));
+    println!(
+        "State:       {}",
+        theme::status_label(status.state.as_str())
+    );
     if let Some(dir) = &status.install_dir {
         println!("Install dir: {}", dir.display());
     }
@@ -363,7 +361,10 @@ fn cmd_menu() -> anyhow::Result<i32> {
 
     loop {
         println!();
-        println!("{}", theme::bold(&format!("DevKit {VERSION} — plugin menu")));
+        println!(
+            "{}",
+            theme::bold(&format!("DevKit {VERSION} — plugin menu"))
+        );
         println!(
             "{}",
             theme::bold(&format!("{:<4} {:<16} {:<20} STATUS", "#", "ID", "NAME"))
