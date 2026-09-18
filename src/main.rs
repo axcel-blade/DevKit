@@ -14,6 +14,7 @@ mod plugin_utils;
 mod plugins;
 mod progress;
 mod registry;
+mod theme;
 
 fn main() {
     let code = match cli::main(None) {
