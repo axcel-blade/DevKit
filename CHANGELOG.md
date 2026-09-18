@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-09-18
+
+### Changed
+
+- `list`, `status`, `doctor`, and the interactive `menu` now color-code
+  plugin/environment status (green = installed/ok, yellow = partial/no
+  network, red = missing/error, dim = not installed) via a new `theme`
+  module. Colors are skipped automatically when `NO_COLOR` is set or
+  stdout isn't a terminal, so piped/redirected output is unaffected.
+
 ## [0.8.5] - 2026-09-14
 
 ### Changed
@@ -235,6 +245,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.9.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.0
 [0.8.5]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.5
 [0.8.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.4
 [0.8.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.3

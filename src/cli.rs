@@ -8,6 +8,7 @@ use crate::paths::{ensure_home, home, plugin_install_dir};
 use crate::platform::{is_windows, os_label};
 use crate::plugin::{InstallContext, InstallState, Plugin};
 use crate::registry::default_registry;
+use crate::theme;
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
@@ -78,8 +79,11 @@ fn cmd_list() -> anyhow::Result<i32> {
         println!("No plugins registered.");
         return Ok(0);
     }
-    println!("{:<16} {:<20} STATUS", "ID", "NAME");
-    println!("{}", "-".repeat(50));
+    println!(
+        "{}",
+        theme::bold(&format!("{:<16} {:<20} STATUS", "ID", "NAME"))
+    );
+    println!("{}", theme::dim(&"-".repeat(50)));
     for plugin in plugins {
         let ctx = context(plugin.id(), None, None)?;
         let status = plugin.status(&ctx);
@@ -87,7 +91,7 @@ fn cmd_list() -> anyhow::Result<i32> {
             "{:<16} {:<20} {}",
             plugin.id(),
             plugin.name(),
-            status.state.as_str()
+            theme::status_label(status.state.as_str())
         );
     }
     Ok(0)
@@ -98,7 +102,8 @@ fn cmd_list() -> anyhow::Result<i32> {
 /// both go through one code path.
 fn perform_install(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<()> {
     println!(
-        "Installing {} ({}) into {} ...",
+        "{} {} ({}) into {} ...",
+        theme::cyan("Installing"),
         plugin.name(),
         plugin.id(),
         ctx.install_dir.display()
@@ -111,8 +116,11 @@ fn perform_install(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<
     } else {
         result.message
     };
-    println!("Installed {}: {}", plugin.id(), msg);
-    println!("Environment updated. Open a new terminal for PATH/env changes to take effect.");
+    println!("{} {}: {}", theme::green("Installed"), plugin.id(), msg);
+    println!(
+        "{}",
+        theme::dim("Environment updated. Open a new terminal for PATH/env changes to take effect.")
+    );
     Ok(())
 }
 
@@ -122,8 +130,11 @@ fn perform_uninstall(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Resul
     let spec = plugin.env_spec(ctx);
     EnvManager::new().revert(&spec)?;
     plugin.uninstall(ctx)?;
-    println!("Uninstalled {}.", plugin.id());
-    println!("Environment updated. Open a new terminal for PATH/env changes to take effect.");
+    println!("{} {}.", theme::yellow("Uninstalled"), plugin.id());
+    println!(
+        "{}",
+        theme::dim("Environment updated. Open a new terminal for PATH/env changes to take effect.")
+    );
     Ok(())
 }
 
@@ -208,7 +219,10 @@ fn cmd_status(plugin_id: &str) -> anyhow::Result<i32> {
     let ctx = context(plugin.id(), None, None)?;
     let status = plugin.status(&ctx);
     println!("Plugin:      {} ({})", plugin.id(), plugin.name());
-    println!("State:       {}", status.state.as_str());
+    println!(
+        "State:       {}",
+        theme::status_label(status.state.as_str())
+    );
     if let Some(dir) = &status.install_dir {
         println!("Install dir: {}", dir.display());
     }
@@ -221,8 +235,7 @@ fn cmd_status(plugin_id: &str) -> anyhow::Result<i32> {
     if !checks.is_empty() {
         println!("Environment:");
         for (key, ok) in &checks {
-            let mark = if *ok { "ok" } else { "missing" };
-            println!("  [{mark}] {key}");
+            println!("  {} {key}", theme::check_mark(*ok));
         }
     }
     Ok(if status.state == InstallState::Installed {
@@ -270,7 +283,7 @@ fn rust_toolchain_line(bin_name: &str) -> String {
 
 fn cmd_doctor() -> anyhow::Result<i32> {
     let root = home();
-    println!("DevKit {VERSION}");
+    println!("{}", theme::bold(&format!("DevKit {VERSION}")));
     println!("Platform:     {} ({})", os_label(), std::env::consts::OS);
     // Replaces the old Python-app `Python: <sys.version>` / `where python` line.
     println!("Rustc:        {}", rust_toolchain_line("rustc"));
@@ -287,16 +300,16 @@ fn cmd_doctor() -> anyhow::Result<i32> {
             match std::fs::write(&probe, "ok") {
                 Ok(()) => {
                     let _ = std::fs::remove_file(&probe);
-                    println!("Root writable: yes");
+                    println!("Root writable: {}", theme::green("yes"));
                 }
                 Err(e) => {
-                    println!("Root writable: no ({e})");
+                    println!("Root writable: {} ({e})", theme::red("no"));
                     return Ok(1);
                 }
             }
         }
         Err(e) => {
-            println!("Root writable: no ({e})");
+            println!("Root writable: {} ({e})", theme::red("no"));
             return Ok(1);
         }
     }
@@ -304,9 +317,12 @@ fn cmd_doctor() -> anyhow::Result<i32> {
     // Advisory only — doesn't fail the command, since doctor is still useful
     // offline (e.g. checking the install root or env backend).
     if crate::download::has_internet_access() {
-        println!("Internet:     yes");
+        println!("Internet:     {}", theme::green("yes"));
     } else {
-        println!("Internet:     no (SDK downloads need network access)");
+        println!(
+            "Internet:     {} (SDK downloads need network access)",
+            theme::yellow("no")
+        );
     }
 
     println!("Env backend:  {}", EnvManager::new().backend_description());
@@ -345,9 +361,15 @@ fn cmd_menu() -> anyhow::Result<i32> {
 
     loop {
         println!();
-        println!("DevKit {VERSION} — plugin menu");
-        println!("{:<4} {:<16} {:<20} STATUS", "#", "ID", "NAME");
-        println!("{}", "-".repeat(54));
+        println!(
+            "{}",
+            theme::bold(&format!("DevKit {VERSION} — plugin menu"))
+        );
+        println!(
+            "{}",
+            theme::bold(&format!("{:<4} {:<16} {:<20} STATUS", "#", "ID", "NAME"))
+        );
+        println!("{}", theme::dim(&"-".repeat(54)));
 
         // Re-check status every loop so the menu reflects what the last
         // action actually did, and remember which are installed so the
@@ -361,13 +383,16 @@ fn cmd_menu() -> anyhow::Result<i32> {
                 i + 1,
                 plugin.id(),
                 plugin.name(),
-                status.state.as_str()
+                theme::status_label(status.state.as_str())
             );
             installed.push(status.state == InstallState::Installed);
         }
 
         println!();
-        print!("Enter a number to install/uninstall, or 'q' to quit: ");
+        print!(
+            "{}",
+            theme::cyan("Enter a number to install/uninstall, or 'q' to quit: ")
+        );
         io::stdout().flush()?;
 
         let mut line = String::new();
@@ -384,7 +409,7 @@ fn cmd_menu() -> anyhow::Result<i32> {
         let choice: usize = match input.parse() {
             Ok(n) if n >= 1 && n <= plugins.len() => n,
             _ => {
-                println!("Invalid choice: {input}");
+                println!("{} {input}", theme::red("Invalid choice:"));
                 continue;
             }
         };
@@ -397,7 +422,7 @@ fn cmd_menu() -> anyhow::Result<i32> {
             perform_install(plugin, &ctx)
         };
         if let Err(e) = outcome {
-            eprintln!("Error: {e}");
+            eprintln!("{} {e}", theme::red("Error:"));
         }
     }
     Ok(0)
