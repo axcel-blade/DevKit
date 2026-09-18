@@ -20,6 +20,10 @@ Track near-term tasks for DevKit **0.9.0 / 1.0.0**.
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
 
+## Done (0.9.0)
+
+- [x] Color-coded CLI/menu status output (`theme` module), honoring `NO_COLOR`
+
 ## Done (0.8.5)
 
 - [x] `EnvManager` now manages one shared PATH; per-tool `*_HOME` vars
