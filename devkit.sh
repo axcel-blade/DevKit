@@ -1,27 +1,18 @@
 #!/usr/bin/env bash
 # DevKit application launcher (macOS / Linux).
 #
-# 1. Require an internet connection (needed to fetch rustup / crates).
-# 2. Use Rust from the machine `dev` folder (`/opt/dev/rust` or `~/dev/rust`,
-#    or `$DEVKIT_HOME/rust`). If cargo is missing there, install rustup
-#    stable into that folder (same rustup-init flags as the rust plugin:
-#    -y --no-modify-path).
-# 3. Build the release binary if needed, then run it.
+# 1. Use Rust from the machine `dev` folder (`/opt/dev/rust` or `~/dev/rust`,
+#    or `$DEVKIT_HOME/rust`). If cargo is missing there, require an internet
+#    connection and install rustup stable into that folder (same rustup-init
+#    flags as the rust plugin: -y --no-modify-path).
+# 2. Rebuild the release binary (a no-op when it is already up to date), so
+#    a stale binary from an older checkout never hides new features.
+# 3. Run it. With no arguments the interactive plugin menu is shown.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 BIN="$ROOT/target/release/devkit"
 
-# Step 1: fail fast if we cannot reach rustup's CDN (HTTPS/443).
-echo "Checking internet connection..."
-# A raw TCP connect via bash's /dev/tcp — no extra tools needed. Wrapped
-# in an `if !` so `set -e` doesn't abort the script on a failed connect.
-if ! (exec 3<>"/dev/tcp/static.rust-lang.org/443") 2>/dev/null; then
-    echo "Error: no internet connection. Connect to the internet and try again."
-    exit 1
-fi
-exec 3<&- 3>&- 2>/dev/null || true
-
-# Step 2: same machine `dev` root as paths::home() (DEVKIT_HOME, /opt/dev, ~/dev).
+# Step 1: same machine `dev` root as paths::home() (DEVKIT_HOME, /opt/dev, ~/dev).
 if [ -n "${DEVKIT_HOME:-}" ]; then
     DEVROOT="$DEVKIT_HOME"
 elif mkdir -p /opt/dev 2>/dev/null && [ -w /opt/dev ]; then
@@ -36,6 +27,17 @@ CARGO_EXE="${CARGO_HOME}/bin/cargo"
 
 if [ ! -x "$CARGO_EXE" ]; then
     echo "Rust is not installed in ${DEVROOT}/rust."
+
+    # Installing Rust needs rustup's CDN, so fail fast when it is
+    # unreachable. An already-installed toolchain skips this check so the
+    # menu still opens offline. A raw TCP connect via bash's /dev/tcp — no
+    # extra tools needed; wrapped in `if !` so `set -e` doesn't abort.
+    echo "Checking internet connection..."
+    if ! (exec 3<>"/dev/tcp/static.rust-lang.org/443") 2>/dev/null; then
+        echo "Error: no internet connection. Connect to the internet and try again."
+        exit 1
+    fi
+
     echo "Installing Rust (rustup, stable) into the machine dev folder..."
 
     case "$(uname -s)" in
@@ -54,13 +56,17 @@ if [ ! -x "$CARGO_EXE" ]; then
     triple="${arch}-${os}"
 
     mkdir -p "${DEVROOT}/rust"
-    tmp_init="$(mktemp)"
+    # rustup picks its mode from its own file name, so the installer must be
+    # named exactly `rustup-init` (mktemp's random name fails with "unknown
+    # proxy name"). Put it in a private temp directory instead.
+    tmp_dir="$(mktemp -d)"
+    tmp_init="${tmp_dir}/rustup-init"
     curl --proto '=https' --tlsv1.2 -sSf \
         "https://static.rust-lang.org/rustup/dist/${triple}/rustup-init" \
         -o "$tmp_init"
     chmod +x "$tmp_init"
     "$tmp_init" -y --no-modify-path --default-toolchain stable --profile default
-    rm -f "$tmp_init"
+    rm -rf "$tmp_dir"
 
     if [ ! -x "$CARGO_EXE" ]; then
         echo "Rust install finished but cargo was not found at $CARGO_EXE."
@@ -69,7 +75,20 @@ if [ ! -x "$CARGO_EXE" ]; then
     echo "Rust installed at ${DEVROOT}/rust."
 fi
 
-if [ ! -x "$BIN" ]; then
-    "$CARGO_EXE" build --release --manifest-path "$ROOT/Cargo.toml"
+# Step 2: always run cargo build. Cargo only recompiles when sources
+# changed, so this is fast when up to date, and it guarantees the binary
+# matches this checkout (an old binary may predate the plugin menu).
+if ! "$CARGO_EXE" build --release --quiet --manifest-path "$ROOT/Cargo.toml"; then
+    if [ ! -x "$BIN" ]; then
+        echo "Build failed."
+        exit 1
+    fi
+    echo "Warning: build failed, running the previously built binary."
+fi
+
+# Step 3: no arguments means the user just launched DevKit, so open the
+# interactive menu explicitly.
+if [ "$#" -eq 0 ]; then
+    exec "$BIN" menu
 fi
 exec "$BIN" "$@"

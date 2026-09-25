@@ -21,6 +21,8 @@ High-level plans for DevKit after **0.8.5**.
 
 ## Completed
 
+- **0.9.1** — Launchers always open the menu with no arguments: fixed the
+  rustup-init file name, rebuild on every run, internet only needed to install Rust
 - **0.8.5** — Single shared PATH; per-tool `*_HOME` variables no longer set
 - **0.8.4** — `msys2` plugin (portable base runtime, Windows); `qemu` plugin
   (silent NSIS install on Windows, system wrappers on macOS/Linux)
