@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.9.0
+**Version:** 0.9.1
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -9,8 +9,8 @@ It is **not** a published crate. Run it from this repository.
 ## Requirements
 
 - Windows, macOS, or Linux
-- An internet connection (the launchers exit with an error if the network is
-  unreachable)
+- An internet connection for the first run (to install Rust and fetch crates)
+  and for SDK downloads; once Rust is installed the launchers start offline
 - A Rust toolchain in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`,
   or `~/dev/rust`; override the root with `DEVKIT_HOME`). `devkit.bat` /
   `devkit.sh` install rustup stable there if `cargo` is missing.
