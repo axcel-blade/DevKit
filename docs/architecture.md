@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.9.0** is a CLI application with a plugin pipeline.
+DevKit **0.9.1** is a CLI application with a plugin pipeline.
 
 ```text
 target/release/devkit (binary) / devkit.bat / devkit.sh
@@ -27,10 +27,10 @@ Each plugin installs to `<home>/<plugin-id>`.
 
 `devkit.bat` and `devkit.sh` run before the compiled binary:
 
-1. Probe the network (`static.rust-lang.org:443`). Fail with a connect-to-internet error if offline.
-2. Resolve the same `dev` root as `paths::home()` (`DEVKIT_HOME` or the OS default).
-3. Look for `cargo` under `<dev>/rust/cargo/bin`. If missing, download rustup-init and install the stable toolchain into `<dev>/rust` (`CARGO_HOME` / `RUSTUP_HOME`, `--no-modify-path`).
-4. `cargo build --release` if `target/release/devkit` is missing, then exec the binary.
+1. Resolve the same `dev` root as `paths::home()` (`DEVKIT_HOME` or the OS default).
+2. Look for `cargo` under `<dev>/rust/cargo/bin`. If missing, probe the network (`static.rust-lang.org:443`, failing with a connect-to-internet error if offline), download the installer as `rustup-init` (rustup chooses its mode from its file name) and install the stable toolchain into `<dev>/rust` (`CARGO_HOME` / `RUSTUP_HOME`, `--no-modify-path`).
+3. Always run `cargo build --release` (a no-op when up to date) so the binary matches the checkout. If the build fails but an older binary exists, it is used with a warning.
+4. Exec the binary. With no arguments the launcher runs `devkit menu`, the interactive plugin menu.
 
 `devkit doctor` reports `Rustc` and `Cargo` the same way `where rustc` / `where cargo` would (PATH first, then `<dev>/rust/cargo/bin`).
 

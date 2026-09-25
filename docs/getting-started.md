@@ -2,8 +2,10 @@
 
 ## Requirements
 
-- An internet connection. The launchers exit with an error if the network is
-  unreachable (needed for rustup, crates.io, and later SDK downloads).
+- An internet connection for the first run (rustup, crates.io) and for SDK
+  downloads. Once Rust is installed in the `dev` folder the launchers start
+  offline; they only exit with a connect-to-internet error when Rust still
+  needs to be installed.
 - A Rust toolchain in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`,
   or `~/dev/rust`; override the root with `DEVKIT_HOME`). `devkit.bat` /
   `devkit.sh` install rustup stable there when `cargo` is missing. Running
@@ -21,7 +23,7 @@ cargo run --release -- doctor
 cargo run --release -- list
 ```
 
-Windows shortcut (internet check, then rustup into `C:\dev\rust` if needed):
+Windows shortcut (rustup into `C:\dev\rust` if needed, then build and run):
 
 ```bat
 devkit.bat doctor
@@ -34,9 +36,11 @@ chmod +x devkit.sh
 ./devkit.sh doctor
 ```
 
-Either launcher run with **no arguments** opens an interactive menu instead —
-lists every plugin with its status and lets you pick a number to install or
-uninstall it:
+Either launcher run with **no arguments** (including double-clicking
+`devkit.bat`) opens an interactive menu instead — lists every plugin with its
+status and lets you pick a number to install or uninstall it. The launchers
+rebuild DevKit on every run (instant when nothing changed), so the menu is
+always the one from your current checkout:
 
 ```bash
 ./devkit.sh        # or: devkit.bat
