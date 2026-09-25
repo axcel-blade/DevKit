@@ -1,6 +1,6 @@
 # TODO
 
-Track near-term tasks for DevKit **0.9.0 / 1.0.0**.
+Track near-term tasks for DevKit **0.9.1 / 1.0.0**.
 
 ## In progress / next
 
@@ -19,6 +19,12 @@ Track near-term tasks for DevKit **0.9.0 / 1.0.0**.
 
 - [ ] Expand wiki pages as the plugin set grows
 - [ ] Add short demo GIF/screenshot to README
+
+## Done (0.9.1)
+
+- [x] `devkit.bat` / `devkit.sh` show the interactive menu when run with no
+      arguments (rustup-init name fix, always rebuild, explicit `menu`)
+- [x] Launchers only require internet when Rust must be installed
 
 ## Done (0.9.0)
 

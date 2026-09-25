@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.9.0** ships these built-in plugins:
+DevKit **0.9.1** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
