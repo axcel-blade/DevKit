@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-09-25
+
+### Fixed
+
+- `devkit.bat` / `devkit.sh` now reliably open the interactive plugin menu
+  when run with no arguments (e.g. double-clicking `devkit.bat`):
+  - The downloaded installer is saved as `rustup-init` (in a DevKit temp
+    folder). The old `devkit-rustup-init.exe` / `mktemp` names made rustup
+    fail with "unknown proxy name", so Rust never installed and the
+    launcher exited before reaching the menu.
+  - The launchers always run `cargo build --release` (a no-op when up to
+    date) instead of building only when the binary is missing, so a stale
+    binary from an older checkout can no longer hide the menu. If the build
+    fails but a previous binary exists, that binary is run with a warning.
+  - With no arguments the launchers invoke `devkit menu` explicitly.
+
+### Changed
+
+- The launchers only require an internet connection when Rust has to be
+  installed; with Rust already in `<dev>/rust` the menu opens offline.
+- `devkit.bat` pauses on errors when launched without arguments so the
+  message stays visible in a double-clicked console window.
+
 ## [0.9.0] - 2026-09-18
 
 ### Changed
@@ -245,6 +268,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.9.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.0
 [0.8.5]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.5
 [0.8.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.4
