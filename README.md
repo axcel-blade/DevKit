@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.9.2
+**Version:** 0.9.3
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -18,8 +18,10 @@ It is **not** a published crate. Run it from this repository.
 ## Quick start
 
 Running either launcher with **no arguments** opens an interactive menu
-listing every plugin with its install status — pick a number to install or
-uninstall it, `q` to quit.
+listing every plugin with its install status, the **installed version**, and
+the **newest available version** (flagged when an update is available) — pick a
+number to install or uninstall it, `r` to re-check available versions, `q` to
+quit.
 
 **Windows**
 

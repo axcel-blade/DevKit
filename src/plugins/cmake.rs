@@ -107,6 +107,11 @@ impl Plugin for CmakePlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_cmake_download()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let binary = cmake_bin(ctx);
         let parent = binary.parent().unwrap_or(&ctx.install_dir).to_path_buf();

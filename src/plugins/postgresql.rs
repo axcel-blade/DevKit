@@ -113,6 +113,11 @@ impl Plugin for PostgresqlPlugin {
         Ok(())
     }
 
+    /// DevKit pins this release, so "latest" is the pinned version it installs.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(PG_VERSION.to_string()))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let binary = pgsql_bin(ctx);
         let mut paths: Vec<PathBuf> = Vec::new();

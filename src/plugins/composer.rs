@@ -112,6 +112,26 @@ impl Plugin for ComposerPlugin {
         Ok(())
     }
 
+    /// composer.phar embeds `const VERSION = 'X.Y.Z';` uncompressed, so scan
+    /// for it rather than shelling out to PHP (which may not be on PATH).
+    fn installed_version(&self, ctx: &InstallContext) -> Option<String> {
+        let bytes = std::fs::read(ctx.install_dir.join(PHAR_NAME)).ok()?;
+        let text = String::from_utf8_lossy(&bytes);
+        let re = regex::Regex::new(r"const VERSION = '(\d+\.\d+\.\d+[^']*)'").ok()?;
+        re.captures(&text).map(|c| c[1].to_string())
+    }
+
+    /// Newest stable version from getcomposer.org's version feed.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        let data = crate::download::download_json_value("https://getcomposer.org/versions")?;
+        Ok(data
+            .get("stable")
+            .and_then(|v| v.get(0))
+            .and_then(|v| v.get("version"))
+            .and_then(|v| v.as_str())
+            .map(str::to_string))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let composer_home = ctx.install_dir.join("home");
         EnvSpec {

@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.9.2** ships these built-in plugins:
+DevKit **0.9.3** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -93,6 +93,26 @@ impl Plugin for ExamplePlugin {
 
 Register it in `crate::plugins::all()` (`src/plugins/mod.rs`) — Rust has no
 runtime module scan, so every plugin is listed explicitly there.
+
+### Versions in the menu
+
+The interactive menu shows an **INSTALLED** and **AVAILABLE** column, fed by two
+optional trait methods:
+
+- `installed_version(&self, ctx)` — defaults to the first line of the
+  `.devkit-<id>` marker in `install_dir` (placeholders such as `stable` or
+  `system-wrapper` show as `-`). Override when the SDK records its own version
+  (e.g. JDK `release`, Flutter `flutter.version.json`, `rustc --version`).
+- `latest_version(&self, ctx)` — defaults to `Ok(None)`. Return the version
+  your `install` would fetch right now, ideally by reusing the same resolver so
+  the string matches the marker you write. Pinned plugins return their pinned
+  constant. Lookups run in parallel when the menu opens (and on `r`).
+
+```rust
+fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+    Ok(Some(resolve_example_download()?.1))
+}
+```
 
 ## Helpers
 

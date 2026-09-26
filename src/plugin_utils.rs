@@ -139,9 +139,82 @@ pub fn parse_maven_latest_version(html: &str) -> Result<String> {
     Ok(versions.into_iter().max_by_key(|v| key(v)).unwrap())
 }
 
+/// Read the version stored in a plugin's `.devkit-<id>` install marker.
+///
+/// Returns the first line of the marker when it looks like a version. Placeholder markers such as `installed`, `stable`, or
+/// `system-wrapper` return `None` so the menu shows "-" instead of noise.
+pub fn read_marker_version(install_dir: &Path, plugin_id: &str) -> Option<String> {
+    let marker = install_dir.join(format!(".devkit-{plugin_id}"));
+    let text = std::fs::read_to_string(marker).ok()?;
+    let first = text.lines().next()?.trim();
+    if looks_like_version(first) {
+        Some(first.to_string())
+    } else {
+        None
+    }
+}
+
+/// Normalize a version string for display and comparison: trim, drop tool
+/// prefixes some release tags carry (`bun-`, `go`, `v`), and ignore case, so
+/// `bun-v1.2.3`, `go1.2.3`, `v1.2.3`, and `1.2.3` all become `1.2.3`.
+pub fn normalize_version(version: &str) -> String {
+    let v = version.trim().to_lowercase();
+    let v = v.strip_prefix("bun-").unwrap_or(&v);
+    let v = v.strip_prefix("go").unwrap_or(v);
+    v.strip_prefix('v').unwrap_or(v).to_string()
+}
+
+/// True when a (normalized) string is an actual version rather than a
+/// placeholder tag like `latest` or `nightly-x86_64`.
+pub fn looks_like_version(version: &str) -> bool {
+    normalize_version(version)
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_digit())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn read_marker_version_skips_placeholders() {
+        let tmp = tempfile::tempdir().unwrap();
+        assert_eq!(read_marker_version(tmp.path(), "x"), None);
+        std::fs::write(
+            tmp.path().join(".devkit-x"),
+            "v1.2.3
+",
+        )
+        .unwrap();
+        assert_eq!(
+            read_marker_version(tmp.path(), "x").as_deref(),
+            Some("v1.2.3")
+        );
+        std::fs::write(
+            tmp.path().join(".devkit-x"),
+            "system-wrapper
+/usr/bin/x
+",
+        )
+        .unwrap();
+        assert_eq!(read_marker_version(tmp.path(), "x"), None);
+    }
+
+    #[test]
+    fn normalize_version_strips_prefixes() {
+        assert_eq!(normalize_version("v1.2.3"), "1.2.3");
+        assert_eq!(normalize_version("go1.23.0"), "1.23.0");
+        assert_eq!(normalize_version(" 3.9.6 "), "3.9.6");
+        assert_eq!(normalize_version("bun-v1.4.2"), "1.4.2");
+    }
+
+    #[test]
+    fn looks_like_version_rejects_placeholders() {
+        assert!(looks_like_version("v1.2.3"));
+        assert!(!looks_like_version("latest"));
+        assert!(!looks_like_version("nightly-x86_64"));
+    }
 
     #[test]
     fn parse_maven_latest_version_picks_max() {

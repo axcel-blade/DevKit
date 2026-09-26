@@ -108,4 +108,24 @@ pub trait Plugin: Send + Sync {
 
     /// Declare PATH entries and env vars for this install.
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec;
+
+    /// Version currently installed in `ctx.install_dir`, if known.
+    ///
+    /// Default: read the `.devkit-<id>` marker that most plugins write after a
+    /// successful install. Markers that don't hold a version (e.g. `stable`,
+    /// `system-wrapper`) yield `None`. Override when the SDK records its own
+    /// version (JDK `release`, Flutter `version`, `rustc --version`, ...).
+    fn installed_version(&self, ctx: &InstallContext) -> Option<String> {
+        crate::plugin_utils::read_marker_version(&ctx.install_dir, self.id())
+    }
+
+    /// Newest version DevKit would install right now, if it can be looked up.
+    ///
+    /// Default `Ok(None)` (unknown). Implementations usually reuse the same
+    /// resolver `install` calls, so the string matches what `installed_version`
+    /// later reports. May hit the network — callers should run it off the
+    /// main thread and cache the result.
+    fn latest_version(&self, _ctx: &InstallContext) -> anyhow::Result<Option<String>> {
+        Ok(None)
+    }
 }

@@ -163,6 +163,11 @@ impl Plugin for QemuPlugin {
         Ok(())
     }
 
+    /// DevKit pins this release, so "latest" is the pinned version it installs.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(QEMU_VERSION.to_string()))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let mut paths = Vec::new();
         if is_windows() && qemu_windows_binary(ctx).is_file() {
