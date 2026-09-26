@@ -71,7 +71,7 @@ After install, **open a new terminal** so PATH and env vars reload.
 cargo run --release -- install flutter --channel beta
 cargo run --release -- install flutter --channel stable --version 3.24
 cargo run --release -- install jdk --version 17
-cargo run --release -- install jdk --version 21
+cargo run --release -- install jdk --version 25
 cargo run --release -- install junit --version 1.11.4
 cargo run --release -- install pmd --version 7.26.0
 ```

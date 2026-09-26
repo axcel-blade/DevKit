@@ -1,6 +1,6 @@
 [package]
 name = "devkit"
-version = "0.9.1"
+version = "0.9.2"
 edition = "2021"
 description = "DevKit application — install developer SDKs and configure environment variables"
 license = "MIT"

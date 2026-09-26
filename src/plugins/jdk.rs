@@ -8,9 +8,9 @@ use anyhow::{bail, Result};
 use std::path::PathBuf;
 
 /// Default LTS line when `install jdk` is run without `--version`.
-const JDK_FEATURE_VERSION: u32 = 21;
+const JDK_FEATURE_VERSION: u32 = 25;
 
-/// Parse a feature version from `--version` (`21` or `21.0.2` -> 21).
+/// Parse a feature version from `--version` (`25` or `25.0.1` -> 25).
 fn parse_jdk_feature(version: Option<&str>) -> Result<u32> {
     let version = match version {
         None => return Ok(JDK_FEATURE_VERSION),
@@ -24,7 +24,7 @@ fn parse_jdk_feature(version: Option<&str>) -> Result<u32> {
     let major = raw.split('.').next().unwrap_or("");
     if major.is_empty() || !major.chars().all(|c| c.is_ascii_digit()) {
         bail!(
-            "Invalid JDK version '{}'. Use a feature number like 17 or 21.",
+            "Invalid JDK version '{}'. Use a feature number like 21 or 25.",
             version
         );
     }
@@ -67,7 +67,7 @@ impl Plugin for JdkPlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Download Eclipse Temurin JDK (default 21 LTS; optional --version for feature line) \
+        "Download Eclipse Temurin JDK (default 25 LTS; optional --version for feature line) \
          and set JAVA_HOME / PATH."
     }
 

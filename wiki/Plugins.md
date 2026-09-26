@@ -1,6 +1,6 @@
 # Plugins
 
-Built-in plugins in **0.9.1**: run `cargo run --release -- list` for the full set.
+Built-in plugins in **0.9.2**: run `cargo run --release -- list` for the full set.
 
 Highlights:
 

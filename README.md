@@ -1,6 +1,6 @@
 # DevKit
 
-**Version:** 0.9.1
+**Version:** 0.9.2
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -64,15 +64,15 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 
 | Plugin | Installs |
 |--------|----------|
-| `python` | Portable CPython (python-build-standalone) |
+| `python` | Portable CPython 3.14 (python-build-standalone) |
 | `go` | Latest stable Go toolchain |
 | `rust` | Rust stable via rustup |
-| `dotnet` | .NET SDK 8.0 LTS |
+| `dotnet` | .NET SDK 10.0 LTS |
 | `node` | Latest Node.js LTS (npm / npx) |
 | `pnpm` | Latest pnpm standalone |
 | `deno` | Latest Deno runtime |
 | `bun` | Latest Bun runtime |
-| `jdk` | Eclipse Temurin JDK (default 21; `--version`) |
+| `jdk` | Eclipse Temurin JDK (default 25; `--version`) |
 | `maven` | Latest Apache Maven |
 | `gradle` | Latest Gradle binary ZIP |
 | `junit` | JUnit Platform Console Standalone (`--version`) |
@@ -83,7 +83,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `php` | PHP NTS (Windows); system wrappers (Unix) |
 | `composer` | Composer PHAR + wrapper |
 | `mysql` | MySQL 8.4 LTS portable |
-| `postgresql` | EDB Windows binaries; system wrappers (Unix) |
+| `postgresql` | PostgreSQL 18 EDB Windows binaries; system wrappers (Unix) |
 | `sqlite` | Official sqlite-tools CLI |
 | `android` | Android SDK cmdline-tools |
 | `platform-tools` | Android platform-tools (`adb`) |
@@ -93,7 +93,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `terraform` | Latest Terraform |
 | `mono` | Mono 6.12 (Win/macOS); system wrappers (Linux) |
 | `msys2` | Portable MSYS2 base runtime (Windows only) |
-| `qemu` | Silent NSIS install (Windows); system wrappers (macOS/Linux) |
+| `qemu` | QEMU 11.1 silent NSIS install (Windows); system wrappers (macOS/Linux) |
 | `hello` | Demo ZIP install |
 
 Default install root:
