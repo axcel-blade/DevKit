@@ -194,6 +194,11 @@ impl Plugin for PhpPlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_php_windows_url()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let mut paths = vec![ctx.install_dir.clone()];
         let bin_dir = ctx.install_dir.join("bin");

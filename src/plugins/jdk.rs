@@ -1,6 +1,6 @@
 //! Eclipse Temurin JDK plugin (Adoptium).
 
-use crate::download::install_archive_from_url;
+use crate::download::{download_json_value, install_archive_from_url};
 use crate::platform::{adoptium_os, cpu_arch, is_windows};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
 use crate::progress::download_progress;
@@ -45,6 +45,14 @@ fn temurin_download_url(feature: u32) -> Result<String> {
     Ok(format!(
         "https://api.adoptium.net/v3/binary/latest/{feature}/ga/{os_slug}/{arch}/jdk/hotspot/normal/eclipse"
     ))
+}
+
+/// Extract the value of `JAVA_VERSION="..."` from a JDK `release` file.
+fn parse_release_java_version(text: &str) -> Option<String> {
+    text.lines()
+        .find_map(|l| l.strip_prefix("JAVA_VERSION="))
+        .map(|v| v.trim().trim_matches('"').to_string())
+        .filter(|v| !v.is_empty())
 }
 
 fn java_bin(ctx: &InstallContext) -> PathBuf {
@@ -120,6 +128,34 @@ impl Plugin for JdkPlugin {
             std::fs::remove_dir_all(&ctx.install_dir)?;
         }
         Ok(())
+    }
+
+    /// Read `JAVA_VERSION="25.0.1"` from the JDK's `release` file.
+    fn installed_version(&self, ctx: &InstallContext) -> Option<String> {
+        let text = std::fs::read_to_string(ctx.install_dir.join("release")).ok()?;
+        parse_release_java_version(&text)
+    }
+
+    /// Latest GA Temurin build for the installed feature line (or the default
+    /// LTS line when nothing is installed), as `major.minor.security`.
+    fn latest_version(&self, ctx: &InstallContext) -> Result<Option<String>> {
+        let feature = self
+            .installed_version(ctx)
+            .and_then(|v| v.split('.').next().and_then(|m| m.parse::<u32>().ok()))
+            .filter(|f| *f >= 9)
+            .unwrap_or(JDK_FEATURE_VERSION);
+        let url = format!(
+            "https://api.adoptium.net/v3/assets/latest/{feature}/hotspot?architecture={}&image_type=jdk&os={}&vendor=eclipse",
+            cpu_arch(),
+            adoptium_os()?
+        );
+        let data = download_json_value(&url)?;
+        let ver = data.get(0).and_then(|e| e.get("version"));
+        let part = |k: &str| ver.and_then(|v| v.get(k)).and_then(|v| v.as_u64());
+        Ok(match (part("major"), part("minor"), part("security")) {
+            (Some(a), Some(b), Some(c)) => Some(format!("{a}.{b}.{c}")),
+            _ => None,
+        })
     }
 
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {

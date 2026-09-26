@@ -220,6 +220,32 @@ impl Plugin for FlutterPlugin {
         Ok(())
     }
 
+    /// The SDK records its own version: `bin/cache/flutter.version.json`
+    /// (Flutter 3.13+) or the legacy top-level `version` file.
+    fn installed_version(&self, ctx: &InstallContext) -> Option<String> {
+        let json = ctx
+            .install_dir
+            .join("bin")
+            .join("cache")
+            .join("flutter.version.json");
+        if let Ok(text) = std::fs::read_to_string(json) {
+            if let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) {
+                if let Some(v) = value.get("frameworkVersion").and_then(|v| v.as_str()) {
+                    return Some(v.to_string());
+                }
+            }
+        }
+        std::fs::read_to_string(ctx.install_dir.join("version"))
+            .ok()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+    }
+
+    /// Newest release on the stable channel (the default `install` channel).
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_flutter_url("stable", None)?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         EnvSpec {
             paths: vec![ctx.install_dir.join("bin")],

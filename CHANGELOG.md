@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-09-26
+
+### Added
+
+- Interactive menu now shows an **INSTALLED** and **AVAILABLE** version column
+  for every plugin. The available column is marked `up to date` or
+  `update available` when the plugin is installed. Press `r` to re-check.
+- `Plugin::installed_version` (defaults to the `.devkit-<id>` marker) and
+  `Plugin::latest_version` (defaults to unknown) trait methods. All built-in
+  plugins except `hello` report a latest version; JDK, Flutter, Rust, and
+  Composer read their installed version from the SDK itself.
+- `plugin_utils::read_marker_version`, `normalize_version`, and
+  `looks_like_version` helpers.
+
+### Changed
+
+- Available versions are fetched in parallel after a single connectivity
+  probe, so the menu opens quickly and degrades to `-` when offline.
+- Widened the menu NAME column so "Android platform-tools" no longer
+  misaligns the table.
+
 ## [0.9.2] - 2026-09-26
 
 ### Changed
@@ -284,6 +305,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.9.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.3
 [0.9.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.0
