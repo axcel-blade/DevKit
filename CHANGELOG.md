@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-09-26
+
+### Added
+
+- Interactive menu now shows an **INSTALLED** and **AVAILABLE** version column
+  for every plugin. The available column is marked `up to date` or
+  `update available` when the plugin is installed. Press `r` to re-check.
+- `Plugin::installed_version` (defaults to the `.devkit-<id>` marker) and
+  `Plugin::latest_version` (defaults to unknown) trait methods. All built-in
+  plugins except `hello` report a latest version; JDK, Flutter, Rust, and
+  Composer read their installed version from the SDK itself.
+- `plugin_utils::read_marker_version`, `normalize_version`, and
+  `looks_like_version` helpers.
+
+### Changed
+
+- Available versions are fetched in parallel after a single connectivity
+  probe, so the menu opens quickly and degrades to `-` when offline.
+- Widened the menu NAME column so "Android platform-tools" no longer
+  misaligns the table.
+
+## [0.9.2] - 2026-09-26
+
+### Changed
+
+- Updated pinned plugin versions to the latest upstream releases:
+  - `android`: cmdline-tools build 14742923 -> 16111833. Apple Silicon Macs
+    now download the `mac_arm64` ZIP; Intel Macs stay on build 15641748, the
+    last build Google published with an Intel macOS ZIP.
+  - `dotnet`: .NET SDK channel 8.0 LTS -> 10.0 LTS.
+  - `jdk`: default Temurin feature line 21 LTS -> 25 LTS (`--version 21`
+    still installs JDK 21).
+  - `mysql`: MySQL Community Server 8.4.10 -> 8.4.11 (8.4 LTS line).
+  - `postgresql`: EDB Windows binaries 16.8-1 -> 18.4-2.
+  - `python`: CPython 3.12.13 -> 3.14.7 (python-build-standalone 20260924).
+  - `qemu`: Windows installer 8.2.2 (20240423) -> 11.1.0 (20260811).
+
 ## [0.9.1] - 2026-09-25
 
 ### Fixed
@@ -268,6 +305,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.9.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.3
+[0.9.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.1
 [0.9.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.0
 [0.8.5]: https://github.com/axcel-blade/DevKit/releases/tag/v0.8.5

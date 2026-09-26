@@ -11,7 +11,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 // Pin a known EDB Windows binaries ZIP; bump with DevKit releases.
-const PG_VERSION: &str = "16.8-1";
+const PG_VERSION: &str = "18.4-2";
 const MARKER: &str = ".devkit-postgresql";
 
 fn windows_url() -> String {
@@ -75,7 +75,7 @@ impl Plugin for PostgresqlPlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Download PostgreSQL 16.8-1 Windows binaries from EDB. \
+        "Download PostgreSQL 18.4-2 Windows binaries from EDB. \
          On macOS/Linux, registers system PostgreSQL clients if installed."
     }
 
@@ -111,6 +111,11 @@ impl Plugin for PostgresqlPlugin {
             std::fs::remove_dir_all(&ctx.install_dir)?;
         }
         Ok(())
+    }
+
+    /// DevKit pins this release, so "latest" is the pinned version it installs.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(PG_VERSION.to_string()))
     }
 
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {

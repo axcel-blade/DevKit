@@ -6,27 +6,31 @@
 //! platform-tools — run `sdkmanager` yourself after install.
 
 use crate::download::install_archive_from_url;
-use crate::platform::{current_os, is_windows, HostOS};
+use crate::platform::{cpu_arch, current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
 use std::path::PathBuf;
 
 // Pin a known cmdline-tools build; bump when cutting a release that tracks newer tools.
-const CMDLINE_TOOLS_BUILD: &str = "14742923";
+const CMDLINE_TOOLS_BUILD: &str = "16111833";
+// Google stopped publishing Intel macOS ZIPs after this build (newer builds ship
+// `mac_arm64` only), so Intel Macs stay on the last build that has a `mac` ZIP.
+const CMDLINE_TOOLS_BUILD_MAC_INTEL: &str = "15641748";
 const REPO: &str = "https://dl.google.com/android/repository";
 const MARKER: &str = ".devkit-android";
 
-/// Return `(download_url, build_id)` for this OS.
+/// Return `(download_url, build_id)` for this OS/arch.
 fn resolve_cmdline_tools_url() -> Result<(String, String)> {
-    let slug = match current_os() {
-        HostOS::Windows => "win",
-        HostOS::MacOS => "mac",
-        HostOS::Linux => "linux",
+    let (slug, build) = match current_os() {
+        HostOS::Windows => ("win", CMDLINE_TOOLS_BUILD),
+        HostOS::MacOS if cpu_arch() == "aarch64" => ("mac_arm64", CMDLINE_TOOLS_BUILD),
+        HostOS::MacOS => ("mac", CMDLINE_TOOLS_BUILD_MAC_INTEL),
+        HostOS::Linux => ("linux", CMDLINE_TOOLS_BUILD),
         HostOS::Other => bail!("Android cmdline-tools are not supported on: other"),
     };
-    let name = format!("commandlinetools-{slug}-{CMDLINE_TOOLS_BUILD}_latest.zip");
-    Ok((format!("{REPO}/{name}"), CMDLINE_TOOLS_BUILD.to_string()))
+    let name = format!("commandlinetools-{slug}-{build}_latest.zip");
+    Ok((format!("{REPO}/{name}"), build.to_string()))
 }
 
 fn sdkmanager(ctx: &InstallContext) -> PathBuf {
@@ -146,6 +150,11 @@ impl Plugin for AndroidPlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_cmdline_tools_url()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let home = ctx
             .install_dir
@@ -176,8 +185,8 @@ mod tests {
     #[test]
     fn resolve_cmdline_tools_url_contains_build() {
         let (url, build) = resolve_cmdline_tools_url().unwrap();
-        assert_eq!(build, CMDLINE_TOOLS_BUILD);
-        assert!(url.contains(CMDLINE_TOOLS_BUILD));
+        assert!(build == CMDLINE_TOOLS_BUILD || build == CMDLINE_TOOLS_BUILD_MAC_INTEL);
+        assert!(url.contains(&build));
         assert!(url.starts_with(REPO));
     }
 

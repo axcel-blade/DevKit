@@ -343,10 +343,66 @@ fn cmd_doctor() -> anyhow::Result<i32> {
     Ok(0)
 }
 
-/// Interactive text menu: lists every plugin with its current status, lets
-/// the user pick one by number, and toggles install/uninstall on it —
-/// installs if missing/partial, uninstalls if already installed. Loops until
-/// the user quits. This is what a bare `devkit` (no subcommand) runs, so
+/// Look up the newest available version of every plugin in parallel.
+///
+/// Each lookup may hit a release API, so they run on scoped threads rather
+/// than one after another (30+ sequential HTTP calls would stall the menu).
+/// Returns one entry per plugin, in the same order; `None` means unknown
+/// (offline, no resolver, or the lookup failed).
+fn fetch_latest_versions(plugins: &[&dyn Plugin]) -> Vec<Option<String>> {
+    use crate::plugin_utils::{looks_like_version, normalize_version};
+    // One connectivity probe up front so offline users don't wait on every
+    // plugin's own probe timing out.
+    if !crate::download::has_internet_access() {
+        return vec![None; plugins.len()];
+    }
+    std::thread::scope(|scope| {
+        let handles: Vec<_> = plugins
+            .iter()
+            .map(|plugin| {
+                scope.spawn(move || {
+                    let ctx = context(plugin.id(), None, None).ok()?;
+                    plugin
+                        .latest_version(&ctx)
+                        .ok()
+                        .flatten()
+                        .filter(|v| looks_like_version(v))
+                        .map(|v| normalize_version(&v))
+                })
+            })
+            .collect();
+        handles
+            .into_iter()
+            .map(|h| h.join().ok().flatten())
+            .collect()
+    })
+}
+
+/// Pad an already-colored cell to `width` using its plain-text length, since
+/// ANSI escape codes would otherwise throw off `{:<width}` alignment.
+fn pad_cell(colored: String, plain_len: usize, width: usize) -> String {
+    format!("{colored}{}", " ".repeat(width.saturating_sub(plain_len)))
+}
+
+/// Render the AVAILABLE column: the latest version, flagged in yellow when it
+/// differs from what's installed, green when the install is current.
+fn available_cell(installed: Option<&str>, latest: Option<&str>) -> String {
+    use crate::plugin_utils::normalize_version;
+    match (installed, latest) {
+        (_, None) => theme::dim("-"),
+        (Some(i), Some(l)) if normalize_version(i) == normalize_version(l) => {
+            theme::green(&format!("{l} (up to date)"))
+        }
+        (Some(_), Some(l)) => theme::yellow(&format!("{l} (update available)")),
+        (None, Some(l)) => l.to_string(),
+    }
+}
+
+/// Interactive text menu: lists every plugin with its current status, the
+/// installed version, and the newest available version, lets the user pick
+/// one by number, and toggles install/uninstall on it — installs if
+/// missing/partial, uninstalls if already installed. Loops until the user
+/// quits. This is what a bare `devkit` (no subcommand) runs, so
 /// double-clicking `devkit.bat`/`devkit.sh` gives a usable menu instead of a
 /// clap usage error.
 fn cmd_menu() -> anyhow::Result<i32> {
@@ -359,6 +415,18 @@ fn cmd_menu() -> anyhow::Result<i32> {
         return Ok(0);
     }
 
+    // Available versions are fetched once (network) and reused across loop
+    // iterations; 'r' re-fetches. Installed versions are local reads, so they
+    // are refreshed every loop alongside status.
+    println!("{}", theme::dim("Checking for available versions ..."));
+    let mut latest = fetch_latest_versions(&plugins);
+    if latest.iter().all(Option::is_none) {
+        println!(
+            "{}",
+            theme::yellow("Could not look up available versions (offline?). Press 'r' to retry.")
+        );
+    }
+
     loop {
         println!();
         println!(
@@ -367,9 +435,12 @@ fn cmd_menu() -> anyhow::Result<i32> {
         );
         println!(
             "{}",
-            theme::bold(&format!("{:<4} {:<16} {:<20} STATUS", "#", "ID", "NAME"))
+            theme::bold(&format!(
+                "{:<4} {:<16} {:<24} {:<14} {:<16} AVAILABLE",
+                "#", "ID", "NAME", "STATUS", "INSTALLED"
+            ))
         );
-        println!("{}", theme::dim(&"-".repeat(54)));
+        println!("{}", theme::dim(&"-".repeat(104)));
 
         // Re-check status every loop so the menu reflects what the last
         // action actually did, and remember which are installed so the
@@ -378,12 +449,28 @@ fn cmd_menu() -> anyhow::Result<i32> {
         for (i, plugin) in plugins.iter().enumerate() {
             let ctx = context(plugin.id(), None, None)?;
             let status = plugin.status(&ctx);
+            let state = status.state.as_str();
+            // Only report a version for a complete install; a partial dir may
+            // hold a stale marker from an interrupted run.
+            let current = if status.state == InstallState::Installed {
+                plugin
+                    .installed_version(&ctx)
+                    .map(|v| crate::plugin_utils::normalize_version(&v))
+            } else {
+                None
+            };
+            let current_cell = match &current {
+                Some(v) => pad_cell(v.clone(), v.chars().count(), 16),
+                None => pad_cell(theme::dim("-"), 1, 16),
+            };
             println!(
-                "{:<4} {:<16} {:<20} {}",
+                "{:<4} {:<16} {:<24} {} {} {}",
                 i + 1,
                 plugin.id(),
                 plugin.name(),
-                theme::status_label(status.state.as_str())
+                pad_cell(theme::status_label(state), state.len(), 14),
+                current_cell,
+                available_cell(current.as_deref(), latest[i].as_deref())
             );
             installed.push(status.state == InstallState::Installed);
         }
@@ -391,7 +478,9 @@ fn cmd_menu() -> anyhow::Result<i32> {
         println!();
         print!(
             "{}",
-            theme::cyan("Enter a number to install/uninstall, or 'q' to quit: ")
+            theme::cyan(
+                "Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit: "
+            )
         );
         io::stdout().flush()?;
 
@@ -404,6 +493,11 @@ fn cmd_menu() -> anyhow::Result<i32> {
         let input = line.trim();
         if input.is_empty() || input.eq_ignore_ascii_case("q") {
             break;
+        }
+        if input.eq_ignore_ascii_case("r") {
+            println!("{}", theme::dim("Checking for available versions ..."));
+            latest = fetch_latest_versions(&plugins);
+            continue;
         }
 
         let choice: usize = match input.parse() {

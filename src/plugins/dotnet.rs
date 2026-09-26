@@ -8,8 +8,8 @@ use crate::progress::download_progress;
 use anyhow::{bail, Result};
 use std::path::PathBuf;
 
-// Track .NET LTS channel (8.0). Bump when DevKit moves to a newer LTS.
-const DOTNET_CHANNEL: &str = "8.0";
+// Track .NET LTS channel (10.0). Bump when DevKit moves to a newer LTS.
+const DOTNET_CHANNEL: &str = "10.0";
 const MARKER: &str = ".devkit-dotnet";
 
 fn meta_url() -> String {
@@ -86,7 +86,7 @@ impl Plugin for DotnetPlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Download .NET SDK 8.0 LTS ZIP and set DOTNET_ROOT / PATH."
+        "Download .NET SDK 10.0 LTS ZIP and set DOTNET_ROOT / PATH."
     }
 
     fn status(&self, ctx: &InstallContext) -> PluginStatus {
@@ -131,6 +131,11 @@ impl Plugin for DotnetPlugin {
             std::fs::remove_dir_all(&ctx.install_dir)?;
         }
         Ok(())
+    }
+
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_dotnet_download()?.1))
     }
 
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {

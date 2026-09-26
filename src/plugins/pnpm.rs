@@ -159,6 +159,11 @@ impl Plugin for PnpmPlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_pnpm_download()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         EnvSpec {
             paths: vec![ctx.install_dir.clone()],

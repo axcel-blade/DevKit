@@ -13,7 +13,7 @@ use anyhow::{bail, Result};
 use std::path::PathBuf;
 
 // Pin MySQL 8.4 LTS; bump when DevKit cuts a release that tracks a newer LTS.
-const MYSQL_VERSION: &str = "8.4.10";
+const MYSQL_VERSION: &str = "8.4.11";
 const MYSQL_SERIES: &str = "8.4";
 const MARKER: &str = ".devkit-mysql";
 
@@ -68,7 +68,7 @@ impl Plugin for MysqlPlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Download MySQL Community Server 8.4.10 (LTS) portable archive and set MYSQL_HOME / PATH."
+        "Download MySQL Community Server 8.4.11 (LTS) portable archive and set MYSQL_HOME / PATH."
     }
 
     fn status(&self, ctx: &InstallContext) -> PluginStatus {
@@ -115,6 +115,11 @@ impl Plugin for MysqlPlugin {
             std::fs::remove_dir_all(&ctx.install_dir)?;
         }
         Ok(())
+    }
+
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_mysql_url()?.1))
     }
 
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {

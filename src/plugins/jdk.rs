@@ -1,6 +1,6 @@
 //! Eclipse Temurin JDK plugin (Adoptium).
 
-use crate::download::install_archive_from_url;
+use crate::download::{download_json_value, install_archive_from_url};
 use crate::platform::{adoptium_os, cpu_arch, is_windows};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
 use crate::progress::download_progress;
@@ -8,9 +8,9 @@ use anyhow::{bail, Result};
 use std::path::PathBuf;
 
 /// Default LTS line when `install jdk` is run without `--version`.
-const JDK_FEATURE_VERSION: u32 = 21;
+const JDK_FEATURE_VERSION: u32 = 25;
 
-/// Parse a feature version from `--version` (`21` or `21.0.2` -> 21).
+/// Parse a feature version from `--version` (`25` or `25.0.1` -> 25).
 fn parse_jdk_feature(version: Option<&str>) -> Result<u32> {
     let version = match version {
         None => return Ok(JDK_FEATURE_VERSION),
@@ -24,7 +24,7 @@ fn parse_jdk_feature(version: Option<&str>) -> Result<u32> {
     let major = raw.split('.').next().unwrap_or("");
     if major.is_empty() || !major.chars().all(|c| c.is_ascii_digit()) {
         bail!(
-            "Invalid JDK version '{}'. Use a feature number like 17 or 21.",
+            "Invalid JDK version '{}'. Use a feature number like 21 or 25.",
             version
         );
     }
@@ -47,6 +47,14 @@ fn temurin_download_url(feature: u32) -> Result<String> {
     ))
 }
 
+/// Extract the value of `JAVA_VERSION="..."` from a JDK `release` file.
+fn parse_release_java_version(text: &str) -> Option<String> {
+    text.lines()
+        .find_map(|l| l.strip_prefix("JAVA_VERSION="))
+        .map(|v| v.trim().trim_matches('"').to_string())
+        .filter(|v| !v.is_empty())
+}
+
 fn java_bin(ctx: &InstallContext) -> PathBuf {
     if is_windows() {
         ctx.install_dir.join("bin").join("java.exe")
@@ -67,7 +75,7 @@ impl Plugin for JdkPlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Download Eclipse Temurin JDK (default 21 LTS; optional --version for feature line) \
+        "Download Eclipse Temurin JDK (default 25 LTS; optional --version for feature line) \
          and set JAVA_HOME / PATH."
     }
 
@@ -120,6 +128,34 @@ impl Plugin for JdkPlugin {
             std::fs::remove_dir_all(&ctx.install_dir)?;
         }
         Ok(())
+    }
+
+    /// Read `JAVA_VERSION="25.0.1"` from the JDK's `release` file.
+    fn installed_version(&self, ctx: &InstallContext) -> Option<String> {
+        let text = std::fs::read_to_string(ctx.install_dir.join("release")).ok()?;
+        parse_release_java_version(&text)
+    }
+
+    /// Latest GA Temurin build for the installed feature line (or the default
+    /// LTS line when nothing is installed), as `major.minor.security`.
+    fn latest_version(&self, ctx: &InstallContext) -> Result<Option<String>> {
+        let feature = self
+            .installed_version(ctx)
+            .and_then(|v| v.split('.').next().and_then(|m| m.parse::<u32>().ok()))
+            .filter(|f| *f >= 9)
+            .unwrap_or(JDK_FEATURE_VERSION);
+        let url = format!(
+            "https://api.adoptium.net/v3/assets/latest/{feature}/hotspot?architecture={}&image_type=jdk&os={}&vendor=eclipse",
+            cpu_arch(),
+            adoptium_os()?
+        );
+        let data = download_json_value(&url)?;
+        let ver = data.get(0).and_then(|e| e.get("version"));
+        let part = |k: &str| ver.and_then(|v| v.get(k)).and_then(|v| v.as_u64());
+        Ok(match (part("major"), part("minor"), part("security")) {
+            (Some(a), Some(b), Some(c)) => Some(format!("{a}.{b}.{c}")),
+            _ => None,
+        })
     }
 
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {

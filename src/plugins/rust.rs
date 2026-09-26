@@ -149,6 +149,39 @@ impl Plugin for RustPlugin {
         Ok(())
     }
 
+    /// The marker only says `stable`, so ask the installed `rustc` directly
+    /// (with this install's CARGO_HOME/RUSTUP_HOME so the rustup proxy resolves).
+    fn installed_version(&self, ctx: &InstallContext) -> Option<String> {
+        let rustc = ctx
+            .install_dir
+            .join("cargo")
+            .join("bin")
+            .join(if is_windows() { "rustc.exe" } else { "rustc" });
+        if !rustc.is_file() {
+            return None;
+        }
+        let out = Command::new(rustc)
+            .arg("--version")
+            .env("CARGO_HOME", ctx.install_dir.join("cargo"))
+            .env("RUSTUP_HOME", ctx.install_dir.join("rustup"))
+            .output()
+            .ok()?;
+        // "rustc 1.90.0 (1159e78c4 2025-09-14)" -> "1.90.0"
+        String::from_utf8_lossy(&out.stdout)
+            .split_whitespace()
+            .nth(1)
+            .map(str::to_string)
+    }
+
+    /// Latest stable Rust release tag from GitHub (e.g. `1.90.0`).
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        let release = crate::plugin_utils::github_latest_release("rust-lang", "rust")?;
+        Ok(release
+            .get("tag_name")
+            .and_then(|v| v.as_str())
+            .map(str::to_string))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let cargo_home = ctx.install_dir.join("cargo");
         let rustup_home = ctx.install_dir.join("rustup");

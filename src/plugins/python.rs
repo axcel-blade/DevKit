@@ -9,8 +9,8 @@ use anyhow::{bail, Result};
 use std::path::PathBuf;
 
 // Pin a known-good CPython + python-build-standalone release pair.
-const PYTHON_VERSION: &str = "3.12.13";
-const PBS_TAG: &str = "20260728";
+const PYTHON_VERSION: &str = "3.14.7";
+const PBS_TAG: &str = "20260924";
 const MARKER: &str = ".devkit-python";
 
 fn pbs_triple() -> Result<String> {
@@ -79,7 +79,7 @@ impl Plugin for PythonPlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Download portable Python 3.12.13 (python-build-standalone) and set PYTHON_HOME / PATH."
+        "Download portable Python 3.14.7 (python-build-standalone) and set PYTHON_HOME / PATH."
     }
 
     fn status(&self, ctx: &InstallContext) -> crate::plugin::PluginStatus {
@@ -128,6 +128,11 @@ impl Plugin for PythonPlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_python_download()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let home = ctx
             .install_dir
@@ -157,7 +162,7 @@ mod tests {
     fn resolve_python_download_builds_expected_url() {
         let (url, version) = resolve_python_download().unwrap();
         assert_eq!(version, PYTHON_VERSION);
-        assert!(url.contains("cpython-3.12.13%2B20260728-"));
+        assert!(url.contains("cpython-3.14.7%2B20260924-"));
         assert!(url.starts_with(
             "https://github.com/astral-sh/python-build-standalone/releases/download/"
         ));

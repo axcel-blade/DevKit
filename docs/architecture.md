@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.9.1** is a CLI application with a plugin pipeline.
+DevKit **0.9.3** is a CLI application with a plugin pipeline.
 
 ```text
 target/release/devkit (binary) / devkit.bat / devkit.sh
@@ -49,3 +49,9 @@ Plugins are structs implementing the `Plugin` trait (`src/plugin.rs`). Rust
 has no runtime module scan like Python's `pkgutil`, so `src/plugins/mod.rs`
 explicitly lists every plugin — add new modules under `src/plugins/` and
 register them there.
+
+The interactive menu (`cmd_menu` in `src/cli.rs`) calls each plugin's
+`latest_version` once on scoped threads when it opens (again on `r`), after a
+single connectivity probe, and reads `installed_version` on every redraw. Both
+sides go through `plugin_utils::normalize_version` so tags like `go1.27.1`,
+`bun-v1.4.2`, and `1.27.1` compare equal.

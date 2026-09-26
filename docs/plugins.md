@@ -1,18 +1,18 @@
 # Plugins
 
-DevKit **0.9.1** ships these built-in plugins:
+DevKit **0.9.3** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
-| `python` | Portable CPython via python-build-standalone |
+| `python` | Portable CPython 3.14.7 via python-build-standalone |
 | `go` | Latest stable from go.dev/dl JSON |
 | `rust` | rustup stable into `CARGO_HOME` / `RUSTUP_HOME` |
-| `dotnet` | .NET SDK 8.0 LTS ZIP from Microsoft release metadata |
+| `dotnet` | .NET SDK 10.0 LTS ZIP from Microsoft release metadata |
 | `node` | Latest Node.js LTS (npm / npx) |
 | `pnpm` | Latest pnpm standalone ZIP/tar from GitHub |
 | `deno` | Latest Deno ZIP from GitHub |
 | `bun` | Latest Bun ZIP from GitHub |
-| `jdk` | Temurin via Adoptium; `--version` selects feature (default 21) |
+| `jdk` | Temurin via Adoptium; `--version` selects feature (default 25) |
 | `maven` | Latest Apache Maven 3.x binary ZIP |
 | `gradle` | Latest Gradle `-bin.zip` |
 | `junit` | JUnit Platform Console Standalone JAR + wrapper; `--version` optional |
@@ -22,10 +22,10 @@ DevKit **0.9.1** ships these built-in plugins:
 | `git` | MinGit on Windows; system wrappers on Unix |
 | `php` | Windows NTS ZIP; system wrappers on Unix |
 | `composer` | `composer.phar` + wrapper; needs PHP |
-| `mysql` | MySQL 8.4 LTS portable (binaries only) |
-| `postgresql` | EDB Windows binaries; system client wrappers on Unix |
+| `mysql` | MySQL 8.4 LTS portable (8.4.11, binaries only) |
+| `postgresql` | PostgreSQL 18.4 EDB Windows binaries; system client wrappers on Unix |
 | `sqlite` | Official sqlite-tools from sqlite.org |
-| `android` | Android SDK cmdline-tools |
+| `android` | Android SDK cmdline-tools (build 16111833) |
 | `platform-tools` | Android `adb` / fastboot ZIP |
 | `flutter` | `--channel` (stable/beta/dev) and `--version` |
 | `kubectl` | Latest stable from dl.k8s.io |
@@ -33,7 +33,7 @@ DevKit **0.9.1** ships these built-in plugins:
 | `terraform` | Latest from HashiCorp releases |
 | `mono` | Windows MSI / macOS PKG; Linux system wrappers |
 | `msys2` | Portable MSYS2 base runtime (Windows only) |
-| `qemu` | Silent NSIS install (Windows); system QEMU wrappers on macOS/Linux |
+| `qemu` | QEMU 11.1.0 silent NSIS install (Windows); system QEMU wrappers on macOS/Linux |
 | `hello` | Offline demo of ZIP → `dev` folder → env |
 
 ## Authoring a plugin
@@ -93,6 +93,26 @@ impl Plugin for ExamplePlugin {
 
 Register it in `crate::plugins::all()` (`src/plugins/mod.rs`) — Rust has no
 runtime module scan, so every plugin is listed explicitly there.
+
+### Versions in the menu
+
+The interactive menu shows an **INSTALLED** and **AVAILABLE** column, fed by two
+optional trait methods:
+
+- `installed_version(&self, ctx)` — defaults to the first line of the
+  `.devkit-<id>` marker in `install_dir` (placeholders such as `stable` or
+  `system-wrapper` show as `-`). Override when the SDK records its own version
+  (e.g. JDK `release`, Flutter `flutter.version.json`, `rustc --version`).
+- `latest_version(&self, ctx)` — defaults to `Ok(None)`. Return the version
+  your `install` would fetch right now, ideally by reusing the same resolver so
+  the string matches the marker you write. Pinned plugins return their pinned
+  constant. Lookups run in parallel when the menu opens (and on `r`).
+
+```rust
+fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+    Ok(Some(resolve_example_download()?.1))
+}
+```
 
 ## Helpers
 

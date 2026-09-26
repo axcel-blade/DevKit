@@ -182,6 +182,11 @@ impl Plugin for NodePlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_node_lts_download()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         // Windows ZIP lays binaries at the root; Unix uses bin/.
         let path_dir = if is_windows() {

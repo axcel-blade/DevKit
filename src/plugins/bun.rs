@@ -149,6 +149,11 @@ impl Plugin for BunPlugin {
         Ok(())
     }
 
+    /// Same resolver `install` uses, so the string matches the marker it writes.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(resolve_bun_download()?.1))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let binary = bun_bin(ctx);
         let path_entry = if binary.is_file() {

@@ -16,8 +16,8 @@ use crate::progress::download_progress;
 use anyhow::Context;
 
 const MARKER: &str = ".devkit-qemu";
-const QEMU_VERSION: &str = "8.2.2";
-const QEMU_WINDOWS_URL: &str = "https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20240423.exe";
+const QEMU_VERSION: &str = "11.1.0";
+const QEMU_WINDOWS_URL: &str = "https://qemu.weilnetz.de/w64/2026/qemu-w64-setup-20260811.exe";
 
 fn qemu_windows_binary(ctx: &InstallContext) -> PathBuf {
     ctx.install_dir.join("qemu-system-x86_64.exe")
@@ -161,6 +161,11 @@ impl Plugin for QemuPlugin {
             std::fs::remove_dir_all(&ctx.install_dir)?;
         }
         Ok(())
+    }
+
+    /// DevKit pins this release, so "latest" is the pinned version it installs.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(QEMU_VERSION.to_string()))
     }
 
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {

@@ -38,7 +38,9 @@ chmod +x devkit.sh
 
 Either launcher run with **no arguments** (including double-clicking
 `devkit.bat`) opens an interactive menu instead — lists every plugin with its
-status and lets you pick a number to install or uninstall it. The launchers
+status, installed version, and newest available version (marked
+`update available` or `up to date`), and lets you pick a number to install or
+uninstall it (`r` re-checks available versions, `q` quits). The launchers
 rebuild DevKit on every run (instant when nothing changed), so the menu is
 always the one from your current checkout:
 
@@ -71,7 +73,7 @@ After install, **open a new terminal** so PATH and env vars reload.
 cargo run --release -- install flutter --channel beta
 cargo run --release -- install flutter --channel stable --version 3.24
 cargo run --release -- install jdk --version 17
-cargo run --release -- install jdk --version 21
+cargo run --release -- install jdk --version 25
 cargo run --release -- install junit --version 1.11.4
 cargo run --release -- install pmd --version 7.26.0
 ```

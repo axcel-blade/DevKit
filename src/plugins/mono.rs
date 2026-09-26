@@ -149,6 +149,11 @@ impl Plugin for MonoPlugin {
         Ok(())
     }
 
+    /// DevKit pins this release, so "latest" is the pinned version it installs.
+    fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        Ok(Some(MONO_VERSION.to_string()))
+    }
+
     fn env_spec(&self, ctx: &InstallContext) -> EnvSpec {
         let mut paths = Vec::new();
         if let Some(bin_dir) = find_mono_bin_dir(&ctx.install_dir) {
