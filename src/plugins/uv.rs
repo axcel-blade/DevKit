@@ -88,10 +88,7 @@ impl Plugin for UvPlugin {
         progress.done();
         let binary = uv_bin(ctx);
         if !binary.is_file() {
-            bail!(
-                "uv extracted but binary not found at {}",
-                binary.display()
-            );
+            bail!("uv extracted but binary not found at {}", binary.display());
         }
         std::fs::write(ctx.install_dir.join(MARKER), format!("{version}\n"))?;
         Ok(InstallResult::new(
