@@ -10,10 +10,7 @@ use std::path::PathBuf;
 
 const MARKER: &str = ".devkit-uv";
 
-fn resolve_uv_download() -> Result<(String, String)> {
-    let release = github_latest_release("astral-sh", "uv")?;
-    let host = current_os();
-    let arch = cpu_arch();
+fn uv_asset_name(host: HostOS, arch: &str) -> Result<&'static str> {
     let asset = match host {
         HostOS::Windows => {
             if arch == "aarch64" {
@@ -38,6 +35,12 @@ fn resolve_uv_download() -> Result<(String, String)> {
         }
         HostOS::Other => bail!("uv is not supported on this OS: other"),
     };
+    Ok(asset)
+}
+
+fn resolve_uv_download() -> Result<(String, String)> {
+    let release = github_latest_release("astral-sh", "uv")?;
+    let asset = uv_asset_name(current_os(), &cpu_arch())?;
     pick_release_asset(&release, &[asset])
 }
 
@@ -129,16 +132,82 @@ mod tests {
     use super::*;
     use crate::plugin::InstallState;
 
+    fn ctx(tmp: &std::path::Path) -> InstallContext {
+        InstallContext {
+            install_dir: tmp.join("uv"),
+            home: tmp.to_path_buf(),
+            version: None,
+            channel: None,
+        }
+    }
+
+    #[test]
+    fn asset_name_matches_host() {
+        assert_eq!(
+            uv_asset_name(HostOS::Windows, "x86_64").unwrap(),
+            "uv-x86_64-pc-windows-msvc.zip"
+        );
+        assert_eq!(
+            uv_asset_name(HostOS::Windows, "aarch64").unwrap(),
+            "uv-aarch64-pc-windows-msvc.zip"
+        );
+        assert_eq!(
+            uv_asset_name(HostOS::Linux, "x86_64").unwrap(),
+            "uv-x86_64-unknown-linux-gnu.tar.gz"
+        );
+        assert_eq!(
+            uv_asset_name(HostOS::Linux, "aarch64").unwrap(),
+            "uv-aarch64-unknown-linux-gnu.tar.gz"
+        );
+        assert_eq!(
+            uv_asset_name(HostOS::MacOS, "x86_64").unwrap(),
+            "uv-x86_64-apple-darwin.tar.gz"
+        );
+        assert_eq!(
+            uv_asset_name(HostOS::MacOS, "aarch64").unwrap(),
+            "uv-aarch64-apple-darwin.tar.gz"
+        );
+        assert!(uv_asset_name(HostOS::Other, "x86_64").is_err());
+    }
+
     #[test]
     fn status_not_installed_on_empty_dir() {
         let tmp = tempfile::tempdir().unwrap();
         let plugin = UvPlugin;
-        let ctx = InstallContext {
-            install_dir: tmp.path().join("uv"),
-            home: tmp.path().to_path_buf(),
-            version: None,
-            channel: None,
-        };
-        assert_eq!(plugin.status(&ctx).state, InstallState::NotInstalled);
+        let c = ctx(tmp.path());
+        assert_eq!(plugin.status(&c).state, InstallState::NotInstalled);
+    }
+
+    #[test]
+    fn status_installed_when_binary_present() {
+        let tmp = tempfile::tempdir().unwrap();
+        let plugin = UvPlugin;
+        let c = ctx(tmp.path());
+        std::fs::create_dir_all(&c.install_dir).unwrap();
+        let name = if is_windows() { "uv.exe" } else { "uv" };
+        std::fs::write(c.install_dir.join(name), b"stub").unwrap();
+        assert_eq!(plugin.status(&c).state, InstallState::Installed);
+    }
+
+    #[test]
+    fn env_spec_points_at_install_dir() {
+        let tmp = tempfile::tempdir().unwrap();
+        let plugin = UvPlugin;
+        let c = ctx(tmp.path());
+        std::fs::create_dir_all(&c.install_dir).unwrap();
+        let spec = plugin.env_spec(&c);
+        assert_eq!(spec.paths, vec![c.install_dir.clone()]);
+        assert_eq!(spec.vars.len(), 1);
+        assert_eq!(spec.vars[0].0, "UV_INSTALL_DIR");
+    }
+
+    #[test]
+    fn uninstall_removes_install_dir() {
+        let tmp = tempfile::tempdir().unwrap();
+        let plugin = UvPlugin;
+        let c = ctx(tmp.path());
+        std::fs::create_dir_all(&c.install_dir).unwrap();
+        plugin.uninstall(&c).unwrap();
+        assert!(!c.install_dir.exists());
     }
 }
