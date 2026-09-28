@@ -12,6 +12,7 @@ DevKit **0.9.3** ships these built-in plugins:
 | `pnpm` | Latest pnpm standalone ZIP/tar from GitHub |
 | `deno` | Latest Deno ZIP from GitHub |
 | `bun` | Latest Bun ZIP from GitHub |
+| `uv` | Latest uv and uvx archive from GitHub |
 | `jdk` | Temurin via Adoptium; `--version` selects feature (default 25) |
 | `maven` | Latest Apache Maven 3.x binary ZIP |
 | `gradle` | Latest Gradle `-bin.zip` |

@@ -74,6 +74,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `pnpm` | Latest pnpm standalone |
 | `deno` | Latest Deno runtime |
 | `bun` | Latest Bun runtime |
+| `uv` | Latest uv and uvx |
 | `jdk` | Eclipse Temurin JDK (default 25; `--version`) |
 | `maven` | Latest Apache Maven |
 | `gradle` | Latest Gradle binary ZIP |
