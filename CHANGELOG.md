@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `uv` plugin: latest uv and uvx from astral-sh/uv GitHub releases.
+
 ## [0.9.3] - 2026-09-26
 
 ### Added
