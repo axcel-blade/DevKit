@@ -34,6 +34,7 @@ pub mod qemu;
 pub mod rust;
 pub mod sqlite;
 pub mod terraform;
+pub mod uv;
 
 use crate::plugin::Plugin;
 
@@ -71,5 +72,6 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(rust::RustPlugin),
         Box::new(sqlite::SqlitePlugin),
         Box::new(terraform::TerraformPlugin),
+        Box::new(uv::UvPlugin),
     ]
 }
