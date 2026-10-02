@@ -3,7 +3,9 @@
 //! Rust has no runtime module scan, so every plugin module is declared and
 //! registered here explicitly (mirrors Python's `registry.load_builtin()`).
 
+pub mod anaconda;
 pub mod android;
+pub mod android_ndk;
 pub mod bun;
 pub mod cmake;
 pub mod composer;
@@ -41,7 +43,9 @@ use crate::plugin::Plugin;
 /// Return every built-in plugin instance.
 pub fn all() -> Vec<Box<dyn Plugin>> {
     vec![
+        Box::new(anaconda::AnacondaPlugin),
         Box::new(android::AndroidPlugin),
+        Box::new(android_ndk::AndroidNdkPlugin),
         Box::new(bun::BunPlugin),
         Box::new(cmake::CmakePlugin),
         Box::new(composer::ComposerPlugin),

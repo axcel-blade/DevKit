@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-02
+
 ### Added
 
 - `uv` plugin: latest uv and uvx from astral-sh/uv GitHub releases.
+- `anaconda` plugin: latest Anaconda3 distribution from repo.anaconda.com,
+  installed silently (NSIS on Windows, `-b -p` shell installer on macOS/Linux);
+  sets `CONDA_HOME`.
+- `android-ndk` plugin: Android NDK r29 native toolchain; sets
+  `ANDROID_NDK_HOME` / `ANDROID_NDK_ROOT`.
 
 ## [0.9.3] - 2026-09-26
 
@@ -309,6 +316,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.10.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.10.0
 [0.9.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.3
 [0.9.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.2
 [0.9.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.1
