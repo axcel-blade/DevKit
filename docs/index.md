@@ -1,6 +1,6 @@
 # Documentation
 
-DevKit **0.9.3** documentation index.
+DevKit **0.10.0** documentation index.
 
 | Page | Description |
 |------|-------------|
