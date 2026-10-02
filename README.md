@@ -1,6 +1,8 @@
 # DevKit
 
-**Version:** 0.9.3
+[![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)](CHANGELOG.md)
+[![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -75,6 +77,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `deno` | Latest Deno runtime |
 | `bun` | Latest Bun runtime |
 | `uv` | Latest uv and uvx |
+| `anaconda` | Latest Anaconda3 distribution (conda + Python) |
 | `jdk` | Eclipse Temurin JDK (default 25; `--version`) |
 | `maven` | Latest Apache Maven |
 | `gradle` | Latest Gradle binary ZIP |
@@ -90,6 +93,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `sqlite` | Official sqlite-tools CLI |
 | `android` | Android SDK cmdline-tools |
 | `platform-tools` | Android platform-tools (`adb`) |
+| `android-ndk` | Android NDK r29 native toolchain |
 | `flutter` | Flutter SDK (`--channel` / `--version`) |
 | `kubectl` | Latest stable kubectl |
 | `docker` | Official static Docker CLI (client only) |

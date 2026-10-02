@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.9.3** ships these built-in plugins:
+DevKit **0.10.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -13,6 +13,7 @@ DevKit **0.9.3** ships these built-in plugins:
 | `deno` | Latest Deno ZIP from GitHub |
 | `bun` | Latest Bun ZIP from GitHub |
 | `uv` | Latest uv and uvx archive from GitHub |
+| `anaconda` | Latest Anaconda3 installer from repo.anaconda.com, run silently |
 | `jdk` | Temurin via Adoptium; `--version` selects feature (default 25) |
 | `maven` | Latest Apache Maven 3.x binary ZIP |
 | `gradle` | Latest Gradle `-bin.zip` |
@@ -28,6 +29,7 @@ DevKit **0.9.3** ships these built-in plugins:
 | `sqlite` | Official sqlite-tools from sqlite.org |
 | `android` | Android SDK cmdline-tools (build 16111833) |
 | `platform-tools` | Android `adb` / fastboot ZIP |
+| `android-ndk` | Android NDK r29 native toolchain ZIP |
 | `flutter` | `--channel` (stable/beta/dev) and `--version` |
 | `kubectl` | Latest stable from dl.k8s.io |
 | `docker` | Official static Docker CLI (client only; no engine) |
