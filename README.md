@@ -1,11 +1,11 @@
 # DevKit
 
-[![Version](https://img.shields.io/badge/version-0.10.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.11.0-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](docs/getting-started.md)
-[![Plugins](https://img.shields.io/badge/plugins-34-blueviolet.svg)](docs/plugins.md)
+[![Plugins](https://img.shields.io/badge/plugins-35-blueviolet.svg)](docs/plugins.md)
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -42,6 +42,7 @@ devkit.bat install maven
 devkit.bat install gradle
 devkit.bat install junit
 devkit.bat install pmd
+devkit.bat install make
 devkit.bat install flutter
 ```
 
@@ -88,6 +89,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `pmd` | PMD Source Code Analyzer binary (`--version`) |
 | `cmake` | Latest CMake binary |
 | `ninja` | Latest Ninja binary |
+| `make` | GNU Make 4.4.1 (Windows); system wrappers (Unix) |
 | `git` | MinGit (Windows); system wrappers (Unix) |
 | `php` | PHP NTS (Windows); system wrappers (Unix) |
 | `composer` | Composer PHAR + wrapper |
