@@ -163,9 +163,9 @@ mod tests {
         let tmp = std::env::temp_dir().join("devkit_test_plugin_dir");
         std::fs::create_dir_all(&tmp).unwrap();
         std::env::set_var("DEVKIT_HOME", &tmp);
-        let dir = plugin_install_dir("hello");
+        let dir = plugin_install_dir("git");
         std::env::remove_var("DEVKIT_HOME");
-        assert_eq!(dir, to_absolute(&tmp).join("hello"));
+        assert_eq!(dir, to_absolute(&tmp).join("git"));
     }
 
     #[test]

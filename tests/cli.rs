@@ -5,7 +5,7 @@
 //! file only exercises commands that do not call `EnvManager::apply`/
 //! `revert` (not `install`/`uninstall`), so `cargo test` does not mutate
 //! the developer's environment. Install/uninstall is covered in plugin
-//! unit tests (see `src/plugins/hello.rs`).
+//! unit tests.
 
 use assert_cmd::Command;
 use predicates::prelude::*;
@@ -50,7 +50,6 @@ fn list_shows_registered_plugins() {
         .env("DEVKIT_HOME", tmp.path())
         .assert()
         .success()
-        .stdout(predicate::str::contains("hello"))
         .stdout(predicate::str::contains("git"))
         .stdout(predicate::str::contains("junit"))
         .stdout(predicate::str::contains("gradle"))
@@ -73,14 +72,14 @@ fn doctor_reports_dev_root_and_plugins() {
         .stdout(predicate::str::contains("Rustc:"))
         .stdout(predicate::str::contains("Cargo:"))
         .stdout(predicate::str::contains("Internet:"))
-        .stdout(predicate::str::contains("hello"));
+        .stdout(predicate::str::contains("git"));
 }
 
 #[test]
 fn status_unknown_plugin_before_install_is_not_installed() {
     let tmp = tempfile::tempdir().unwrap();
     devkit()
-        .args(["status", "hello"])
+        .args(["status", "git"])
         .env("DEVKIT_HOME", tmp.path())
         .assert()
         .failure()
@@ -103,13 +102,54 @@ fn menu_lists_plugins_and_quits_on_q() {
     let tmp = tempfile::tempdir().unwrap();
     // No subcommand at all — a bare `devkit` should fall through to the menu
     // rather than clap's "a subcommand is required" usage error.
-    devkit()
+    let check = devkit()
         .env("DEVKIT_HOME", tmp.path())
         .write_stdin("q\n")
         .assert()
         .success()
-        .stdout(predicate::str::contains("plugin menu"))
-        .stdout(predicate::str::contains("hello"));
+        .stdout(predicate::str::contains("DevKit"))
+        .stdout(predicate::str::contains(&format!(
+            "Version: {}",
+            env!("CARGO_PKG_VERSION")
+        )))
+        .stdout(predicate::str::contains(&format!(
+            "OS: {}",
+            if cfg!(windows) {
+                "Windows"
+            } else if cfg!(target_os = "macos") {
+                "macOS"
+            } else if cfg!(target_os = "linux") {
+                "Linux"
+            } else {
+                "Unknown"
+            }
+        )))
+        .stdout(predicate::str::contains("git"));
+    if cfg!(windows) {
+        check
+            .stdout(predicate::str::contains("chocolatey"))
+            .stdout(predicate::str::contains("msys2"));
+    } else {
+        check
+            .stdout(predicate::str::contains("chocolatey").not())
+            .stdout(predicate::str::contains("msys2").not());
+    }
+}
+
+#[cfg(not(windows))]
+#[test]
+fn install_refuses_windows_only_plugins() {
+    let tmp = tempfile::tempdir().unwrap();
+    for id in ["chocolatey", "msys2"] {
+        devkit()
+            .args(["install", id])
+            .env("DEVKIT_HOME", tmp.path())
+            .assert()
+            .failure()
+            .stderr(predicate::str::contains("Cannot install"))
+            .stderr(predicate::str::contains("Reason:"))
+            .stderr(predicate::str::contains("only supported on Windows"));
+    }
 }
 
 #[test]

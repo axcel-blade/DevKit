@@ -1,11 +1,11 @@
 # Documentation
 
-DevKit **0.12.1** documentation index.
+DevKit **0.13.0** documentation index.
 
 | Page | Description |
 |------|-------------|
-| [getting-started.md](getting-started.md) | Install requirements and run the app |
+| [getting-started.md](getting-started.md) | Install requirements, Makefile targets, and how to run the app |
 | [plugins.md](plugins.md) | Built-in plugins and how to write your own |
 | [architecture.md](architecture.md) | Internals: registry, env, downloads |
 
-Also see the repository root: README, CHANGELOG, CONTRIBUTING, SECURITY, SUPPORT, ROADMAP, TODO.
+Also see the repository root: README (Makefile targets and `make bat` / `make sh`), CHANGELOG, CONTRIBUTING, SECURITY, SUPPORT, ROADMAP, TODO.

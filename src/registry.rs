@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn default_registry_has_core_plugins() {
         let registry = default_registry();
-        assert!(registry.get("hello").is_some());
+        assert!(registry.get("git").is_some());
         assert!(registry.get("junit").is_some());
         assert!(registry.get("gradle").is_some());
         assert!(registry.get("maven").is_some());

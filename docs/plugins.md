@@ -1,45 +1,44 @@
 # Plugins
 
-DevKit **0.12.1** ships these built-in plugins:
+DevKit **0.13.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
 
-| ID | Notes |
-|----|-------|
-| `python` | Portable CPython 3.14.7 via python-build-standalone |
-| `go` | Latest stable from go.dev/dl JSON |
-| `rust` | rustup stable into `CARGO_HOME` / `RUSTUP_HOME` |
-| `dotnet` | .NET SDK 10.0 LTS ZIP from Microsoft release metadata |
-| `node` | Latest Node.js LTS (npm / npx) |
-| `pnpm` | Latest pnpm standalone ZIP/tar from GitHub |
-| `deno` | Latest Deno ZIP from GitHub |
-| `bun` | Latest Bun ZIP from GitHub |
-| `uv` | Latest uv and uvx archive from GitHub |
-| `anaconda` | Latest Anaconda3 installer from repo.anaconda.com, run silently |
-| `jdk` | Temurin via Adoptium; `--version` selects feature (default 25) |
-| `maven` | Latest Apache Maven 3.x binary ZIP |
-| `gradle` | Latest Gradle `-bin.zip` |
-| `junit` | JUnit Platform Console Standalone JAR + wrapper; `--version` optional |
-| `pmd` | PMD Source Code Analyzer binary ZIP from GitHub; `--version` optional |
-| `cmake` | Latest Kitware CMake binary |
-| `ninja` | Latest ninja-build binary ZIP |
-| `make` | Chocolatey `make` 4.4.1 package unpacked into the DevKit folder on Windows (no elevated `choco`); system wrappers on Unix |
-| `chocolatey` | Latest Chocolatey CLI unpacked into the DevKit folder (Windows only); sets user `ChocolateyInstall` |
-| `git` | MinGit on Windows; system wrappers on Unix |
-| `php` | Windows NTS ZIP; system wrappers on Unix |
-| `composer` | `composer.phar` + wrapper; needs PHP |
-| `mysql` | MySQL 8.4 LTS portable (8.4.11, binaries only) |
-| `postgresql` | PostgreSQL 18.4 EDB Windows binaries; system client wrappers on Unix |
-| `sqlite` | Official sqlite-tools from sqlite.org |
-| `android` | Android SDK cmdline-tools (build 16111833) |
-| `platform-tools` | Android `adb` / fastboot ZIP |
-| `android-ndk` | Android NDK r29 native toolchain ZIP |
-| `flutter` | `--channel` (stable/beta/dev) and `--version` |
-| `kubectl` | Latest stable from dl.k8s.io |
-| `docker` | Official static Docker CLI (client only; no engine) |
-| `terraform` | Latest from HashiCorp releases |
-| `mono` | Windows MSI / macOS PKG; Linux system wrappers |
-| `msys2` | Portable MSYS2 base runtime (Windows only) |
-| `qemu` | QEMU 11.1.0 silent NSIS install (Windows); system QEMU wrappers on macOS/Linux |
-| `hello` | Offline demo of ZIP → `dev` folder → env |
+| ID | OS | Notes |
+|----|----|-------|
+| `python` | Windows, macOS, Linux | Portable CPython 3.14.7 via python-build-standalone |
+| `go` | Windows, macOS, Linux | Latest stable from go.dev/dl JSON |
+| `rust` | Windows, macOS, Linux | rustup stable into `CARGO_HOME` / `RUSTUP_HOME` |
+| `dotnet` | Windows, macOS, Linux | .NET SDK 10.0 LTS ZIP from Microsoft release metadata |
+| `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
+| `pnpm` | Windows, macOS, Linux | Latest pnpm standalone ZIP/tar from GitHub |
+| `deno` | Windows, macOS, Linux | Latest Deno ZIP from GitHub |
+| `bun` | Windows, macOS, Linux | Latest Bun ZIP from GitHub |
+| `uv` | Windows, macOS, Linux | Latest uv and uvx archive from GitHub |
+| `anaconda` | Windows, macOS, Linux | Latest Anaconda3 installer from repo.anaconda.com, run silently |
+| `jdk` | Windows, macOS, Linux | Temurin via Adoptium; `--version` selects feature (default 25) |
+| `maven` | Windows, macOS, Linux | Latest Apache Maven 3.x binary ZIP |
+| `gradle` | Windows, macOS, Linux | Latest Gradle `-bin.zip` |
+| `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone JAR + wrapper; `--version` optional |
+| `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary ZIP from GitHub; `--version` optional |
+| `cmake` | Windows, macOS, Linux | Latest Kitware CMake binary |
+| `ninja` | Windows, macOS, Linux | Latest ninja-build binary ZIP |
+| `make` | Windows, macOS, Linux | Chocolatey `make` 4.4.1 package unpacked into the DevKit folder on Windows (no elevated `choco`); system wrappers on Unix |
+| `chocolatey` | Windows | Latest Chocolatey CLI unpacked into the DevKit folder; sets user `ChocolateyInstall` |
+| `git` | Windows, macOS, Linux | MinGit on Windows; system wrappers on Unix |
+| `php` | Windows, macOS, Linux | Windows NTS ZIP; system wrappers on Unix |
+| `composer` | Windows, macOS, Linux | `composer.phar` + wrapper; needs PHP |
+| `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable (8.4.11, binaries only) |
+| `postgresql` | Windows, macOS, Linux | PostgreSQL 18.4 EDB Windows binaries; system client wrappers on Unix |
+| `sqlite` | Windows, macOS, Linux | Official sqlite-tools from sqlite.org |
+| `android` | Windows, macOS, Linux | Android SDK cmdline-tools (build 16111833) |
+| `platform-tools` | Windows, macOS, Linux | Android `adb` / fastboot ZIP |
+| `android-ndk` | Windows, macOS, Linux | Android NDK r29 native toolchain ZIP |
+| `flutter` | Windows, macOS, Linux | `--channel` (stable/beta/dev) and `--version` |
+| `kubectl` | Windows, macOS, Linux | Latest stable from dl.k8s.io |
+| `docker` | Windows, macOS, Linux | Official static Docker CLI (client only; no engine) |
+| `terraform` | Windows, macOS, Linux | Latest from HashiCorp releases |
+| `mono` | Windows, macOS, Linux | Windows MSI / macOS PKG; Linux system wrappers |
+| `msys2` | Windows | Portable MSYS2 base runtime |
+| `qemu` | Windows, macOS, Linux | QEMU 11.1.0 silent NSIS install (Windows); system QEMU wrappers on macOS/Linux |
 
 ## Authoring a plugin
 
@@ -101,8 +100,25 @@ runtime module scan, so every plugin is listed explicitly there.
 
 ### Versions in the menu
 
-The interactive menu shows an **INSTALLED** and **AVAILABLE** column, fed by two
-optional trait methods:
+The interactive menu (`make bat`, `make sh`, or a launcher with no arguments) prints like this on Windows. Only plugins whose `supported_os` includes the host are listed. The **INSTALLED** and **AVAILABLE** columns are fed by two optional trait methods:
+
+```text
+Checking for available versions ...
+
+DevKit
+OS: Windows
+Version: 0.13.0
+#    ID               NAME                     STATUS         INSTALLED        AVAILABLE
+--------------------------------------------------------------------------------------------------------
+1    anaconda         Anaconda                 not_installed  -                2026.07-1
+5    chocolatey       Chocolatey               installed      2.7.4            2.7.4 (up to date)
+12   git              Git                      not_installed  -                2.56.0.windows.1
+32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
+
+Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit:
+```
+
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are omitted there. A matching install prints `up to date`. A newer release prints `update available`.
 
 - `installed_version(&self, ctx)` — defaults to the first line of the
   `.devkit-<id>` marker in `install_dir` (placeholders such as `stable` or
@@ -119,6 +135,25 @@ fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
 }
 ```
 
+### OS support
+
+`Plugin::supported_os` defaults to Windows, macOS, and Linux. Override it when
+a plugin cannot be installed on every host — Chocolatey and MSYS2 return
+Windows only. The menu lists only plugins that support the host OS, so those
+two are hidden on macOS and Linux. `devkit install` refuses the rest and
+prints why:
+
+```text
+Cannot install chocolatey on macOS.
+Reason: Chocolatey is only supported on Windows.
+```
+
+```rust
+fn supported_os(&self) -> &'static [HostOS] {
+    &[HostOS::Windows]
+}
+```
+
 ## Helpers
 
 - `crate::download::install_archive_from_url` / `install_archive_from_urls`
@@ -128,4 +163,4 @@ fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
 - `crate::progress::download_progress` (shared progress bar for large downloads)
 - `crate::plugin_utils::github_latest_release` / `pick_release_asset` / `binary_status` / `find_files_named`
 - `crate::installers::extract_msi_admin` / `extract_pkg` (Windows/macOS installers)
-- `crate::platform::pick_for_os`, `cpu_arch`, `adoptium_os`
+- `crate::platform::pick_for_os`, `cpu_arch`, `adoptium_os`, `DESKTOP_HOSTS`
