@@ -99,11 +99,18 @@ fn cmd_list() -> anyhow::Result<i32> {
 
 /// Run a plugin's install step and apply its env_spec. Shared by `cmd_install`
 /// (explicit `devkit install <id>`) and `cmd_menu` (interactive picker) so
-/// both go through one code path.
-fn perform_install(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<()> {
+/// both go through one code path. `updating` only changes the verbs printed;
+/// the install itself replaces whatever is already in the plugin directory.
+fn perform_install(
+    plugin: &dyn Plugin,
+    ctx: &InstallContext,
+    updating: bool,
+) -> anyhow::Result<()> {
+    let verb = if updating { "Updating" } else { "Installing" };
+    let done = if updating { "Updated" } else { "Installed" };
     println!(
         "{} {} ({}) into {} ...",
-        theme::cyan("Installing"),
+        theme::cyan(verb),
         plugin.name(),
         plugin.id(),
         ctx.install_dir.display()
@@ -116,7 +123,7 @@ fn perform_install(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<
     } else {
         result.message
     };
-    println!("{} {}: {}", theme::green("Installed"), plugin.id(), msg);
+    println!("{} {}: {}", theme::green(done), plugin.id(), msg);
     println!(
         "{}",
         theme::dim("Environment updated. Open a new terminal for PATH/env changes to take effect.")
@@ -186,7 +193,7 @@ fn cmd_install(
         );
     }
 
-    perform_install(plugin, &ctx)?;
+    perform_install(plugin, &ctx, false)?;
     Ok(0)
 }
 
@@ -403,13 +410,81 @@ fn available_cell(installed: Option<&str>, latest: Option<&str>) -> String {
     }
 }
 
+const MENU_PROMPT: &str = "Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit: ";
+
+struct MenuRow {
+    installed: bool,
+    current: Option<String>,
+}
+
+/// What one line of menu input asked for. Indexes are 0-based.
+enum MenuChoice {
+    Quit,
+    Refresh,
+    Toggle(usize),
+    UpdateOne(usize),
+    UpdateAll,
+    /// Bare `u`: remind the user that update-one and update-all are both available.
+    UpdateHint,
+    Invalid,
+}
+
+fn parse_menu_choice(input: &str, plugin_count: usize) -> MenuChoice {
+    let input = input.trim();
+    if input.is_empty() || input.eq_ignore_ascii_case("q") {
+        return MenuChoice::Quit;
+    }
+    if input.eq_ignore_ascii_case("r") {
+        return MenuChoice::Refresh;
+    }
+    if input.eq_ignore_ascii_case("a") {
+        return MenuChoice::UpdateAll;
+    }
+    if let Some(rest) = input.strip_prefix('u').or_else(|| input.strip_prefix('U')) {
+        let rest = rest.trim();
+        if rest.is_empty() {
+            return MenuChoice::UpdateHint;
+        }
+        return match rest.parse::<usize>() {
+            Ok(n) if (1..=plugin_count).contains(&n) => MenuChoice::UpdateOne(n - 1),
+            _ => MenuChoice::Invalid,
+        };
+    }
+    match input.parse::<usize>() {
+        Ok(n) if (1..=plugin_count).contains(&n) => MenuChoice::Toggle(n - 1),
+        _ => MenuChoice::Invalid,
+    }
+}
+
+/// Installed and the looked-up release is a different version.
+fn plugin_needs_update(installed: bool, current: Option<&str>, latest: Option<&str>) -> bool {
+    if !installed {
+        return false;
+    }
+    match (current, latest) {
+        (Some(installed_version), Some(latest_version)) => {
+            crate::plugin_utils::normalize_version(installed_version)
+                != crate::plugin_utils::normalize_version(latest_version)
+        }
+        _ => false,
+    }
+}
+
+/// Re-run install so the plugin directory is replaced with the release
+/// `install` would fetch now. Download happens before plugins wipe the old
+/// directory, so a failed lookup leaves the current install in place.
+fn perform_update(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<()> {
+    perform_install(plugin, ctx, true)
+}
+
 /// Interactive text menu: lists plugins that can be installed on this OS,
 /// with status, installed version, and the newest available version. The user
 /// picks one by number to install (if missing/partial) or uninstall (if
-/// already installed). Plugins whose `supported_os` omits the host are left
-/// out. Loops until the user quits. This is what a bare `devkit` (no
-/// subcommand) runs, so double-clicking `devkit.bat`/`devkit.sh` gives a
-/// usable menu instead of a clap usage error.
+/// already installed), `u <number>` to update that plugin, or `a` to update
+/// every installed plugin that has a newer release. Plugins whose
+/// `supported_os` omits the host are left out. Loops until the user quits.
+/// This is what a bare `devkit` (no subcommand) runs, so double-clicking
+/// `devkit.bat`/`devkit.sh` gives a usable menu instead of a clap usage error.
 fn cmd_menu() -> anyhow::Result<i32> {
     use std::io::{self, Write};
 
@@ -451,9 +526,9 @@ fn cmd_menu() -> anyhow::Result<i32> {
         println!("{}", theme::dim(&"-".repeat(104)));
 
         // Re-check status every loop so the menu reflects what the last
-        // action actually did, and remember which are installed so the
-        // chosen action (install vs uninstall) doesn't need a second lookup.
-        let mut installed = Vec::with_capacity(plugins.len());
+        // action actually did. Remember install state and version so install,
+        // uninstall, and update don't need a second lookup.
+        let mut rows = Vec::with_capacity(plugins.len());
         for (i, plugin) in plugins.iter().enumerate() {
             let ctx = context(plugin.id(), None, None)?;
             let status = plugin.status(&ctx);
@@ -480,16 +555,14 @@ fn cmd_menu() -> anyhow::Result<i32> {
                 current_cell,
                 available_cell(current.as_deref(), latest[i].as_deref())
             );
-            installed.push(status.state == InstallState::Installed);
+            rows.push(MenuRow {
+                installed: status.state == InstallState::Installed,
+                current,
+            });
         }
 
         println!();
-        print!(
-            "{}",
-            theme::cyan(
-                "Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit: "
-            )
-        );
+        print!("{}", theme::cyan(MENU_PROMPT));
         io::stdout().flush()?;
 
         let mut line = String::new();
@@ -499,35 +572,124 @@ fn cmd_menu() -> anyhow::Result<i32> {
             break;
         }
         let input = line.trim();
-        if input.is_empty() || input.eq_ignore_ascii_case("q") {
-            break;
-        }
-        if input.eq_ignore_ascii_case("r") {
-            println!("{}", theme::dim("Checking for available versions ..."));
-            latest = fetch_latest_versions(&plugins);
-            continue;
-        }
-
-        let choice: usize = match input.parse() {
-            Ok(n) if n >= 1 && n <= plugins.len() => n,
-            _ => {
-                println!("{} {input}", theme::red("Invalid choice:"));
-                continue;
+        match parse_menu_choice(input, plugins.len()) {
+            MenuChoice::Quit => break,
+            MenuChoice::Refresh => {
+                println!("{}", theme::dim("Checking for available versions ..."));
+                latest = fetch_latest_versions(&plugins);
             }
-        };
-        let plugin = plugins[choice - 1];
-        let ctx = context(plugin.id(), None, None)?;
-
-        let outcome = if installed[choice - 1] {
-            perform_uninstall(plugin, &ctx)
-        } else {
-            perform_install(plugin, &ctx)
-        };
-        if let Err(e) = outcome {
-            eprintln!("{} {e}", theme::red("Error:"));
+            MenuChoice::UpdateHint => {
+                println!(
+                    "{}",
+                    theme::yellow("Enter 'u <number>' to update one plugin, or 'a' to update all.")
+                );
+            }
+            MenuChoice::Invalid => {
+                println!("{} {input}", theme::red("Invalid choice:"));
+            }
+            MenuChoice::Toggle(index) => {
+                let plugin = plugins[index];
+                let ctx = context(plugin.id(), None, None)?;
+                let outcome = if rows[index].installed {
+                    perform_uninstall(plugin, &ctx)
+                } else {
+                    perform_install(plugin, &ctx, false)
+                };
+                if let Err(e) = outcome {
+                    eprintln!("{} {e}", theme::red("Error:"));
+                }
+            }
+            MenuChoice::UpdateOne(index) => {
+                if let Err(e) = update_one(
+                    plugins[index],
+                    &rows[index],
+                    latest[index].as_deref(),
+                    index,
+                ) {
+                    eprintln!("{} {e}", theme::red("Error:"));
+                }
+            }
+            MenuChoice::UpdateAll => {
+                let pending: Vec<usize> = rows
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, row)| {
+                        plugin_needs_update(
+                            row.installed,
+                            row.current.as_deref(),
+                            latest[*i].as_deref(),
+                        )
+                    })
+                    .map(|(i, _)| i)
+                    .collect();
+                if let Err(e) = update_all(&plugins, &pending) {
+                    eprintln!("{} {e}", theme::red("Error:"));
+                }
+            }
         }
     }
     Ok(0)
+}
+
+fn update_one(
+    plugin: &dyn Plugin,
+    row: &MenuRow,
+    latest: Option<&str>,
+    index: usize,
+) -> anyhow::Result<()> {
+    if !row.installed {
+        println!(
+            "{} is not installed. Enter {} to install it.",
+            plugin.id(),
+            index + 1
+        );
+        return Ok(());
+    }
+    match (row.current.as_deref(), latest) {
+        (_, None) => {
+            println!(
+                "Could not look up an available version for {}. Press 'r' to retry.",
+                plugin.id()
+            );
+            return Ok(());
+        }
+        (Some(_), Some(_)) if !plugin_needs_update(true, row.current.as_deref(), latest) => {
+            println!("{} is already up to date.", plugin.id());
+            return Ok(());
+        }
+        _ => {}
+    }
+    let ctx = context(plugin.id(), None, None)?;
+    perform_update(plugin, &ctx)
+}
+
+fn update_all(plugins: &[&dyn Plugin], indexes: &[usize]) -> anyhow::Result<()> {
+    if indexes.is_empty() {
+        println!(
+            "{}",
+            theme::yellow("No installed plugins have an update available.")
+        );
+        return Ok(());
+    }
+    let ids: Vec<&str> = indexes.iter().map(|&i| plugins[i].id()).collect();
+    let label = if indexes.len() == 1 {
+        "plugin"
+    } else {
+        "plugins"
+    };
+    println!(
+        "{} {}",
+        theme::cyan(&format!("Updating {} {label}:", indexes.len())),
+        ids.join(", ")
+    );
+    for &index in indexes {
+        let plugin = plugins[index];
+        let ctx = context(plugin.id(), None, None)?;
+        if let Err(e) = perform_update(plugin, &ctx) {
+            eprintln!("{} {e}", theme::red("Error:"));
+        }
+    }
+    Ok(())
 }
 
 pub fn main(argv: Option<Vec<String>>) -> anyhow::Result<i32> {
@@ -547,5 +709,38 @@ pub fn main(argv: Option<Vec<String>>) -> anyhow::Result<i32> {
         Some(Command::Status { plugin }) => cmd_status(&plugin),
         Some(Command::Doctor) => cmd_doctor(),
         Some(Command::Menu) | None => cmd_menu(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{parse_menu_choice, plugin_needs_update, MenuChoice};
+
+    #[test]
+    fn menu_choice_keeps_update_one_and_update_all() {
+        assert!(matches!(parse_menu_choice("a", 3), MenuChoice::UpdateAll));
+        assert!(matches!(parse_menu_choice("A", 3), MenuChoice::UpdateAll));
+        assert!(matches!(parse_menu_choice("u", 3), MenuChoice::UpdateHint));
+        assert!(matches!(
+            parse_menu_choice("u 2", 3),
+            MenuChoice::UpdateOne(1)
+        ));
+        assert!(matches!(
+            parse_menu_choice("U2", 3),
+            MenuChoice::UpdateOne(1)
+        ));
+        assert!(matches!(parse_menu_choice("u 9", 3), MenuChoice::Invalid));
+        assert!(matches!(parse_menu_choice("2", 3), MenuChoice::Toggle(1)));
+        assert!(matches!(parse_menu_choice("q", 3), MenuChoice::Quit));
+        assert!(matches!(parse_menu_choice("r", 3), MenuChoice::Refresh));
+    }
+
+    #[test]
+    fn plugin_needs_update_only_when_installed_version_differs() {
+        assert!(plugin_needs_update(true, Some("1.0.0"), Some("1.1.0")));
+        assert!(!plugin_needs_update(true, Some("v1.0.0"), Some("1.0.0")));
+        assert!(!plugin_needs_update(false, Some("1.0.0"), Some("1.1.0")));
+        assert!(!plugin_needs_update(true, Some("1.0.0"), None));
+        assert!(!plugin_needs_update(true, None, Some("1.0.0")));
     }
 }

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The interactive menu can update one installed plugin (`u <number>`) or every
+  installed plugin with a newer release (`a`). A number still installs or
+  uninstalls that plugin.
+
 ## [0.13.0] - 2026-10-04
 
 ### Changed

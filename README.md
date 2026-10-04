@@ -42,10 +42,10 @@ Version: 0.13.0
 ...
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit:
+Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
-On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only, so those rows are left out there. Pick a number to install or uninstall, `r` to re-check versions, `q` to quit.
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only, so those rows are left out there. Pick a number to install or uninstall, `u <number>` to update that plugin, `a` to update every installed plugin that has a newer release, `r` to re-check versions, `q` to quit.
 
 **Windows**
 
