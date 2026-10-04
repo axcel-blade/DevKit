@@ -7,7 +7,9 @@
 
 use crate::download::{download_file, extract_zip};
 use crate::platform::{current_os, HostOS};
-use crate::plugin::{EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus};
+use crate::plugin::{
+    cannot_install_message, EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus,
+};
 use crate::plugin_utils::{binary_status, read_text_url};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
@@ -141,6 +143,10 @@ impl Plugin for ChocolateyPlugin {
          set ChocolateyInstall so packages do not need an elevated shell."
     }
 
+    fn supported_os(&self) -> &'static [HostOS] {
+        &[HostOS::Windows]
+    }
+
     fn status(&self, ctx: &InstallContext) -> PluginStatus {
         binary_status(
             &choco_binary(ctx),
@@ -150,8 +156,8 @@ impl Plugin for ChocolateyPlugin {
     }
 
     fn install(&self, ctx: &InstallContext) -> Result<InstallResult> {
-        if current_os() != HostOS::Windows {
-            bail!("Chocolatey is only supported on Windows");
+        if !self.supports_os(current_os()) {
+            bail!("{}", cannot_install_message(self));
         }
         let (url, version) = resolve_chocolatey_download()?;
         println!("Chocolatey {version}");

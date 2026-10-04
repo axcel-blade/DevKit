@@ -1,12 +1,12 @@
 # DevKit Wiki
 
-**Version 0.12.1**
+**Version 0.13.0**
 
 Welcome to the DevKit wiki mirror in-repo.
 
 | Page | Topic |
 |------|-------|
-| [Installation](Installation.md) | How to run the app |
+| [Installation](Installation.md) | How to run the app (`make`, `devkit.bat`, `devkit.sh`) |
 | [Plugins](Plugins.md) | Built-in SDK plugins |
 
 Canonical docs also live under [`docs/`](../docs/).

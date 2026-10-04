@@ -5,8 +5,8 @@
 
 use crate::env::EnvManager;
 use crate::paths::{ensure_home, home, plugin_install_dir};
-use crate::platform::{is_windows, os_label};
-use crate::plugin::{InstallContext, InstallState, Plugin};
+use crate::platform::{current_os, is_windows, os_label};
+use crate::plugin::{cannot_install_message, InstallContext, InstallState, Plugin};
 use crate::registry::default_registry;
 use crate::theme;
 use clap::{Parser, Subcommand};
@@ -30,7 +30,7 @@ enum Command {
     List,
     /// Install a plugin
     Install {
-        /// Plugin id (e.g. hello)
+        /// Plugin id (e.g. git)
         plugin: String,
         /// Reinstall even if already installed
         #[arg(long)]
@@ -166,6 +166,11 @@ fn cmd_install(
         );
         println!("Use --force to reinstall.");
         return Ok(0);
+    }
+
+    if !plugin.supports_os(current_os()) {
+        eprintln!("{}", cannot_install_message(plugin));
+        return Ok(1);
     }
 
     if ctx.channel.is_some() && plugin.id() != "flutter" {
@@ -398,20 +403,24 @@ fn available_cell(installed: Option<&str>, latest: Option<&str>) -> String {
     }
 }
 
-/// Interactive text menu: lists every plugin with its current status, the
-/// installed version, and the newest available version, lets the user pick
-/// one by number, and toggles install/uninstall on it — installs if
-/// missing/partial, uninstalls if already installed. Loops until the user
-/// quits. This is what a bare `devkit` (no subcommand) runs, so
-/// double-clicking `devkit.bat`/`devkit.sh` gives a usable menu instead of a
-/// clap usage error.
+/// Interactive text menu: lists plugins that can be installed on this OS,
+/// with status, installed version, and the newest available version. The user
+/// picks one by number to install (if missing/partial) or uninstall (if
+/// already installed). Plugins whose `supported_os` omits the host are left
+/// out. Loops until the user quits. This is what a bare `devkit` (no
+/// subcommand) runs, so double-clicking `devkit.bat`/`devkit.sh` gives a
+/// usable menu instead of a clap usage error.
 fn cmd_menu() -> anyhow::Result<i32> {
     use std::io::{self, Write};
 
     let registry = default_registry();
-    let plugins = registry.all();
+    let plugins: Vec<&dyn Plugin> = registry
+        .all()
+        .into_iter()
+        .filter(|plugin| plugin.supports_os(current_os()))
+        .collect();
     if plugins.is_empty() {
-        println!("No plugins registered.");
+        println!("No plugins can be installed on {}.", os_label());
         return Ok(0);
     }
 
@@ -429,10 +438,9 @@ fn cmd_menu() -> anyhow::Result<i32> {
 
     loop {
         println!();
-        println!(
-            "{}",
-            theme::bold(&format!("DevKit {VERSION} — plugin menu"))
-        );
+        println!("{}", theme::bold("DevKit"));
+        println!("OS: {}", os_label());
+        println!("Version: {VERSION}");
         println!(
             "{}",
             theme::bold(&format!(

@@ -10,6 +10,33 @@ pub enum HostOS {
     Other,
 }
 
+impl HostOS {
+    /// Human-readable name used in the menu and install errors.
+    pub fn label(self) -> &'static str {
+        match self {
+            HostOS::Windows => "Windows",
+            HostOS::MacOS => "macOS",
+            HostOS::Linux => "Linux",
+            HostOS::Other => "Unknown",
+        }
+    }
+}
+
+/// Windows, macOS, and Linux — the default set a plugin can be installed on.
+pub const DESKTOP_HOSTS: &[HostOS] = &[HostOS::Windows, HostOS::MacOS, HostOS::Linux];
+
+/// Join host labels for menu summaries and error text (`Windows, macOS`).
+pub fn format_os_list(hosts: &[HostOS]) -> String {
+    if hosts.is_empty() {
+        return "none".to_string();
+    }
+    hosts
+        .iter()
+        .map(|host| host.label())
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
 pub fn current_os() -> HostOS {
     if cfg!(target_os = "windows") {
         HostOS::Windows
@@ -61,12 +88,7 @@ pub fn adoptium_os() -> anyhow::Result<&'static str> {
 
 /// Human-readable OS name for CLI output.
 pub fn os_label() -> &'static str {
-    match current_os() {
-        HostOS::Windows => "Windows",
-        HostOS::MacOS => "macOS",
-        HostOS::Linux => "Linux",
-        HostOS::Other => "Unknown",
-    }
+    current_os().label()
 }
 
 /// Pick a value from a platform map.
@@ -175,5 +197,13 @@ mod tests {
     fn cpu_arch_is_known_label() {
         let arch = cpu_arch();
         assert!(["x64", "aarch64", "x86"].contains(&arch.as_str()) || !arch.is_empty());
+    }
+
+    #[test]
+    fn format_os_list_joins_labels() {
+        assert_eq!(format_os_list(DESKTOP_HOSTS), "Windows, macOS, Linux");
+        assert_eq!(format_os_list(&[HostOS::Windows]), "Windows");
+        assert_eq!(format_os_list(&[]), "none");
+        assert_eq!(os_label(), current_os().label());
     }
 }
