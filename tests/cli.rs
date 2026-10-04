@@ -108,11 +108,11 @@ fn menu_lists_plugins_and_quits_on_q() {
         .assert()
         .success()
         .stdout(predicate::str::contains("DevKit"))
-        .stdout(predicate::str::contains(&format!(
+        .stdout(predicate::str::contains(format!(
             "Version: {}",
             env!("CARGO_PKG_VERSION")
         )))
-        .stdout(predicate::str::contains(&format!(
+        .stdout(predicate::str::contains(format!(
             "OS: {}",
             if cfg!(windows) {
                 "Windows"
