@@ -20,6 +20,7 @@ pub mod hello;
 pub mod jdk;
 pub mod junit;
 pub mod kubectl;
+pub mod make;
 pub mod maven;
 pub mod mono;
 pub mod msys2;
@@ -60,6 +61,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(jdk::JdkPlugin),
         Box::new(junit::JunitPlugin),
         Box::new(kubectl::KubectlPlugin),
+        Box::new(make::MakePlugin),
         Box::new(maven::MavenPlugin),
         Box::new(mono::MonoPlugin),
         Box::new(msys2::Msys2Plugin),

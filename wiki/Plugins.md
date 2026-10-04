@@ -1,6 +1,6 @@
 # Plugins
 
-Built-in plugins in **0.10.0**: run `cargo run --release -- list` for the full set.
+Built-in plugins in **0.11.0**: run `cargo run --release -- list` for the full set.
 
 Highlights:
 
@@ -9,6 +9,7 @@ cargo run --release -- install python
 cargo run --release -- install go
 cargo run --release -- install rust
 cargo run --release -- install cmake
+cargo run --release -- install make
 cargo run --release -- install platform-tools
 cargo run --release -- install jdk
 cargo run --release -- install maven

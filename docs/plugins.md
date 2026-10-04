@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.10.0** ships these built-in plugins:
+DevKit **0.11.0** ships these built-in plugins:
 
 | ID | Notes |
 |----|-------|
@@ -21,6 +21,7 @@ DevKit **0.10.0** ships these built-in plugins:
 | `pmd` | PMD Source Code Analyzer binary ZIP from GitHub; `--version` optional |
 | `cmake` | Latest Kitware CMake binary |
 | `ninja` | Latest ninja-build binary ZIP |
+| `make` | GNU Make 4.4.1 ezwinports ZIP on Windows; system wrappers on Unix |
 | `git` | MinGit on Windows; system wrappers on Unix |
 | `php` | Windows NTS ZIP; system wrappers on Unix |
 | `composer` | `composer.phar` + wrapper; needs PHP |
