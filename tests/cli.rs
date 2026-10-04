@@ -153,6 +153,28 @@ fn install_refuses_windows_only_plugins() {
 }
 
 #[test]
+fn menu_offers_update_one_and_update_all() {
+    let tmp = tempfile::tempdir().unwrap();
+    // Nothing is installed under a fresh home, so both update paths must
+    // explain themselves instead of downloading.
+    devkit()
+        .env("DEVKIT_HOME", tmp.path())
+        .write_stdin("u\nu 1\na\nq\n")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "'u <number>' to update one, 'a' to update all",
+        ))
+        .stdout(predicate::str::contains(
+            "Enter 'u <number>' to update one plugin, or 'a' to update all.",
+        ))
+        .stdout(predicate::str::contains("is not installed"))
+        .stdout(predicate::str::contains(
+            "No installed plugins have an update available.",
+        ));
+}
+
+#[test]
 fn menu_via_explicit_subcommand_quits_on_eof() {
     let tmp = tempfile::tempdir().unwrap();
     // Closed stdin (EOF) must exit cleanly instead of hanging or erroring.

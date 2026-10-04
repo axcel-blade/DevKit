@@ -73,7 +73,7 @@ Version: 0.13.0
 5    chocolatey       Chocolatey               installed      2.7.4            2.7.4 (up to date)
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit:
+Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
 `devkit doctor` reports `Rustc` and `Cargo` the same way `where rustc` / `where cargo` would (PATH first, then `<dev>/rust/cargo/bin`).
@@ -96,8 +96,10 @@ register them there.
 
 The interactive menu (`cmd_menu` in `src/cli.rs`) calls each plugin's
 `latest_version` once on scoped threads when it opens (again on `r`), after a
-single connectivity probe, and reads `installed_version` on every redraw. Both
-sides go through `plugin_utils::normalize_version` so tags like `go1.27.1`,
+single connectivity probe, and reads `installed_version` on every redraw.
+`u <number>` reinstalls that plugin when its installed version differs from
+the available one. `a` does that for every such plugin. Both sides go through
+`plugin_utils::normalize_version` so tags like `go1.27.1`,
 `bun-v1.4.2`, and `1.27.1` compare equal. Plugins that do not list the detected
 OS in `supported_os` are omitted from the menu. The
 header prints `DevKit`, `OS: <host>`, and `Version: <version>`. `devkit install`
