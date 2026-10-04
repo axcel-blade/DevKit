@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 0.12.0**
+**DevKit 0.12.1**
 
 Clone the repository, then from the root:
 
@@ -15,7 +15,9 @@ machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`, or `~/dev/rust`) they
 check the internet connection and install rustup stable there, then rebuild
 DevKit (instant when up to date) and run it. On Windows, if a previous DevKit
 window still has `devkit.exe` open, the launcher renames that copy aside and
-builds a new one.
+builds a new one. On Linux / WSL, `devkit.sh` also installs the system C
+linker (`cc`, e.g. `build-essential`) when it is missing, since Rust needs it
+to link.
 
 Running either launcher with no arguments (or double-clicking `devkit.bat`) opens an interactive menu to pick
 plugins to install/uninstall instead of needing to know their ids up front. The menu

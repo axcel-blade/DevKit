@@ -4,7 +4,8 @@
 # 1. Use Rust from the machine `dev` folder (`/opt/dev/rust` or `~/dev/rust`,
 #    or `$DEVKIT_HOME/rust`). If cargo is missing there, require an internet
 #    connection and install rustup stable into that folder (same rustup-init
-#    flags as the rust plugin: -y --no-modify-path).
+#    flags as the rust plugin: -y --no-modify-path). Make sure the system C
+#    linker `cc` exists (installed via the distro package manager if not).
 # 2. Rebuild the release binary (a no-op when it is already up to date), so
 #    a stale binary from an older checkout never hides new features.
 # 3. Run it. With no arguments the interactive plugin menu is shown.
@@ -73,6 +74,50 @@ if [ ! -x "$CARGO_EXE" ]; then
         exit 1
     fi
     echo "Rust installed at ${DEVROOT}/rust."
+fi
+
+# Step 1b: Rust links (and runs build scripts) through the system C linker
+# `cc`. Fresh Linux / WSL installs often ship without it, which makes every
+# build script fail with "linker `cc` not found". Install the distro's C
+# toolchain when it is missing (sudo when not root), otherwise explain how.
+if ! command -v cc >/dev/null 2>&1; then
+    echo "C compiler/linker (cc) not found; Rust needs it to build DevKit."
+    SUDO=""
+    if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
+        SUDO="sudo"
+    fi
+    # Pick the package command for the detected package manager.
+    if command -v apt-get >/dev/null 2>&1; then
+        install_cmd="$SUDO apt-get update && $SUDO apt-get install -y build-essential"
+    elif command -v dnf >/dev/null 2>&1; then
+        install_cmd="$SUDO dnf install -y gcc gcc-c++ make"
+    elif command -v yum >/dev/null 2>&1; then
+        install_cmd="$SUDO yum install -y gcc gcc-c++ make"
+    elif command -v pacman >/dev/null 2>&1; then
+        install_cmd="$SUDO pacman -S --needed --noconfirm base-devel"
+    elif command -v zypper >/dev/null 2>&1; then
+        install_cmd="$SUDO zypper install -y gcc gcc-c++ make"
+    elif command -v apk >/dev/null 2>&1; then
+        install_cmd="$SUDO apk add build-base"
+    elif [ "$(uname -s)" = "Darwin" ]; then
+        install_cmd="xcode-select --install"
+    else
+        install_cmd=""
+    fi
+
+    if [ -n "$install_cmd" ]; then
+        echo "Installing the C toolchain: $install_cmd"
+        # `if !` keeps `set -e` from aborting before the hint is printed.
+        if ! sh -c "$install_cmd" || ! command -v cc >/dev/null 2>&1; then
+            echo "Error: could not install the C toolchain automatically."
+            echo "Run this yourself, then start DevKit again:"
+            echo "  $install_cmd"
+            exit 1
+        fi
+    else
+        echo "Error: install a C compiler (gcc or clang) providing 'cc', then try again."
+        exit 1
+    fi
 fi
 
 # Step 2: always run cargo build. Cargo only recompiles when sources
