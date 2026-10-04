@@ -6,6 +6,8 @@
 2. Run diagnostics:
 
    ```bash
+   make doctor
+   make bat doctor
    cargo run --release -- doctor
    cargo run --release -- status <plugin>
    ```
@@ -16,7 +18,7 @@
 
 ## What to include in a bug report
 
-- DevKit version (`cargo run --release -- --version`) — current is **0.12.1**
+- DevKit version (`cargo run --release -- --version`) — current is **0.13.0**
 - OS and architecture
 - Command you ran
 - Full error output

@@ -35,7 +35,33 @@ git checkout develop
 git merge --no-ff release/0.x.0
 ```
 
-## Development setup
+## Makefile
+
+If `make` is not installed, run `scripts\ensure-makefile.bat` (Windows) or `sh scripts/ensure-makefile.sh` (macOS / Linux) first. Before a target runs, `make` checks for GNU make, `cargo`, and a C compiler, and installs them when they are missing. `make sh` also checks for `bash`.
+
+`make ci` runs the same checks as GitHub Actions. `make bat` and `make sh` with no extra words open the plugin menu. Extra words are passed to the launcher (`make bat doctor`, `make sh list`). `make` alone prints:
+
+```text
+DevKit
+  make build          Debug build
+  make release        Release build
+  make test           Run tests
+  make test-release   Run tests in release mode
+  make fmt            Format Rust sources
+  make fmt-check      Check formatting
+  make clippy         Lint with warnings denied
+  make doctor         Build and run devkit doctor
+  make version        Print the DevKit version
+  make run            Open the plugin menu via cargo
+  make bat            Run devkit.bat and show the menu
+  make sh             Run devkit.sh and show the menu
+  make bat doctor     Run devkit.bat with arguments
+  make sh list        Run devkit.sh with arguments
+  make ci             fmt-check, clippy, release build, release tests, doctor
+  make clean          Remove build artifacts
+```
+
+Or call Cargo directly:
 
 ```bash
 cargo build
@@ -53,7 +79,7 @@ cargo run --release -- doctor
 ## Adding a plugin
 
 1. Create `src/plugins/<name>.rs` with a struct implementing the `Plugin` trait and a unique `id()`.
-2. Implement `status`, `install`, `uninstall`, and `env_spec`.
+2. Implement `status`, `install`, `uninstall`, and `env_spec`. Override `supported_os` when the plugin does not run on every desktop OS.
 3. Register the plugin in `crate::plugins::all()` (`src/plugins/mod.rs`).
 4. Add tests in a `#[cfg(test)] mod tests` block at the bottom of the file.
 5. Document the plugin in `README.md` and `docs/plugins.md`.

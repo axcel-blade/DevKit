@@ -13,10 +13,9 @@
 
 - [ ] Version updated if this is a release (`VERSION`, `Cargo.toml`, CHANGELOG)
 - [ ] Docs updated when behavior changes
-- [ ] `cargo test` passes
+- [ ] `cargo test` passes (or `make ci`)
 - [ ] `cargo clippy --all-targets -- -D warnings` passes
 - [ ] `cargo fmt --all -- --check` passes
-- [ ] No AI/bot co-author trailers on commits
 
 ## Test plan
 

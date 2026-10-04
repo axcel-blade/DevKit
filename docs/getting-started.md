@@ -11,13 +11,32 @@
   `devkit.sh` install rustup stable there when `cargo` is missing. Running
   `cargo run` yourself still needs a toolchain on PATH (the one in `dev/rust`
   works if you export `CARGO_HOME` / `RUSTUP_HOME` first).
-- On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` installs
-  the distro toolchain (`build-essential`, `base-devel`, ...) when it is missing.
+- On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` and the
+  Makefile install the distro toolchain (`build-essential`, `base-devel`, ...)
+  when it is missing.
 - Write access to the `dev` install root
+- Optional: GNU make. If `make` is not installed, run
+  `scripts\ensure-makefile.bat` (Windows) or `sh scripts/ensure-makefile.sh`
+  (macOS / Linux). That script installs make, then you can run `make`.
 
 ## Run DevKit
 
-From the repository root:
+From the repository root, with GNU make:
+
+```bash
+make bat              # Windows launcher, plugin menu
+make sh               # macOS / Linux launcher, plugin menu
+make bat doctor       # devkit.bat doctor
+make sh list          # devkit.sh list
+make version
+```
+
+`make` checks for GNU make, `cargo`, and a C compiler before the target runs,
+and installs them when they are missing. `make sh` also checks for `bash`.
+With no extra words, `make bat` and `make sh` open the plugin menu. Extra
+words are passed to the launcher.
+
+Without make:
 
 ```bash
 cargo run --release -- --version
@@ -39,10 +58,28 @@ chmod +x devkit.sh
 ```
 
 Either launcher run with **no arguments** (including double-clicking
-`devkit.bat`) opens an interactive menu instead — lists every plugin with its
-status, installed version, and newest available version (marked
-`update available` or `up to date`), and lets you pick a number to install or
-uninstall it (`r` re-checks available versions, `q` quits). The launchers
+`devkit.bat`, or `make bat` / `make sh`) opens an interactive menu. On Windows the terminal prints:
+
+```text
+Checking for available versions ...
+
+DevKit
+OS: Windows
+Version: 0.13.0
+#    ID               NAME                     STATUS         INSTALLED        AVAILABLE
+--------------------------------------------------------------------------------------------------------
+1    anaconda         Anaconda                 not_installed  -                2026.07-1
+2    android          Android SDK              not_installed  -                16111833
+3    android-ndk      Android NDK              not_installed  -                -
+4    bun              Bun                      not_installed  -                1.4.2
+5    chocolatey       Chocolatey               installed      2.7.4            2.7.4 (up to date)
+...
+32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
+
+Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit:
+```
+
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only and those rows are omitted there. An installed plugin that matches the newest release prints `up to date` in the AVAILABLE column; a newer release prints `update available`. Pick a number to install or uninstall (`r` re-checks available versions, `q` quits). The launchers
 rebuild DevKit on every run (instant when nothing changed), so the menu is
 always the one from your current checkout. On Windows, if a previous DevKit
 window still has `devkit.exe` open, the launcher renames that copy aside and
@@ -52,9 +89,39 @@ builds a new one:
 ./devkit.sh        # or: devkit.bat
 ```
 
+## Makefile
+
+Run these from the repository root. If `make` is not installed, run `scripts\ensure-makefile.bat` (Windows) or `sh scripts/ensure-makefile.sh` (macOS / Linux) first.
+
+Before a target runs, `make` checks for GNU make, `cargo`, and a C compiler, and installs them when they are missing. `make sh` also checks for `bash`. `make` alone prints:
+
+```text
+DevKit
+  make build          Debug build
+  make release        Release build
+  make test           Run tests
+  make test-release   Run tests in release mode
+  make fmt            Format Rust sources
+  make fmt-check      Check formatting
+  make clippy         Lint with warnings denied
+  make doctor         Build and run devkit doctor
+  make version        Print the DevKit version
+  make run            Open the plugin menu via cargo
+  make bat            Run devkit.bat and show the menu
+  make sh             Run devkit.sh and show the menu
+  make bat doctor     Run devkit.bat with arguments
+  make sh list        Run devkit.sh with arguments
+  make ci             fmt-check, clippy, release build, release tests, doctor
+  make clean          Remove build artifacts
+```
+
+`make bat` and `make sh` with no extra words open the plugin menu. Extra words are passed through: `make bat install git` runs `devkit.bat install git`.
+
 ## Install a tool
 
 ```bash
+make bat install git
+make sh install git
 cargo run --release -- install git
 cargo run --release -- install make
 cargo run --release -- install chocolatey
@@ -97,17 +164,17 @@ cargo run --release -- install pmd --version 7.26.0
 ```bash
 # Windows PowerShell
 $env:DEVKIT_HOME = "D:\dev"
-cargo run --release -- install hello
+cargo run --release -- install git
 
 # Unix
 export DEVKIT_HOME="$HOME/my-dev"
-cargo run --release -- install hello
+cargo run --release -- install git
 ```
 
 ## Uninstall
 
 ```bash
-cargo run --release -- uninstall hello
+cargo run --release -- uninstall git
 ```
 
 Removes files under the `dev` folder and reverses PATH/env entries DevKit added.

@@ -3,7 +3,9 @@
 
 use crate::download::install_archive_from_url;
 use crate::platform::{current_os, HostOS};
-use crate::plugin::{EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus};
+use crate::plugin::{
+    cannot_install_message, EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus,
+};
 use crate::plugin_utils::{binary_status, github_latest_release, pick_release_asset};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
@@ -41,6 +43,10 @@ impl Plugin for Msys2Plugin {
          install to bring package databases up to date."
     }
 
+    fn supported_os(&self) -> &'static [HostOS] {
+        &[HostOS::Windows]
+    }
+
     fn status(&self, ctx: &InstallContext) -> PluginStatus {
         binary_status(
             &msys2_bash(ctx),
@@ -50,8 +56,8 @@ impl Plugin for Msys2Plugin {
     }
 
     fn install(&self, ctx: &InstallContext) -> Result<InstallResult> {
-        if current_os() != HostOS::Windows {
-            bail!("MSYS2 is only supported on Windows");
+        if !self.supports_os(current_os()) {
+            bail!("{}", cannot_install_message(self));
         }
         let (url, version) = resolve_msys2_download()?;
         println!("MSYS2 {version}");
@@ -93,6 +99,9 @@ impl Plugin for Msys2Plugin {
 
     /// Same resolver `install` uses, so the string matches the marker it writes.
     fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
+        if current_os() != HostOS::Windows {
+            return Ok(None);
+        }
         Ok(Some(resolve_msys2_download()?.1))
     }
 

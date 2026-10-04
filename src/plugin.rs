@@ -1,5 +1,6 @@
 //! Plugin contract for DevKit installers.
 
+use crate::platform::{HostOS, DESKTOP_HOSTS};
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -86,6 +87,16 @@ impl PluginStatus {
     }
 }
 
+/// Text `devkit install` prints when the plugin does not support this OS.
+pub fn cannot_install_message(plugin: &dyn Plugin) -> String {
+    format!(
+        "Cannot install {} on {}.\nReason: {}",
+        plugin.id(),
+        crate::platform::os_label(),
+        plugin.unavailable_reason()
+    )
+}
+
 /// Abstract installer plugin.
 ///
 /// Implement this and register it in `plugins::all()` to expose
@@ -95,6 +106,30 @@ pub trait Plugin: Send + Sync {
     fn name(&self) -> &'static str;
     fn description(&self) -> &'static str {
         ""
+    }
+
+    /// Operating systems this plugin can be installed on.
+    ///
+    /// Defaults to Windows, macOS, and Linux. Override for plugins that only
+    /// ship on a subset (Chocolatey and MSYS2 are Windows-only). The menu
+    /// lists only plugins that include the host. `devkit install` refuses
+    /// the rest and prints [`cannot_install_message`].
+    fn supported_os(&self) -> &'static [HostOS] {
+        DESKTOP_HOSTS
+    }
+
+    /// Whether `os` is one of [`supported_os`](Plugin::supported_os).
+    fn supports_os(&self, os: HostOS) -> bool {
+        self.supported_os().contains(&os)
+    }
+
+    /// Why this plugin cannot be installed on a host outside [`supported_os`](Plugin::supported_os).
+    fn unavailable_reason(&self) -> String {
+        format!(
+            "{} is only supported on {}.",
+            self.name(),
+            crate::platform::format_os_list(self.supported_os())
+        )
     }
 
     /// Return whether this plugin is installed.

@@ -17,7 +17,6 @@ pub mod flutter;
 pub mod git;
 pub mod go;
 pub mod gradle;
-pub mod hello;
 pub mod jdk;
 pub mod junit;
 pub mod kubectl;
@@ -59,7 +58,6 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(git::GitPlugin),
         Box::new(go::GoPlugin),
         Box::new(gradle::GradlePlugin),
-        Box::new(hello::HelloPlugin),
         Box::new(jdk::JdkPlugin),
         Box::new(junit::JunitPlugin),
         Box::new(kubectl::KubectlPlugin),
@@ -82,4 +80,64 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(terraform::TerraformPlugin),
         Box::new(uv::UvPlugin),
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::platform::{current_os, HostOS};
+
+    #[test]
+    fn plugins_declare_os_support() {
+        for plugin in all() {
+            let hosts = plugin.supported_os();
+            assert!(!hosts.is_empty(), "{} lists no supported OS", plugin.id());
+            assert!(
+                !hosts.contains(&HostOS::Other),
+                "{} should not list Other",
+                plugin.id()
+            );
+            match plugin.id() {
+                "chocolatey" | "msys2" => {
+                    assert_eq!(hosts, &[HostOS::Windows], "{}", plugin.id());
+                }
+                _ => {
+                    assert!(
+                        hosts.contains(&HostOS::Windows)
+                            && hosts.contains(&HostOS::MacOS)
+                            && hosts.contains(&HostOS::Linux),
+                        "{} should support Windows, macOS, and Linux",
+                        plugin.id()
+                    );
+                }
+            }
+            assert_eq!(
+                plugin.supports_os(current_os()),
+                hosts.contains(&current_os())
+            );
+        }
+    }
+
+    #[test]
+    fn windows_only_plugins_explain_why_install_fails() {
+        use crate::plugin::cannot_install_message;
+
+        for plugin in all() {
+            if !matches!(plugin.id(), "chocolatey" | "msys2") {
+                continue;
+            }
+            let msg = cannot_install_message(plugin.as_ref());
+            assert!(
+                msg.contains(&format!("Cannot install {} on ", plugin.id())),
+                "{msg}"
+            );
+            assert!(
+                msg.contains(&format!(
+                    "Reason: {} is only supported on Windows.",
+                    plugin.name()
+                )),
+                "{msg}"
+            );
+        }
+    }
 }

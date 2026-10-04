@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-04
+
+### Changed
+
+- The plugin menu header prints DevKit, then `OS: <host>` and
+  `Version: <version>` on separate lines.
+
+### Removed
+
+- Removed the `hello` demo plugin.
+
+### Added
+
+- `Makefile` with `build`, `test`, `clippy`, `fmt`, `doctor`, `ci`, `bat`, and
+  `sh` targets. `make ci` runs the same checks as GitHub Actions. `make bat`
+  and `make sh` open the plugin menu; extra words are passed to the launcher
+  (`make bat doctor`). Before a target runs, missing GNU make, `cargo`, a C
+  compiler, or `bash` (for `make sh`) is installed.
+- The interactive menu detects the host OS and lists only plugins that can
+  be installed on it. Chocolatey and MSYS2 are Windows-only, so they are
+  omitted on macOS and Linux. `devkit install` refuses them there and prints
+  why, for example `Cannot install chocolatey on macOS` / `Reason: Chocolatey
+  is only supported on Windows.`
+
 ## [0.12.1] - 2026-10-04
 
 ### Fixed
@@ -352,6 +376,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.13.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.13.0
 [0.12.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.1
 [0.12.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.0
 [0.11.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.11.0
