@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `make` on Windows installs GNU Make with Chocolatey (`choco install make`)
+  instead of downloading the ezwinports ZIP directly.
+
 ## [0.11.0] - 2026-10-04
 
 ### Added
