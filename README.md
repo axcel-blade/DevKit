@@ -1,6 +1,6 @@
 # DevKit
 
-[![Version](https://img.shields.io/badge/version-0.12.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.12.1-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
@@ -19,6 +19,8 @@ It is **not** a published crate. Run it from this repository.
 - A Rust toolchain in the machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`,
   or `~/dev/rust`; override the root with `DEVKIT_HOME`). `devkit.bat` /
   `devkit.sh` install rustup stable there if `cargo` is missing.
+- On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` installs
+  the distro toolchain (`build-essential`, `base-devel`, ...) when it is missing.
 
 ## Quick start
 
