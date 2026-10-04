@@ -1,17 +1,15 @@
-//! GNU Make plugin — ezwinports ZIP on Windows; system Make wrappers on macOS/Linux.
+//! GNU Make plugin — Chocolatey on Windows; system Make wrappers on macOS/Linux.
 //!
-//! Windows: GNU does not publish a portable Make binary, so DevKit downloads the
-//! ezwinports `make-<ver>-without-guile-w32-bin.zip` (bin/make.exe) used by
-//! common Windows package managers.
+//! Windows: GNU does not publish a portable Make binary. DevKit runs
+//! `choco install make`, then copies `make.exe` (and sibling DLLs) out of the
+//! Chocolatey lib folder into the DevKit install directory.
 //!
 //! macOS/Linux: there is no official portable archive, so DevKit registers thin
 //! wrappers around an already-installed system `make` (or `gmake`).
 
-use crate::download::install_archive_from_url;
 use crate::platform::{current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
-use crate::progress::download_progress;
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 #[cfg(unix)]
 use std::path::Path;
 use std::path::PathBuf;
@@ -19,12 +17,55 @@ use std::path::PathBuf;
 const MAKE_VERSION: &str = "4.4.1";
 const MARKER: &str = ".devkit-make";
 
-/// `(url, version)` for the Windows ezwinports archive `install` extracts.
-fn make_windows_archive() -> (String, String) {
-    let url = format!(
-        "https://downloads.sourceforge.net/project/ezwinports/make-{MAKE_VERSION}-without-guile-w32-bin.zip"
-    );
-    (url, MAKE_VERSION.to_string())
+/// Non-interactive form of `choco install make`, pinned to [`MAKE_VERSION`].
+fn choco_make_args() -> &'static [&'static str] {
+    &["install", "make", "--version", MAKE_VERSION, "-y"]
+}
+
+fn chocolatey_make_bin(root: &std::path::Path) -> PathBuf {
+    root.join("lib")
+        .join("make")
+        .join("tools")
+        .join("install")
+        .join("bin")
+}
+
+fn chocolatey_root() -> PathBuf {
+    if let Some(root) = std::env::var_os("ChocolateyInstall") {
+        return PathBuf::from(root);
+    }
+    if let Ok(choco) = which::which("choco") {
+        if let Some(root) = choco.parent().and_then(|bin| bin.parent()) {
+            return root.to_path_buf();
+        }
+    }
+    PathBuf::from(r"C:\ProgramData\chocolatey")
+}
+
+/// Copy `make.exe` and sibling files from Chocolatey's package `bin` into `install_dir/bin`.
+fn stage_make_bin(src_bin: &std::path::Path, install_dir: &std::path::Path) -> Result<PathBuf> {
+    let dest = install_dir.join("bin");
+    std::fs::create_dir_all(&dest)?;
+    let mut copied_exe = None;
+    for entry in std::fs::read_dir(src_bin)
+        .with_context(|| format!("Chocolatey Make bin not found at {}", src_bin.display()))?
+    {
+        let entry = entry?;
+        if !entry.file_type()?.is_file() {
+            continue;
+        }
+        let to = dest.join(entry.file_name());
+        std::fs::copy(entry.path(), &to)?;
+        if entry.file_name() == "make.exe" {
+            copied_exe = Some(to);
+        }
+    }
+    copied_exe.ok_or_else(|| {
+        anyhow::anyhow!(
+            "choco install make finished but make.exe was not found under {}",
+            src_bin.display()
+        )
+    })
 }
 
 fn make_binary(ctx: &InstallContext) -> Option<PathBuf> {
@@ -75,7 +116,7 @@ impl Plugin for MakePlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Install GNU Make (ezwinports ZIP) on Windows. \
+        "Install GNU Make with Chocolatey (`choco install make`) on Windows. \
          On macOS/Linux, registers system make if already installed."
     }
 
@@ -114,7 +155,7 @@ impl Plugin for MakePlugin {
         Ok(())
     }
 
-    /// Pinned to the ezwinports archive `install` downloads on Windows.
+    /// Pinned to the Chocolatey `make` package `install` requests on Windows.
     fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
         Ok(Some(MAKE_VERSION.to_string()))
     }
@@ -141,31 +182,34 @@ impl Plugin for MakePlugin {
 }
 
 fn install_windows(ctx: &InstallContext) -> Result<InstallResult> {
-    let (url, version) = make_windows_archive();
-    println!("GNU Make {version}");
-    println!("URL: {url}");
-    let mut progress = download_progress("Downloading GNU Make");
-    // Archive root is bin/make.exe (plus docs); do not strip a top-level folder.
-    install_archive_from_url(
-        &url,
-        &ctx.install_dir,
-        false,
-        None,
-        Some(&mut |d, t| progress.update(d, t)),
-    )?;
-    progress.done();
-    if make_binary(ctx).is_none() {
-        bail!(
-            "GNU Make extracted but make.exe was not found under {}",
-            ctx.install_dir.display()
-        );
+    use std::process::Command;
+
+    let choco = which::which("choco").map_err(|_| {
+        anyhow::anyhow!(
+            "GNU Make on Windows is installed with Chocolatey.\n\
+             Install Chocolatey, then re-run this command.\n\
+             DevKit runs:  choco install make"
+        )
+    })?;
+    let args = choco_make_args();
+    println!("Running: choco {}", args.join(" "));
+    let status = Command::new(&choco)
+        .args(args)
+        .status()
+        .context("failed to launch choco")?;
+    let code = status.code();
+    // 3010: success, reboot requested.
+    if code != Some(0) && code != Some(3010) {
+        bail!("choco install make exited with {code:?}");
     }
-    std::fs::write(ctx.install_dir.join(MARKER), format!("{version}\n"))?;
+    let src_bin = chocolatey_make_bin(&chocolatey_root());
+    let dest_exe = stage_make_bin(&src_bin, &ctx.install_dir)?;
+    std::fs::write(ctx.install_dir.join(MARKER), format!("{MAKE_VERSION}\n"))?;
     Ok(InstallResult::new(
         ctx.install_dir.clone(),
         format!(
-            "GNU Make {version} installed at {}",
-            ctx.install_dir.display()
+            "GNU Make {MAKE_VERSION} installed at {}",
+            dest_exe.display()
         ),
     ))
 }
@@ -208,11 +252,41 @@ mod tests {
     }
 
     #[test]
-    fn windows_archive_pins_ezwinports_zip() {
-        let (url, version) = make_windows_archive();
-        assert_eq!(version, "4.4.1");
-        assert!(url.contains("make-4.4.1-without-guile-w32-bin.zip"));
-        assert!(url.starts_with("https://downloads.sourceforge.net/"));
+    fn choco_install_args_pin_make() {
+        assert_eq!(
+            choco_make_args(),
+            ["install", "make", "--version", "4.4.1", "-y"]
+        );
+    }
+
+    #[test]
+    fn chocolatey_make_bin_uses_package_layout() {
+        let root = std::path::Path::new(r"C:\ProgramData\chocolatey");
+        assert_eq!(
+            chocolatey_make_bin(root),
+            root.join("lib")
+                .join("make")
+                .join("tools")
+                .join("install")
+                .join("bin")
+        );
+    }
+
+    #[test]
+    fn stage_make_bin_copies_exe_and_siblings() {
+        let tmp = tempfile::tempdir().unwrap();
+        let src = tmp.path().join("src-bin");
+        std::fs::create_dir_all(&src).unwrap();
+        std::fs::write(src.join("make.exe"), b"make").unwrap();
+        std::fs::write(src.join("libintl-8.dll"), b"dll").unwrap();
+        let install = tmp.path().join("make");
+        let dest = stage_make_bin(&src, &install).unwrap();
+        assert_eq!(dest, install.join("bin").join("make.exe"));
+        assert_eq!(std::fs::read(dest).unwrap(), b"make");
+        assert_eq!(
+            std::fs::read(install.join("bin").join("libintl-8.dll")).unwrap(),
+            b"dll"
+        );
     }
 
     #[test]
@@ -244,7 +318,7 @@ mod tests {
     }
 
     #[test]
-    fn latest_version_matches_pinned_archive() {
+    fn latest_version_matches_chocolatey_package() {
         let tmp = tempfile::tempdir().unwrap();
         let plugin = MakePlugin;
         assert_eq!(
