@@ -28,8 +28,8 @@ time for investigation before any public disclosure.
 
 ## Security notes for users
 
-- DevKit downloads third-party SDK archives (Flutter, Temurin, Mono, Composer, Git for Windows / MinGit, Gradle, JUnit, PMD, PHP, MySQL, Node.js, Android cmdline-tools / platform-tools / NDK, Python, Go, Rust, .NET, CMake, Ninja, Maven, PostgreSQL, SQLite, kubectl, Terraform, pnpm, Deno, Bun, uv, Anaconda, Docker CLI).
+- DevKit downloads third-party SDK archives (Flutter, Temurin, Mono, Composer, Git for Windows / MinGit, GNU Make, Chocolatey CLI, Gradle, JUnit, PMD, PHP, MySQL, Node.js, Android cmdline-tools / platform-tools / NDK, Python, Go, Rust, .NET, CMake, Ninja, Maven, PostgreSQL, SQLite, kubectl, Terraform, pnpm, Deno, Bun, uv, Anaconda, Docker CLI).
   Only use trusted networks when installing.
-- On Windows, the `make` plugin installs GNU Make with Chocolatey (`choco install make`). Chocolatey downloads that package.
+- On Windows, GNU Make is the Chocolatey `make` 4.4.1 package, unpacked into the DevKit install folder. DevKit does not run an elevated `choco install`.
 - Plugins may modify **user** environment variables (Windows registry or shell profiles).
 - Review plugin code before running `install` on untrusted forks.

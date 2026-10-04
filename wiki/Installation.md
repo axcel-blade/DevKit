@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 0.11.0**
+**DevKit 0.12.0**
 
 Clone the repository, then from the root:
 
@@ -13,7 +13,9 @@ No separate install step is required — `cargo run` builds the binary on first
 use. Prefer `devkit.bat` / `devkit.sh`: if `cargo` is not already in the
 machine `dev` folder (`C:\dev\rust`, `/opt/dev/rust`, or `~/dev/rust`) they
 check the internet connection and install rustup stable there, then rebuild
-DevKit (instant when up to date) and run it.
+DevKit (instant when up to date) and run it. On Windows, if a previous DevKit
+window still has `devkit.exe` open, the launcher renames that copy aside and
+builds a new one.
 
 Running either launcher with no arguments (or double-clicking `devkit.bat`) opens an interactive menu to pick
 plugins to install/uninstall instead of needing to know their ids up front. The menu
