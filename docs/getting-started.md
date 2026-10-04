@@ -52,6 +52,7 @@ always the one from your current checkout:
 
 ```bash
 cargo run --release -- install git
+cargo run --release -- install make
 cargo run --release -- install gradle
 cargo run --release -- install maven
 cargo run --release -- install junit
