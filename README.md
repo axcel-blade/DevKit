@@ -89,7 +89,7 @@ set per-tool `*_HOME` variables (`PYTHON_HOME`, `GOROOT`, etc.).
 | `pmd` | PMD Source Code Analyzer binary (`--version`) |
 | `cmake` | Latest CMake binary |
 | `ninja` | Latest Ninja binary |
-| `make` | GNU Make 4.4.1 (Windows); system wrappers (Unix) |
+| `make` | GNU Make via `choco install make` (Windows); system wrappers (Unix) |
 | `git` | MinGit (Windows); system wrappers (Unix) |
 | `php` | PHP NTS (Windows); system wrappers (Unix) |
 | `composer` | Composer PHAR + wrapper |
