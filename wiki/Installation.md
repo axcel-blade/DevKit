@@ -64,10 +64,10 @@ Version: 0.13.0
 5    chocolatey       Chocolatey               installed      2.7.4            2.7.4 (up to date)
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit:
+Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
-On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Plugins that cannot be installed on this OS are left out (`chocolatey` and `msys2` appear only on Windows). The AVAILABLE column shows the newest version, `up to date`, or `update available`.
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Plugins that cannot be installed on this OS are left out (`chocolatey` and `msys2` appear only on Windows). The AVAILABLE column shows the newest version, `up to date`, or `update available`. `u <number>` updates that plugin. `a` updates every installed plugin that has a newer release.
 
 Optional flags for selected plugins:
 

@@ -115,10 +115,10 @@ Version: 0.13.0
 12   git              Git                      not_installed  -                2.56.0.windows.1
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'r' to refresh versions, or 'q' to quit:
+Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
-On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are omitted there. A matching install prints `up to date`. A newer release prints `update available`.
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are omitted there. A matching install prints `up to date`. A newer release prints `update available`. `u <number>` reinstalls that plugin at the available version. `a` does the same for every row that shows `update available`.
 
 - `installed_version(&self, ctx)` — defaults to the first line of the
   `.devkit-<id>` marker in `install_dir` (placeholders such as `stable` or
