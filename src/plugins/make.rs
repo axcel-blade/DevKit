@@ -1,15 +1,18 @@
-//! GNU Make plugin — Chocolatey on Windows; system Make wrappers on macOS/Linux.
+//! GNU Make plugin — Chocolatey package on Windows; system Make wrappers on macOS/Linux.
 //!
-//! Windows: GNU does not publish a portable Make binary. DevKit runs
-//! `choco install make`, then copies `make.exe` (and sibling DLLs) out of the
-//! Chocolatey lib folder into the DevKit install directory.
+//! Windows: GNU does not publish a portable Make binary. DevKit downloads the
+//! Chocolatey `make` nupkg and unpacks `tools/install` into the DevKit folder.
+//! That avoids `choco install`, which needs an elevated shell to lock
+//! `C:\ProgramData\chocolatey`.
 //!
 //! macOS/Linux: there is no official portable archive, so DevKit registers thin
 //! wrappers around an already-installed system `make` (or `gmake`).
 
+use crate::download::{download_file, extract_zip};
 use crate::platform::{current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, InstallState, Plugin, PluginStatus};
-use anyhow::{bail, Context, Result};
+use crate::progress::download_progress;
+use anyhow::{bail, Result};
 #[cfg(unix)]
 use std::path::Path;
 use std::path::PathBuf;
@@ -17,55 +20,40 @@ use std::path::PathBuf;
 const MAKE_VERSION: &str = "4.4.1";
 const MARKER: &str = ".devkit-make";
 
-/// Non-interactive form of `choco install make`, pinned to [`MAKE_VERSION`].
-fn choco_make_args() -> &'static [&'static str] {
-    &["install", "make", "--version", MAKE_VERSION, "-y"]
+/// Chocolatey community nupkg for GNU Make [`MAKE_VERSION`].
+fn make_package_url() -> String {
+    format!("https://community.chocolatey.org/api/v2/package/make/{MAKE_VERSION}")
 }
 
-fn chocolatey_make_bin(root: &std::path::Path) -> PathBuf {
-    root.join("lib")
-        .join("make")
-        .join("tools")
-        .join("install")
-        .join("bin")
-}
-
-fn chocolatey_root() -> PathBuf {
-    if let Some(root) = std::env::var_os("ChocolateyInstall") {
-        return PathBuf::from(root);
-    }
-    if let Ok(choco) = which::which("choco") {
-        if let Some(root) = choco.parent().and_then(|bin| bin.parent()) {
-            return root.to_path_buf();
-        }
-    }
-    PathBuf::from(r"C:\ProgramData\chocolatey")
-}
-
-/// Copy `make.exe` and sibling files from Chocolatey's package `bin` into `install_dir/bin`.
-fn stage_make_bin(src_bin: &std::path::Path, install_dir: &std::path::Path) -> Result<PathBuf> {
-    let dest = install_dir.join("bin");
-    std::fs::create_dir_all(&dest)?;
-    let mut copied_exe = None;
-    for entry in std::fs::read_dir(src_bin)
-        .with_context(|| format!("Chocolatey Make bin not found at {}", src_bin.display()))?
-    {
+fn copy_tree(src: &std::path::Path, dest: &std::path::Path) -> Result<()> {
+    std::fs::create_dir_all(dest)?;
+    for entry in std::fs::read_dir(src)? {
         let entry = entry?;
-        if !entry.file_type()?.is_file() {
-            continue;
-        }
         let to = dest.join(entry.file_name());
-        std::fs::copy(entry.path(), &to)?;
-        if entry.file_name() == "make.exe" {
-            copied_exe = Some(to);
+        if entry.file_type()?.is_dir() {
+            copy_tree(&entry.path(), &to)?;
+        } else {
+            std::fs::copy(entry.path(), &to)?;
         }
     }
-    copied_exe.ok_or_else(|| {
-        anyhow::anyhow!(
-            "choco install make finished but make.exe was not found under {}",
-            src_bin.display()
-        )
-    })
+    Ok(())
+}
+
+/// Copy `tools/install` from an extracted Chocolatey nupkg into `install_dir`.
+fn stage_chocolatey_package(
+    extracted: &std::path::Path,
+    install_dir: &std::path::Path,
+) -> Result<PathBuf> {
+    let src = extracted.join("tools").join("install");
+    let exe = src.join("bin").join("make.exe");
+    if !exe.is_file() {
+        bail!("Chocolatey make package did not contain {}", exe.display());
+    }
+    if install_dir.exists() {
+        std::fs::remove_dir_all(install_dir)?;
+    }
+    copy_tree(&src, install_dir)?;
+    Ok(install_dir.join("bin").join("make.exe"))
 }
 
 fn make_binary(ctx: &InstallContext) -> Option<PathBuf> {
@@ -116,7 +104,7 @@ impl Plugin for MakePlugin {
     }
 
     fn description(&self) -> &'static str {
-        "Install GNU Make with Chocolatey (`choco install make`) on Windows. \
+        "Install the Chocolatey GNU Make package on Windows without an administrator prompt. \
          On macOS/Linux, registers system make if already installed."
     }
 
@@ -155,7 +143,7 @@ impl Plugin for MakePlugin {
         Ok(())
     }
 
-    /// Pinned to the Chocolatey `make` package `install` requests on Windows.
+    /// Pinned to the Chocolatey `make` nupkg `install` unpacks on Windows.
     fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
         Ok(Some(MAKE_VERSION.to_string()))
     }
@@ -182,28 +170,20 @@ impl Plugin for MakePlugin {
 }
 
 fn install_windows(ctx: &InstallContext) -> Result<InstallResult> {
-    use std::process::Command;
-
-    let choco = which::which("choco").map_err(|_| {
-        anyhow::anyhow!(
-            "GNU Make on Windows is installed with Chocolatey.\n\
-             Install Chocolatey, then re-run this command.\n\
-             DevKit runs:  choco install make"
-        )
-    })?;
-    let args = choco_make_args();
-    println!("Running: choco {}", args.join(" "));
-    let status = Command::new(&choco)
-        .args(args)
-        .status()
-        .context("failed to launch choco")?;
-    let code = status.code();
-    // 3010: success, reboot requested.
-    if code != Some(0) && code != Some(3010) {
-        bail!("choco install make exited with {code:?}");
-    }
-    let src_bin = chocolatey_make_bin(&chocolatey_root());
-    let dest_exe = stage_make_bin(&src_bin, &ctx.install_dir)?;
+    let url = make_package_url();
+    println!("GNU Make {MAKE_VERSION} (Chocolatey package)");
+    println!("URL: {url}");
+    let mut progress = download_progress("Downloading GNU Make");
+    let nupkg = download_file(
+        &url,
+        None,
+        Some(&format!("make.{MAKE_VERSION}.nupkg")),
+        Some(&mut |d, t| progress.update(d, t)),
+    )?;
+    progress.done();
+    let extracted = tempfile::tempdir()?;
+    extract_zip(&nupkg, extracted.path(), false)?;
+    let dest_exe = stage_chocolatey_package(extracted.path(), &ctx.install_dir)?;
     std::fs::write(ctx.install_dir.join(MARKER), format!("{MAKE_VERSION}\n"))?;
     Ok(InstallResult::new(
         ctx.install_dir.clone(),
@@ -252,41 +232,28 @@ mod tests {
     }
 
     #[test]
-    fn choco_install_args_pin_make() {
+    fn package_url_pins_chocolatey_make() {
+        let url = make_package_url();
         assert_eq!(
-            choco_make_args(),
-            ["install", "make", "--version", "4.4.1", "-y"]
+            url,
+            "https://community.chocolatey.org/api/v2/package/make/4.4.1"
         );
     }
 
     #[test]
-    fn chocolatey_make_bin_uses_package_layout() {
-        let root = std::path::Path::new(r"C:\ProgramData\chocolatey");
-        assert_eq!(
-            chocolatey_make_bin(root),
-            root.join("lib")
-                .join("make")
-                .join("tools")
-                .join("install")
-                .join("bin")
-        );
-    }
-
-    #[test]
-    fn stage_make_bin_copies_exe_and_siblings() {
+    fn stage_chocolatey_package_promotes_tools_install() {
         let tmp = tempfile::tempdir().unwrap();
-        let src = tmp.path().join("src-bin");
-        std::fs::create_dir_all(&src).unwrap();
-        std::fs::write(src.join("make.exe"), b"make").unwrap();
-        std::fs::write(src.join("libintl-8.dll"), b"dll").unwrap();
+        let extracted = tmp.path().join("nupkg");
+        let bin = extracted.join("tools").join("install").join("bin");
+        std::fs::create_dir_all(&bin).unwrap();
+        std::fs::write(bin.join("make.exe"), b"make").unwrap();
         let install = tmp.path().join("make");
-        let dest = stage_make_bin(&src, &install).unwrap();
+        std::fs::create_dir_all(&install).unwrap();
+        std::fs::write(install.join("stale.txt"), b"old").unwrap();
+        let dest = stage_chocolatey_package(&extracted, &install).unwrap();
         assert_eq!(dest, install.join("bin").join("make.exe"));
-        assert_eq!(std::fs::read(dest).unwrap(), b"make");
-        assert_eq!(
-            std::fs::read(install.join("bin").join("libintl-8.dll")).unwrap(),
-            b"dll"
-        );
+        assert_eq!(std::fs::read(&dest).unwrap(), b"make");
+        assert!(!install.join("stale.txt").exists());
     }
 
     #[test]

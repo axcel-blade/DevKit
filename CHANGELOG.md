@@ -7,10 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-04
+
+### Added
+
+- `chocolatey` plugin: latest Chocolatey CLI unpacked into the DevKit folder
+  on Windows, with the user `ChocolateyInstall` variable pointed at that
+  folder so package installs do not need an elevated shell.
+
 ### Changed
 
-- `make` on Windows installs GNU Make with Chocolatey (`choco install make`)
-  instead of downloading the ezwinports ZIP directly.
+- `make` on Windows unpacks the Chocolatey `make` 4.4.1 package into the
+  DevKit folder. It does not run `choco install`, which needs an elevated
+  shell and a lock under `C:\ProgramData\chocolatey`.
+
+### Fixed
+
+- `devkit.bat` rebuilds while an older DevKit window still has `devkit.exe`
+  open. Windows will not delete a running executable (`os error 5`); the
+  launcher renames that copy aside and links a new binary.
 
 ## [0.11.0] - 2026-10-04
 
@@ -328,6 +343,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.12.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.0
 [0.11.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.11.0
 [0.10.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.10.0
 [0.9.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.9.3
