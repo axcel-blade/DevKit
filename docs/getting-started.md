@@ -42,7 +42,9 @@ status, installed version, and newest available version (marked
 `update available` or `up to date`), and lets you pick a number to install or
 uninstall it (`r` re-checks available versions, `q` quits). The launchers
 rebuild DevKit on every run (instant when nothing changed), so the menu is
-always the one from your current checkout:
+always the one from your current checkout. On Windows, if a previous DevKit
+window still has `devkit.exe` open, the launcher renames that copy aside and
+builds a new one:
 
 ```bash
 ./devkit.sh        # or: devkit.bat
@@ -53,6 +55,7 @@ always the one from your current checkout:
 ```bash
 cargo run --release -- install git
 cargo run --release -- install make
+cargo run --release -- install chocolatey
 cargo run --release -- install gradle
 cargo run --release -- install maven
 cargo run --release -- install junit

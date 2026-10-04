@@ -7,6 +7,7 @@ pub mod anaconda;
 pub mod android;
 pub mod android_ndk;
 pub mod bun;
+pub mod chocolatey;
 pub mod cmake;
 pub mod composer;
 pub mod deno;
@@ -48,6 +49,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(android::AndroidPlugin),
         Box::new(android_ndk::AndroidNdkPlugin),
         Box::new(bun::BunPlugin),
+        Box::new(chocolatey::ChocolateyPlugin),
         Box::new(cmake::CmakePlugin),
         Box::new(composer::ComposerPlugin),
         Box::new(deno::DenoPlugin),

@@ -57,7 +57,8 @@ fn list_shows_registered_plugins() {
         .stdout(predicate::str::contains("maven"))
         .stdout(predicate::str::contains("pmd"))
         .stdout(predicate::str::contains("uv"))
-        .stdout(predicate::str::contains("make"));
+        .stdout(predicate::str::contains("make"))
+        .stdout(predicate::str::contains("chocolatey"));
 }
 
 #[test]

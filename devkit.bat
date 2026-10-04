@@ -79,15 +79,41 @@ if not exist "%CARGO_EXE%" (
 REM Step 2: always run cargo build. Cargo only recompiles when sources
 REM changed, so this is fast when up to date, and it guarantees the binary
 REM matches this checkout (an old binary may predate the plugin menu).
-"%CARGO_EXE%" build --release --quiet --manifest-path "%ROOT%Cargo.toml"
-if errorlevel 1 (
-    if not exist "%BIN%" (
-        echo Build failed.
-        goto :fail
-    )
-    echo Warning: build failed, running the previously built binary.
-)
+REM
+REM Windows cannot delete a running executable (Access denied, os error 5).
+REM A previous DevKit window keeps target\release\devkit.exe locked. Rename
+REM that image aside — a running exe can be renamed — then link a new one.
+set "BUILD_LOG=%TEMP%\devkit-build.log"
+del /f /q "%ROOT%target\release\devkit-*.old" >nul 2>&1
+call :cargo_build
+if not errorlevel 1 goto :run
 
+findstr /C:"os error 5" "%BUILD_LOG%" >nul
+if errorlevel 1 goto :build_failed
+
+set "OLDNAME=devkit-!RANDOM!.old"
+ren "%BIN%" "!OLDNAME!"
+if errorlevel 1 goto :build_failed
+
+echo A previous DevKit is still running. Rebuilding beside it...
+call :cargo_build
+if not errorlevel 1 goto :cleanup_old
+if not exist "%BIN%" ren "%ROOT%target\release\!OLDNAME!" "devkit.exe"
+goto :build_failed
+
+:cleanup_old
+del /f /q "%ROOT%target\release\devkit-*.old" >nul 2>&1
+goto :run
+
+:build_failed
+type "%BUILD_LOG%"
+if not exist "%BIN%" (
+    echo Build failed.
+    goto :fail
+)
+echo Warning: build failed, running the previously built binary.
+
+:run
 REM Step 3: no arguments means the user just launched DevKit (e.g. by
 REM double-clicking), so open the interactive menu explicitly.
 if "%~1"=="" (
@@ -95,6 +121,10 @@ if "%~1"=="" (
 ) else (
     "%BIN%" %*
 )
+exit /b %ERRORLEVEL%
+
+:cargo_build
+"%CARGO_EXE%" build --release --quiet --manifest-path "%ROOT%Cargo.toml" > "%BUILD_LOG%" 2>&1
 exit /b %ERRORLEVEL%
 
 REM Error exit. When launched without arguments (double-click) pause so the
