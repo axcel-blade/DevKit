@@ -11,6 +11,8 @@
   `devkit.sh` install rustup stable there when `cargo` is missing. Running
   `cargo run` yourself still needs a toolchain on PATH (the one in `dev/rust`
   works if you export `CARGO_HOME` / `RUSTUP_HOME` first).
+- On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` installs
+  the distro toolchain (`build-essential`, `base-devel`, ...) when it is missing.
 - Write access to the `dev` install root
 
 ## Run DevKit
