@@ -93,41 +93,41 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 
 | Plugin | OS | Installs |
 |--------|----|----------|
-| `python` | Windows, macOS, Linux | Portable CPython 3.14 (python-build-standalone) |
-| `go` | Windows, macOS, Linux | Latest stable Go toolchain |
-| `rust` | Windows, macOS, Linux | Rust stable via rustup |
-| `dotnet` | Windows, macOS, Linux | .NET SDK 10.0 LTS |
-| `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
-| `pnpm` | Windows, macOS, Linux | Latest pnpm standalone |
-| `deno` | Windows, macOS, Linux | Latest Deno runtime |
-| `bun` | Windows, macOS, Linux | Latest Bun runtime |
-| `uv` | Windows, macOS, Linux | Latest uv and uvx |
 | `anaconda` | Windows, macOS, Linux | Latest Anaconda3 distribution (conda + Python) |
-| `jdk` | Windows, macOS, Linux | Eclipse Temurin JDK (default 25; `--version`) |
-| `maven` | Windows, macOS, Linux | Latest Apache Maven |
-| `gradle` | Windows, macOS, Linux | Latest Gradle binary ZIP |
-| `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone (`--version`) |
-| `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary (`--version`) |
-| `cmake` | Windows, macOS, Linux | Latest CMake binary |
-| `ninja` | Windows, macOS, Linux | Latest Ninja binary |
-| `make` | Windows, macOS, Linux | GNU Make 4.4.1 Chocolatey package (Windows, no admin); system wrappers (Unix) |
-| `chocolatey` | Windows | Chocolatey CLI into the DevKit folder; sets `ChocolateyInstall` |
-| `git` | Windows, macOS, Linux | MinGit (Windows); system wrappers (Unix) |
-| `php` | Windows, macOS, Linux | PHP NTS (Windows); system wrappers (Unix) |
-| `composer` | Windows, macOS, Linux | Composer PHAR + wrapper |
-| `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
-| `postgresql` | Windows, macOS, Linux | PostgreSQL 18 EDB Windows binaries; system wrappers (Unix) |
-| `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
 | `android` | Windows, macOS, Linux | Android SDK cmdline-tools |
-| `platform-tools` | Windows, macOS, Linux | Android platform-tools (`adb`) |
 | `android-ndk` | Windows, macOS, Linux | Android NDK r29 native toolchain |
-| `flutter` | Windows, macOS, Linux | Flutter SDK (`--channel` / `--version`) |
-| `kubectl` | Windows, macOS, Linux | Latest stable kubectl |
+| `bun` | Windows, macOS, Linux | Latest Bun runtime |
+| `chocolatey` | Windows | Chocolatey CLI into the DevKit folder; sets `ChocolateyInstall` |
+| `cmake` | Windows, macOS, Linux | Latest CMake binary |
+| `composer` | Windows, macOS, Linux | Composer PHAR + wrapper |
+| `deno` | Windows, macOS, Linux | Latest Deno runtime |
 | `docker` | Windows, macOS, Linux | Official static Docker CLI (client only) |
-| `terraform` | Windows, macOS, Linux | Latest Terraform |
+| `dotnet` | Windows, macOS, Linux | .NET SDK 10.0 LTS |
+| `flutter` | Windows, macOS, Linux | Flutter SDK (`--channel` / `--version`) |
+| `git` | Windows, macOS, Linux | MinGit (Windows); system wrappers (Unix) |
+| `go` | Windows, macOS, Linux | Latest stable Go toolchain |
+| `gradle` | Windows, macOS, Linux | Latest Gradle binary ZIP |
+| `jdk` | Windows, macOS, Linux | Eclipse Temurin JDK (default 25; `--version`) |
+| `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone (`--version`) |
+| `kubectl` | Windows, macOS, Linux | Latest stable kubectl |
+| `make` | Windows, macOS, Linux | GNU Make 4.4.1 Chocolatey package (Windows, no admin); system wrappers (Unix) |
+| `maven` | Windows, macOS, Linux | Latest Apache Maven |
 | `mono` | Windows, macOS, Linux | Mono 6.12 (Win/macOS); system wrappers (Linux) |
 | `msys2` | Windows | Portable MSYS2 base runtime |
+| `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
+| `ninja` | Windows, macOS, Linux | Latest Ninja binary |
+| `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
+| `php` | Windows, macOS, Linux | PHP NTS (Windows); system wrappers (Unix) |
+| `platform-tools` | Windows, macOS, Linux | Android platform-tools (`adb`) |
+| `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary (`--version`) |
+| `pnpm` | Windows, macOS, Linux | Latest pnpm standalone |
+| `postgresql` | Windows, macOS, Linux | PostgreSQL 18 EDB Windows binaries; system wrappers (Unix) |
+| `python` | Windows, macOS, Linux | Portable CPython 3.14 (python-build-standalone) |
 | `qemu` | Windows, macOS, Linux | QEMU 11.1 silent NSIS install (Windows); system wrappers (macOS/Linux) |
+| `rust` | Windows, macOS, Linux | Rust stable via rustup |
+| `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
+| `terraform` | Windows, macOS, Linux | Latest Terraform |
+| `uv` | Windows, macOS, Linux | Latest uv and uvx |
 
 Default install root:
 
