@@ -300,8 +300,14 @@ mod tests {
 
     #[test]
     fn mingit_version_from_tag_handles_builds() {
-        assert_eq!(mingit_version_from_tag("v2.47.0.windows.1").as_deref(), Some("2.47.0"));
-        assert_eq!(mingit_version_from_tag("v2.47.0.windows.2").as_deref(), Some("2.47.0.2"));
+        assert_eq!(
+            mingit_version_from_tag("v2.47.0.windows.1").as_deref(),
+            Some("2.47.0")
+        );
+        assert_eq!(
+            mingit_version_from_tag("v2.47.0.windows.2").as_deref(),
+            Some("2.47.0.2")
+        );
         assert_eq!(mingit_version_from_tag("2.47.0"), None);
     }
 }
