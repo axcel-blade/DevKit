@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-10-06
+
+### Fixed
+
+- Installing Git on Windows no longer fails with "Failed to download JSON"
+  when the GitHub API rate limit (60 requests/hour unauthenticated) is used
+  up. DevKit now falls back to the non-API `releases/latest` redirect to find
+  the MinGit ZIP.
+- GitHub API rate-limit errors now say so, including when the limit resets,
+  instead of a bare `403`.
+
+### Added
+
+- GitHub API requests send `GITHUB_TOKEN` (or `GH_TOKEN`) when set, raising
+  the rate limit to 5,000 requests/hour.
+
 ## [0.15.0] - 2026-10-06
 
 ### Added
@@ -403,6 +419,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.15.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.1
 [0.15.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.0
 [0.14.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.14.0
 [0.13.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.13.0

@@ -16,6 +16,8 @@ use std::path::Path;
 use std::path::PathBuf;
 
 const GFW_LATEST: &str = "https://api.github.com/repos/git-for-windows/git/releases/latest";
+/// Non-API page that redirects to the latest release tag (fallback lookup).
+const GFW_LATEST_PAGE: &str = "https://github.com/git-for-windows/git/releases/latest";
 const MARKER: &str = ".devkit-git";
 
 fn git_binary(ctx: &InstallContext) -> Option<PathBuf> {
@@ -38,7 +40,61 @@ fn path_dirs(ctx: &InstallContext) -> Vec<PathBuf> {
 }
 
 /// Pick the latest MinGit ZIP URL for this Windows CPU arch. Returns `(url, version_label)`.
+///
+/// Tries the GitHub API first; if that fails (e.g. the unauthenticated rate
+/// limit is exhausted), falls back to the non-API `releases/latest` redirect.
 fn resolve_mingit_url() -> Result<(String, String)> {
+    match resolve_mingit_url_api() {
+        Ok(found) => Ok(found),
+        Err(api_err) => resolve_mingit_url_redirect().map_err(|fallback_err| {
+            anyhow::anyhow!("{api_err:#}\nFallback lookup also failed: {fallback_err:#}")
+        }),
+    }
+}
+
+/// MinGit asset suffix for this CPU arch (`64-bit`, `arm64`, or `32-bit`).
+fn mingit_arch_suffix() -> &'static str {
+    match cpu_arch().as_str() {
+        "aarch64" => "arm64",
+        "x64" => "64-bit",
+        _ => "32-bit",
+    }
+}
+
+/// Map a git-for-windows tag to the version used in MinGit asset names:
+/// `v2.47.0.windows.1` -> `2.47.0`, `v2.47.0.windows.2` -> `2.47.0.2`.
+fn mingit_version_from_tag(tag: &str) -> Option<String> {
+    let rest = tag.strip_prefix('v')?;
+    let (base, build) = rest.split_once(".windows.")?;
+    match build {
+        "1" => Some(base.to_string()),
+        n if n.chars().all(|c| c.is_ascii_digit()) => Some(format!("{base}.{n}")),
+        _ => None,
+    }
+}
+
+/// Resolve the latest tag by following github.com's `releases/latest`
+/// redirect (not rate-limited like the API), then build the asset URL.
+fn resolve_mingit_url_redirect() -> Result<(String, String)> {
+    crate::download::ensure_internet_access()?;
+    let resp = ureq::get(GFW_LATEST_PAGE)
+        .set("User-Agent", "DevKit")
+        .call()?;
+    // Final URL looks like .../releases/tag/v2.47.0.windows.1
+    let tag = resp
+        .get_url()
+        .rsplit_once("/tag/")
+        .map(|(_, t)| t.to_string())
+        .ok_or_else(|| anyhow::anyhow!("Could not read latest Git for Windows tag"))?;
+    let version = mingit_version_from_tag(&tag)
+        .ok_or_else(|| anyhow::anyhow!("Unexpected Git for Windows tag format: {tag}"))?;
+    let name = format!("MinGit-{version}-{}.zip", mingit_arch_suffix());
+    let url = format!("https://github.com/git-for-windows/git/releases/download/{tag}/{name}");
+    Ok((url, tag))
+}
+
+/// Resolve the MinGit asset via the GitHub releases API.
+fn resolve_mingit_url_api() -> Result<(String, String)> {
     let arch = cpu_arch();
     let want = match arch.as_str() {
         "aarch64" => regex::Regex::new(r"(?i)^MinGit-.*-arm64\.zip$").unwrap(),
@@ -240,5 +296,12 @@ mod tests {
             channel: None,
         };
         assert!(git_binary(&ctx).is_none());
+    }
+
+    #[test]
+    fn mingit_version_from_tag_handles_builds() {
+        assert_eq!(mingit_version_from_tag("v2.47.0.windows.1").as_deref(), Some("2.47.0"));
+        assert_eq!(mingit_version_from_tag("v2.47.0.windows.2").as_deref(), Some("2.47.0.2"));
+        assert_eq!(mingit_version_from_tag("2.47.0"), None);
     }
 }

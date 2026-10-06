@@ -52,13 +52,68 @@ pub fn ensure_internet_access() -> Result<()> {
     )
 }
 
+/// Return a GitHub token from `GITHUB_TOKEN` or `GH_TOKEN`, if set. Sending
+/// one raises the GitHub API limit from 60 to 5,000 requests per hour.
+fn github_token() -> Option<String> {
+    ["GITHUB_TOKEN", "GH_TOKEN"]
+        .iter()
+        .filter_map(|k| std::env::var(k).ok())
+        .map(|v| v.trim().to_string())
+        .find(|v| !v.is_empty())
+}
+
+/// GET a GitHub REST API URL. Adds the API `Accept` header and an optional
+/// token, and turns rate-limit responses into an actionable error instead of
+/// a bare "403 Forbidden".
+pub fn github_api_get(url: &str) -> Result<ureq::Response> {
+    ensure_internet_access()?;
+    let mut req = ureq::get(url)
+        .set("User-Agent", "DevKit")
+        .set("Accept", "application/vnd.github+json");
+    if let Some(token) = github_token() {
+        req = req.set("Authorization", &format!("Bearer {token}"));
+    }
+    match req.call() {
+        Ok(resp) => Ok(resp),
+        Err(ureq::Error::Status(code, resp))
+            if (code == 403 || code == 429)
+                && resp.header("x-ratelimit-remaining") == Some("0") =>
+        {
+            // `x-ratelimit-reset` is a Unix timestamp; show minutes until reset.
+            let wait = resp
+                .header("x-ratelimit-reset")
+                .and_then(|v| v.parse::<u64>().ok())
+                .and_then(|reset| {
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .ok()?
+                        .as_secs();
+                    Some(reset.saturating_sub(now).div_ceil(60))
+                })
+                .map(|m| format!(" Resets in about {m} minute(s)."))
+                .unwrap_or_default();
+            bail!(
+                "GitHub API rate limit exceeded ({url}).{wait} \
+                 Set GITHUB_TOKEN (or GH_TOKEN) to a GitHub personal access \
+                 token to raise the limit."
+            )
+        }
+        Err(e) => Err(e).with_context(|| format!("GitHub API request failed: {url}")),
+    }
+}
+
 /// Download a JSON document and return the parsed value (object or array).
 pub fn download_json_value(url: &str) -> Result<serde_json::Value> {
-    ensure_internet_access()?;
-    let resp = ureq::get(url)
-        .set("User-Agent", "DevKit")
-        .call()
-        .with_context(|| format!("Failed to download JSON {url}"))?;
+    // GitHub API calls go through the helper for token + rate-limit handling.
+    let resp = if url.starts_with("https://api.github.com/") {
+        github_api_get(url).with_context(|| format!("Failed to download JSON {url}"))?
+    } else {
+        ensure_internet_access()?;
+        ureq::get(url)
+            .set("User-Agent", "DevKit")
+            .call()
+            .with_context(|| format!("Failed to download JSON {url}"))?
+    };
     let value: serde_json::Value = resp
         .into_json()
         .with_context(|| format!("Failed to parse JSON from {url}"))?;
