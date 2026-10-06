@@ -10,12 +10,8 @@ use std::path::{Path, PathBuf};
 
 /// Fetch the latest GitHub release JSON for `owner/repo`.
 pub fn github_latest_release(owner: &str, repo: &str) -> Result<Value> {
-    crate::download::ensure_internet_access()?;
     let url = format!("https://api.github.com/repos/{owner}/{repo}/releases/latest");
-    let resp = ureq::get(&url)
-        .set("User-Agent", "DevKit")
-        .set("Accept", "application/vnd.github+json")
-        .call()
+    let resp = crate::download::github_api_get(&url)
         .with_context(|| format!("Failed to query GitHub release {owner}/{repo}"))?;
     let value: Value = resp
         .into_json()
@@ -25,13 +21,9 @@ pub fn github_latest_release(owner: &str, repo: &str) -> Result<Value> {
 
 /// Fetch a GitHub release by tag (tag slashes are percent-encoded).
 pub fn github_release_by_tag(owner: &str, repo: &str, tag: &str) -> Result<Value> {
-    crate::download::ensure_internet_access()?;
     let encoded = tag.replace('/', "%2F");
     let url = format!("https://api.github.com/repos/{owner}/{repo}/releases/tags/{encoded}");
-    let resp = ureq::get(&url)
-        .set("User-Agent", "DevKit")
-        .set("Accept", "application/vnd.github+json")
-        .call()
+    let resp = crate::download::github_api_get(&url)
         .with_context(|| format!("Failed to query GitHub release {owner}/{repo} tag {tag}"))?;
     let value: Value = resp
         .into_json()

@@ -65,7 +65,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.0
+Version: 0.15.1
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -179,3 +179,11 @@ cargo run --release -- uninstall go node     # several at once
 ```
 
 Removes files under the `dev` folder and reverses PATH/env entries DevKit added.
+
+## Troubleshooting: GitHub rate limit
+
+Many plugins look up releases through the GitHub API, which allows 60
+unauthenticated requests per hour. If you see "GitHub API rate limit
+exceeded", wait for the reset or set `GITHUB_TOKEN` (or `GH_TOKEN`) to a
+personal access token to raise the limit to 5,000/hour. Git on Windows falls
+back to a non-API lookup automatically.
