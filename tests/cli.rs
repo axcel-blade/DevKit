@@ -163,7 +163,7 @@ fn menu_offers_update_one_and_update_all() {
         .assert()
         .success()
         .stdout(predicate::str::contains(
-            "'u <number>' to update one, 'a' to update all",
+            "'u <number(s)>' to update, 'a' to update all",
         ))
         .stdout(predicate::str::contains(
             "Enter 'u <number>' to update one plugin, or 'a' to update all.",
@@ -193,4 +193,50 @@ fn version_flag_reports_package_version() {
         .assert()
         .success()
         .stdout(predicate::str::contains(env!("CARGO_PKG_VERSION")));
+}
+
+#[test]
+fn uninstall_accepts_multiple_plugins() {
+    let tmp = tempfile::tempdir().unwrap();
+    // Space- and comma-separated ids are both accepted.
+    devkit()
+        .args(["uninstall", "git", "go,node"])
+        .env("DEVKIT_HOME", tmp.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("git is not installed."))
+        .stdout(predicate::str::contains("go is not installed."))
+        .stdout(predicate::str::contains("node is not installed."))
+        .stdout(predicate::str::contains("Uninstall 3/3 succeeded."));
+}
+
+#[test]
+fn update_reports_each_plugin_that_is_not_installed() {
+    let tmp = tempfile::tempdir().unwrap();
+    devkit()
+        .args(["update", "git,go"])
+        .env("DEVKIT_HOME", tmp.path())
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("git is not installed."))
+        .stdout(predicate::str::contains("Update 0/2 succeeded."));
+    devkit()
+        .args(["update", "--all"])
+        .env("DEVKIT_HOME", tmp.path())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No plugins are installed."));
+}
+
+#[test]
+fn install_continues_past_unknown_plugins() {
+    let tmp = tempfile::tempdir().unwrap();
+    devkit()
+        .args(["install", "nope1", "nope2"])
+        .env("DEVKIT_HOME", tmp.path())
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Unknown plugin 'nope1'"))
+        .stderr(predicate::str::contains("Unknown plugin 'nope2'"))
+        .stdout(predicate::str::contains("Failed: nope1, nope2"));
 }

@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 0.14.0**
+**DevKit 0.15.0**
 
 Clone the repository, then from the root:
 
@@ -57,14 +57,14 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.14.0
+Version: 0.15.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
 5    chocolatey       Chocolatey               installed      2.7.4            2.7.4 (up to date)
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
+Enter number(s) to install/uninstall (e.g. '1 3 5' or '2-4'), 'u <number(s)>' to update, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
 On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Plugins that cannot be installed on this OS are left out (`chocolatey` and `msys2` appear only on Windows). The AVAILABLE column shows the newest version, `up to date`, or `update available`. `u <number>` updates that plugin. `a` updates every installed plugin that has a newer release.
