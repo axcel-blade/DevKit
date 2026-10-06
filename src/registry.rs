@@ -91,4 +91,15 @@ mod tests {
         sorted.sort();
         assert_eq!(ids, sorted);
     }
+
+    #[test]
+    fn prerequisites_reference_known_plugins() {
+        let registry = default_registry();
+        for plugin in registry.all() {
+            for (dep, _) in plugin.prerequisites() {
+                assert!(registry.get(dep).is_some(), "{} -> {dep}", plugin.id());
+                assert_ne!(*dep, plugin.id());
+            }
+        }
+    }
 }

@@ -162,6 +162,11 @@ impl Plugin for FlutterPlugin {
         "Flutter"
     }
 
+    // Needs `git` at runtime; install the git plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("git", "git")]
+    }
+
     fn description(&self) -> &'static str {
         "Download Flutter SDK into the machine dev folder (optional --channel / --version)."
     }

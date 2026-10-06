@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.13.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
+DevKit **0.14.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
 
 | ID | OS | Notes |
 |----|----|-------|
@@ -107,7 +107,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.13.0
+Version: 0.14.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -134,6 +134,21 @@ fn latest_version(&self, _ctx: &InstallContext) -> Result<Option<String>> {
     Ok(Some(resolve_example_download()?.1))
 }
 ```
+
+### Prerequisites
+
+Override `prerequisites()` to return `(plugin_id, binary)` pairs. Before
+`devkit install` or the menu installs a plugin, DevKit checks each pair. It
+skips the pair when that plugin is installed or `binary` is on PATH. Otherwise
+it installs that plugin first, prerequisites of prerequisites included.
+
+| Plugin | Needs |
+|--------|-------|
+| `android`, `gradle`, `junit`, `maven`, `pmd` | `jdk` (`java`) |
+| `composer` | `php` (`php`) |
+| `flutter` | `git` (`git`) |
+
+Updates (`u` / `a`) do not install prerequisites again.
 
 ### OS support
 
