@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.13.0** is a CLI application with a plugin pipeline.
+DevKit **0.15.1** is a CLI application with a plugin pipeline.
 
 ```text
 target/release/devkit (binary) / devkit.bat / devkit.sh
@@ -66,14 +66,14 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.13.0
+Version: 0.15.1
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
 5    chocolatey       Chocolatey               installed      2.7.4            2.7.4 (up to date)
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
+Enter number(s) to install/uninstall (e.g. '1 3 5' or '2-4'), 'u <number(s)>' to update, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
 `devkit doctor` reports `Rustc` and `Cargo` the same way `where rustc` / `where cargo` would (PATH first, then `<dev>/rust/cargo/bin`).

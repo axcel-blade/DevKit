@@ -88,6 +88,11 @@ impl Plugin for AndroidPlugin {
         "Android SDK"
     }
 
+    // Needs `java` at runtime; install the jdk plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("jdk", "java")]
+    }
+
     fn description(&self) -> &'static str {
         "Download Android SDK cmdline-tools and set ANDROID_HOME / ANDROID_SDK_ROOT."
     }

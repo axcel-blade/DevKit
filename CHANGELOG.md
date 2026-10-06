@@ -7,7 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-10-06
+
+### Fixed
+
+- Installing Git on Windows no longer fails with "Failed to download JSON"
+  when the GitHub API rate limit (60 requests/hour unauthenticated) is used
+  up. DevKit now falls back to the non-API `releases/latest` redirect to find
+  the MinGit ZIP.
+- GitHub API rate-limit errors now say so, including when the limit resets,
+  instead of a bare `403`.
+
 ### Added
+
+- GitHub API requests send `GITHUB_TOKEN` (or `GH_TOKEN`) when set, raising
+  the rate limit to 5,000 requests/hour.
+
+## [0.15.0] - 2026-10-06
+
+### Added
+
+- `devkit install`, `devkit uninstall`, and the new `devkit update` accept
+  several plugin ids, space- or comma-separated (`devkit install git go,node`).
+  Each plugin runs in turn, failures don't stop the rest, and a summary lists
+  what failed (exit code 1 if anything did).
+- `devkit update <ids>` reinstalls a plugin only when a newer release exists;
+  `--all` updates every installed plugin and `--force` reinstalls regardless.
+- The interactive menu accepts several numbers (`1 3 5`, `1,3`, or a range
+  `2-4`) to install/uninstall each, and `u <numbers>` to update several.
+
+## [0.14.0] - 2026-10-06
+
+### Added
+
+- Plugin prerequisites. Before installing a plugin, DevKit checks what it
+  needs and installs any missing prerequisite first: `composer` needs `php`;
+  `junit`, `pmd`, `maven`, `gradle`, and `android` need `jdk`; `flutter`
+  needs `git`. A prerequisite is skipped when DevKit already installed it or
+  its binary is on PATH.
 
 - The interactive menu can update one installed plugin (`u <number>`) or every
   installed plugin with a newer release (`a`). A number still installs or
@@ -382,6 +419,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.15.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.1
+[0.15.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.0
+[0.14.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.14.0
 [0.13.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.13.0
 [0.12.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.1
 [0.12.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.0

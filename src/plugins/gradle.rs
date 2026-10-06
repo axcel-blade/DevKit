@@ -61,6 +61,11 @@ impl Plugin for GradlePlugin {
         "Gradle"
     }
 
+    // Needs `java` at runtime; install the jdk plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("jdk", "java")]
+    }
+
     fn description(&self) -> &'static str {
         "Download latest Gradle binary ZIP and set GRADLE_HOME / PATH."
     }

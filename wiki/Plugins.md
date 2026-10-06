@@ -1,6 +1,6 @@
 # Plugins
 
-Built-in plugins in **0.13.0**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
+Built-in plugins in **0.15.0**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
 
 | OS | Plugins |
 |----|---------|
@@ -26,3 +26,19 @@ cargo run --release -- install kubectl
 ```
 
 Authoring guide: [docs/plugins.md](../docs/plugins.md).
+
+## Prerequisites
+
+Override `prerequisites()` to return `(plugin_id, binary)` pairs. Before
+`devkit install` or the menu installs a plugin, DevKit checks each pair. It
+skips the pair when that plugin is installed or `binary` is on PATH. Otherwise
+it installs that plugin first, prerequisites of prerequisites included.
+
+| Plugin | Needs |
+|--------|-------|
+| `android`, `gradle`, `junit`, `maven`, `pmd` | `jdk` (`java`) |
+| `composer` | `php` (`php`) |
+| `flutter` | `git` (`git`) |
+
+Updates (`u` / `a`) do not install prerequisites again.
+

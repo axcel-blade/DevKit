@@ -60,6 +60,11 @@ impl Plugin for ComposerPlugin {
         "Composer"
     }
 
+    // Needs `php` at runtime; install the php plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("php", "php")]
+    }
+
     fn description(&self) -> &'static str {
         "Download latest stable Composer (composer.phar) into the machine dev folder. \
          Requires PHP on PATH."

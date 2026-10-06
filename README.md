@@ -1,6 +1,6 @@
 # DevKit
 
-[![Version](https://img.shields.io/badge/version-0.13.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.15.1-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
@@ -31,7 +31,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.13.0
+Version: 0.15.1
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -42,10 +42,10 @@ Version: 0.13.0
 ...
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
+Enter number(s) to install/uninstall (e.g. '1 3 5' or '2-4'), 'u <number(s)>' to update, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
-On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only, so those rows are left out there. Pick a number to install or uninstall, `u <number>` to update that plugin, `a` to update every installed plugin that has a newer release, `r` to re-check versions, `q` to quit.
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only, so those rows are left out there. Pick one or more numbers (`1 3 5`, `1,3`, or a range `2-4`) to install or uninstall each, `u <numbers>` to update those plugins, `a` to update every installed plugin that has a newer release, `r` to re-check versions, `q` to quit.
 
 **Windows**
 
@@ -85,6 +85,20 @@ cargo run --release -- install kubectl
 cargo run --release -- install docker
 ```
 
+**Several plugins at once**
+
+`install`, `update`, and `uninstall` take any number of plugin ids, space- or
+comma-separated. Each plugin runs in turn; a failure doesn't stop the rest, and
+a summary is printed at the end.
+
+```bash
+devkit install git go node
+devkit install jdk,maven,gradle
+devkit update git go          # reinstall only if a newer release exists
+devkit update --all           # every installed plugin (--force to reinstall)
+devkit uninstall go node
+```
+
 ## Built-in plugins
 
 Every plugin below is added to the same shared user `PATH` — DevKit does not
@@ -93,41 +107,41 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 
 | Plugin | OS | Installs |
 |--------|----|----------|
-| `python` | Windows, macOS, Linux | Portable CPython 3.14 (python-build-standalone) |
-| `go` | Windows, macOS, Linux | Latest stable Go toolchain |
-| `rust` | Windows, macOS, Linux | Rust stable via rustup |
-| `dotnet` | Windows, macOS, Linux | .NET SDK 10.0 LTS |
-| `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
-| `pnpm` | Windows, macOS, Linux | Latest pnpm standalone |
-| `deno` | Windows, macOS, Linux | Latest Deno runtime |
-| `bun` | Windows, macOS, Linux | Latest Bun runtime |
-| `uv` | Windows, macOS, Linux | Latest uv and uvx |
 | `anaconda` | Windows, macOS, Linux | Latest Anaconda3 distribution (conda + Python) |
-| `jdk` | Windows, macOS, Linux | Eclipse Temurin JDK (default 25; `--version`) |
-| `maven` | Windows, macOS, Linux | Latest Apache Maven |
-| `gradle` | Windows, macOS, Linux | Latest Gradle binary ZIP |
-| `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone (`--version`) |
-| `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary (`--version`) |
-| `cmake` | Windows, macOS, Linux | Latest CMake binary |
-| `ninja` | Windows, macOS, Linux | Latest Ninja binary |
-| `make` | Windows, macOS, Linux | GNU Make 4.4.1 Chocolatey package (Windows, no admin); system wrappers (Unix) |
-| `chocolatey` | Windows | Chocolatey CLI into the DevKit folder; sets `ChocolateyInstall` |
-| `git` | Windows, macOS, Linux | MinGit (Windows); system wrappers (Unix) |
-| `php` | Windows, macOS, Linux | PHP NTS (Windows); system wrappers (Unix) |
-| `composer` | Windows, macOS, Linux | Composer PHAR + wrapper |
-| `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
-| `postgresql` | Windows, macOS, Linux | PostgreSQL 18 EDB Windows binaries; system wrappers (Unix) |
-| `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
 | `android` | Windows, macOS, Linux | Android SDK cmdline-tools |
-| `platform-tools` | Windows, macOS, Linux | Android platform-tools (`adb`) |
 | `android-ndk` | Windows, macOS, Linux | Android NDK r29 native toolchain |
-| `flutter` | Windows, macOS, Linux | Flutter SDK (`--channel` / `--version`) |
-| `kubectl` | Windows, macOS, Linux | Latest stable kubectl |
+| `bun` | Windows, macOS, Linux | Latest Bun runtime |
+| `chocolatey` | Windows | Chocolatey CLI into the DevKit folder; sets `ChocolateyInstall` |
+| `cmake` | Windows, macOS, Linux | Latest CMake binary |
+| `composer` | Windows, macOS, Linux | Composer PHAR + wrapper |
+| `deno` | Windows, macOS, Linux | Latest Deno runtime |
 | `docker` | Windows, macOS, Linux | Official static Docker CLI (client only) |
-| `terraform` | Windows, macOS, Linux | Latest Terraform |
+| `dotnet` | Windows, macOS, Linux | .NET SDK 10.0 LTS |
+| `flutter` | Windows, macOS, Linux | Flutter SDK (`--channel` / `--version`) |
+| `git` | Windows, macOS, Linux | MinGit (Windows); system wrappers (Unix) |
+| `go` | Windows, macOS, Linux | Latest stable Go toolchain |
+| `gradle` | Windows, macOS, Linux | Latest Gradle binary ZIP |
+| `jdk` | Windows, macOS, Linux | Eclipse Temurin JDK (default 25; `--version`) |
+| `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone (`--version`) |
+| `kubectl` | Windows, macOS, Linux | Latest stable kubectl |
+| `make` | Windows, macOS, Linux | GNU Make 4.4.1 Chocolatey package (Windows, no admin); system wrappers (Unix) |
+| `maven` | Windows, macOS, Linux | Latest Apache Maven |
 | `mono` | Windows, macOS, Linux | Mono 6.12 (Win/macOS); system wrappers (Linux) |
 | `msys2` | Windows | Portable MSYS2 base runtime |
+| `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
+| `ninja` | Windows, macOS, Linux | Latest Ninja binary |
+| `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
+| `php` | Windows, macOS, Linux | PHP NTS (Windows); system wrappers (Unix) |
+| `platform-tools` | Windows, macOS, Linux | Android platform-tools (`adb`) |
+| `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary (`--version`) |
+| `pnpm` | Windows, macOS, Linux | Latest pnpm standalone |
+| `postgresql` | Windows, macOS, Linux | PostgreSQL 18 EDB Windows binaries; system wrappers (Unix) |
+| `python` | Windows, macOS, Linux | Portable CPython 3.14 (python-build-standalone) |
 | `qemu` | Windows, macOS, Linux | QEMU 11.1 silent NSIS install (Windows); system wrappers (macOS/Linux) |
+| `rust` | Windows, macOS, Linux | Rust stable via rustup |
+| `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
+| `terraform` | Windows, macOS, Linux | Latest Terraform |
+| `uv` | Windows, macOS, Linux | Latest uv and uvx |
 
 Default install root:
 

@@ -154,6 +154,15 @@ pub trait Plugin: Send + Sync {
         crate::plugin_utils::read_marker_version(&ctx.install_dir, self.id())
     }
 
+    /// Plugins that must be present before this one is installed.
+    ///
+    /// Each entry is `(plugin_id, binary)`. A prerequisite counts as present
+    /// when that plugin reports `Installed` or `binary` is already on PATH
+    /// (e.g. a system JDK). Otherwise DevKit installs it first.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[]
+    }
+
     /// Newest version DevKit would install right now, if it can be looked up.
     ///
     /// Default `Ok(None)` (unknown). Implementations usually reuse the same
