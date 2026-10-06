@@ -65,7 +65,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.14.0
+Version: 0.15.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -76,10 +76,10 @@ Version: 0.14.0
 ...
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
+Enter number(s) to install/uninstall (e.g. '1 3 5' or '2-4'), 'u <number(s)>' to update, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
-On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only and those rows are omitted there. An installed plugin that matches the newest release prints `up to date` in the AVAILABLE column; a newer release prints `update available`. Pick a number to install or uninstall, `u <number>` to update that one, or `a` to update every plugin that shows `update available` (`r` re-checks available versions, `q` quits). The launchers
+On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are Windows-only and those rows are omitted there. An installed plugin that matches the newest release prints `up to date` in the AVAILABLE column; a newer release prints `update available`. Pick one or more numbers (`1 3 5`, `1,3`, or `2-4`) to install or uninstall each, `u <numbers>` to update those, or `a` to update every plugin that shows `update available` (`r` re-checks available versions, `q` quits). The launchers
 rebuild DevKit on every run (instant when nothing changed), so the menu is
 always the one from your current checkout. On Windows, if a previous DevKit
 window still has `devkit.exe` open, the launcher renames that copy aside and
@@ -175,6 +175,7 @@ cargo run --release -- install git
 
 ```bash
 cargo run --release -- uninstall git
+cargo run --release -- uninstall go node     # several at once
 ```
 
 Removes files under the `dev` folder and reverses PATH/env entries DevKit added.

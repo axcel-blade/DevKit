@@ -1,6 +1,7 @@
 //! DevKit command-line interface.
 //!
-//! Commands: list, install, uninstall, status, doctor.
+//! Commands: list, install, update, uninstall, status, doctor.
+//! install/update/uninstall accept several plugin ids at once.
 //! Install flow: plugin.install() then EnvManager.apply(plugin.env_spec()).
 
 use crate::env::EnvManager;
@@ -28,10 +29,11 @@ struct Cli {
 enum Command {
     /// List available plugins
     List,
-    /// Install a plugin
+    /// Install one or more plugins
     Install {
-        /// Plugin id (e.g. git)
-        plugin: String,
+        /// Plugin ids, space- or comma-separated (e.g. `git go` or `git,go`)
+        #[arg(required = true, num_args = 1.., value_delimiter = ',')]
+        plugins: Vec<String>,
         /// Reinstall even if already installed
         #[arg(long)]
         force: bool,
@@ -42,10 +44,23 @@ enum Command {
         #[arg(long, value_name = "NAME")]
         channel: Option<String>,
     },
-    /// Uninstall a plugin
+    /// Update one or more installed plugins to the newest release
+    Update {
+        /// Plugin ids, space- or comma-separated (omit with --all)
+        #[arg(num_args = 0.., value_delimiter = ',', required_unless_present = "all")]
+        plugins: Vec<String>,
+        /// Update every installed plugin
+        #[arg(long, conflicts_with = "plugins")]
+        all: bool,
+        /// Reinstall even if already up to date
+        #[arg(long)]
+        force: bool,
+    },
+    /// Uninstall one or more plugins
     Uninstall {
-        /// Plugin id
-        plugin: String,
+        /// Plugin ids, space- or comma-separated
+        #[arg(required = true, num_args = 1.., value_delimiter = ',')]
+        plugins: Vec<String>,
     },
     /// Show plugin install and env status
     Status {
@@ -199,7 +214,7 @@ fn perform_uninstall(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Resul
     Ok(())
 }
 
-fn cmd_install(
+fn cmd_install_one(
     plugin_id: &str,
     force: bool,
     sdk_version: Option<String>,
@@ -252,7 +267,7 @@ fn cmd_install(
     Ok(0)
 }
 
-fn cmd_uninstall(plugin_id: &str) -> anyhow::Result<i32> {
+fn cmd_uninstall_one(plugin_id: &str) -> anyhow::Result<i32> {
     let registry = default_registry();
     let plugin = match registry.require(plugin_id) {
         Ok(p) => p,
@@ -271,6 +286,129 @@ fn cmd_uninstall(plugin_id: &str) -> anyhow::Result<i32> {
 
     perform_uninstall(plugin, &ctx)?;
     Ok(0)
+}
+
+/// Normalize ids from the command line: trim, drop empties, and remove
+/// duplicates while keeping the order the user typed them in.
+fn dedup_ids(ids: &[String]) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for id in ids.iter().map(|s| s.trim()).filter(|s| !s.is_empty()) {
+        if !out.iter().any(|o| o == id) {
+            out.push(id.to_string());
+        }
+    }
+    out
+}
+
+/// Run `op` for every id, continuing past failures, and print a summary when
+/// more than one plugin was requested. Returns 1 if any plugin failed.
+fn run_batch(
+    action: &str,
+    ids: &[String],
+    mut op: impl FnMut(&str) -> anyhow::Result<i32>,
+) -> anyhow::Result<i32> {
+    let ids = dedup_ids(ids);
+    let mut failed: Vec<String> = Vec::new();
+    for id in &ids {
+        if ids.len() > 1 {
+            println!();
+            println!("{}", theme::bold(&format!("==> {action} {id}")));
+        }
+        match op(id) {
+            Ok(0) => {}
+            Ok(_) => failed.push(id.clone()),
+            Err(e) => {
+                eprintln!("{} {id}: {e}", theme::red("Error:"));
+                failed.push(id.clone());
+            }
+        }
+    }
+    if ids.len() > 1 {
+        println!();
+        let ok = ids.len() - failed.len();
+        println!("{} {ok}/{} succeeded.", theme::bold(action), ids.len());
+        if !failed.is_empty() {
+            println!("{} {}", theme::red("Failed:"), failed.join(", "));
+        }
+    }
+    Ok(if failed.is_empty() { 0 } else { 1 })
+}
+
+/// `devkit install a b c`: install each plugin in order. The version and
+/// channel flags are passed to every plugin (each ignores what it can't use).
+fn cmd_install(
+    ids: &[String],
+    force: bool,
+    sdk_version: Option<String>,
+    channel: Option<String>,
+) -> anyhow::Result<i32> {
+    run_batch("Install", ids, |id| {
+        cmd_install_one(id, force, sdk_version.clone(), channel.clone())
+    })
+}
+
+/// `devkit uninstall a b c`: uninstall each plugin in order.
+fn cmd_uninstall(ids: &[String]) -> anyhow::Result<i32> {
+    run_batch("Uninstall", ids, cmd_uninstall_one)
+}
+
+/// Update a single installed plugin: look up the newest release and reinstall
+/// when it differs from the installed version (or always with `force`). When
+/// the lookup fails the plugin is reinstalled anyway, since `install` fetches
+/// whatever is newest at that moment.
+fn cmd_update_one(plugin_id: &str, force: bool) -> anyhow::Result<i32> {
+    let registry = default_registry();
+    let plugin = match registry.require(plugin_id) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("{e}");
+            return Ok(1);
+        }
+    };
+    let ctx = context(plugin.id(), None, None)?;
+    if plugin.status(&ctx).state != InstallState::Installed {
+        println!(
+            "{} is not installed. Use `devkit install {}`.",
+            plugin.id(),
+            plugin.id()
+        );
+        return Ok(1);
+    }
+    if !force {
+        let current = plugin.installed_version(&ctx);
+        let latest = fetch_latest_versions(&[plugin]).pop().flatten();
+        if let (Some(c), Some(l)) = (current.as_deref(), latest.as_deref()) {
+            if !plugin_needs_update(true, Some(c), Some(l)) {
+                println!("{} is already up to date ({l}).", plugin.id());
+                return Ok(0);
+            }
+        }
+    }
+    perform_update(plugin, &ctx)?;
+    Ok(0)
+}
+
+/// `devkit update a b c` or `devkit update --all`.
+fn cmd_update(ids: &[String], all: bool, force: bool) -> anyhow::Result<i32> {
+    let ids: Vec<String> = if all {
+        // Every plugin DevKit has installed on this machine.
+        let registry = default_registry();
+        let mut installed = Vec::new();
+        for plugin in registry.all() {
+            let ctx = context(plugin.id(), None, None)?;
+            if plugin.status(&ctx).state == InstallState::Installed {
+                installed.push(plugin.id().to_string());
+            }
+        }
+        if installed.is_empty() {
+            println!("No plugins are installed.");
+            return Ok(0);
+        }
+        installed
+    } else {
+        ids.to_vec()
+    };
+    run_batch("Update", &ids, |id| cmd_update_one(id, force))
 }
 
 fn cmd_status(plugin_id: &str) -> anyhow::Result<i32> {
@@ -465,7 +603,7 @@ fn available_cell(installed: Option<&str>, latest: Option<&str>) -> String {
     }
 }
 
-const MENU_PROMPT: &str = "Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit: ";
+const MENU_PROMPT: &str = "Enter number(s) to install/uninstall (e.g. '1 3 5' or '2-4'), 'u <number(s)>' to update, 'a' to update all, 'r' to refresh versions, or 'q' to quit: ";
 
 struct MenuRow {
     installed: bool,
@@ -476,8 +614,10 @@ struct MenuRow {
 enum MenuChoice {
     Quit,
     Refresh,
-    Toggle(usize),
-    UpdateOne(usize),
+    /// Install or uninstall each selected plugin (one or more numbers).
+    Toggle(Vec<usize>),
+    /// Update each selected plugin (one or more numbers).
+    Update(Vec<usize>),
     UpdateAll,
     /// Bare `u`: remind the user that update-one and update-all are both available.
     UpdateHint,
@@ -500,15 +640,44 @@ fn parse_menu_choice(input: &str, plugin_count: usize) -> MenuChoice {
         if rest.is_empty() {
             return MenuChoice::UpdateHint;
         }
-        return match rest.parse::<usize>() {
-            Ok(n) if (1..=plugin_count).contains(&n) => MenuChoice::UpdateOne(n - 1),
-            _ => MenuChoice::Invalid,
+        return match parse_numbers(rest, plugin_count) {
+            Some(list) => MenuChoice::Update(list),
+            None => MenuChoice::Invalid,
         };
     }
-    match input.parse::<usize>() {
-        Ok(n) if (1..=plugin_count).contains(&n) => MenuChoice::Toggle(n - 1),
-        _ => MenuChoice::Invalid,
+    match parse_numbers(input, plugin_count) {
+        Some(list) => MenuChoice::Toggle(list),
+        None => MenuChoice::Invalid,
     }
+}
+
+/// Parse a list of 1-based menu numbers separated by spaces and/or commas
+/// (`1 3 5`, `1,3,5`). Ranges like `2-4` are accepted too. Returns 0-based
+/// indexes without duplicates, or `None` if any entry is invalid.
+fn parse_numbers(input: &str, plugin_count: usize) -> Option<Vec<usize>> {
+    let mut out = Vec::new();
+    let in_range = |n: usize| (1..=plugin_count).contains(&n);
+    for token in input.split(|c: char| c == ',' || c.is_whitespace()) {
+        if token.is_empty() {
+            continue;
+        }
+        let (lo, hi) = match token.split_once('-') {
+            Some((a, b)) => (a.parse::<usize>().ok()?, b.parse::<usize>().ok()?),
+            None => {
+                let n = token.parse::<usize>().ok()?;
+                (n, n)
+            }
+        };
+        if lo > hi || !in_range(lo) || !in_range(hi) {
+            return None;
+        }
+        for n in lo..=hi {
+            if !out.contains(&(n - 1)) {
+                out.push(n - 1);
+            }
+        }
+    }
+    (!out.is_empty()).then_some(out)
 }
 
 /// Installed and the looked-up release is a different version.
@@ -642,28 +811,34 @@ fn cmd_menu() -> anyhow::Result<i32> {
             MenuChoice::Invalid => {
                 println!("{} {input}", theme::red("Invalid choice:"));
             }
-            MenuChoice::Toggle(index) => {
-                let plugin = plugins[index];
-                let ctx = context(plugin.id(), None, None)?;
-                let outcome = if rows[index].installed {
-                    perform_uninstall(plugin, &ctx)
-                } else {
-                    // Install missing prerequisites before the selected plugin.
-                    install_prerequisites(plugin, &mut Vec::new())
-                        .and_then(|_| perform_install(plugin, &ctx, false))
-                };
-                if let Err(e) = outcome {
-                    eprintln!("{} {e}", theme::red("Error:"));
+            MenuChoice::Toggle(indexes) => {
+                // Each selected plugin flips: installed ones are uninstalled,
+                // the rest are installed. A failure doesn't stop the others.
+                for index in indexes {
+                    let plugin = plugins[index];
+                    let ctx = context(plugin.id(), None, None)?;
+                    let outcome = if rows[index].installed {
+                        perform_uninstall(plugin, &ctx)
+                    } else {
+                        // Install missing prerequisites before the selected plugin.
+                        install_prerequisites(plugin, &mut Vec::new())
+                            .and_then(|_| perform_install(plugin, &ctx, false))
+                    };
+                    if let Err(e) = outcome {
+                        eprintln!("{} {}: {e}", theme::red("Error:"), plugin.id());
+                    }
                 }
             }
-            MenuChoice::UpdateOne(index) => {
-                if let Err(e) = update_one(
-                    plugins[index],
-                    &rows[index],
-                    latest[index].as_deref(),
-                    index,
-                ) {
-                    eprintln!("{} {e}", theme::red("Error:"));
+            MenuChoice::Update(indexes) => {
+                for index in indexes {
+                    if let Err(e) = update_one(
+                        plugins[index],
+                        &rows[index],
+                        latest[index].as_deref(),
+                        index,
+                    ) {
+                        eprintln!("{} {}: {e}", theme::red("Error:"), plugins[index].id());
+                    }
                 }
             }
             MenuChoice::UpdateAll => {
@@ -757,12 +932,17 @@ pub fn main(argv: Option<Vec<String>>) -> anyhow::Result<i32> {
     match cli.command {
         Some(Command::List) => cmd_list(),
         Some(Command::Install {
-            plugin,
+            plugins,
             force,
             sdk_version,
             channel,
-        }) => cmd_install(&plugin, force, sdk_version, channel),
-        Some(Command::Uninstall { plugin }) => cmd_uninstall(&plugin),
+        }) => cmd_install(&plugins, force, sdk_version, channel),
+        Some(Command::Update {
+            plugins,
+            all,
+            force,
+        }) => cmd_update(&plugins, all, force),
+        Some(Command::Uninstall { plugins }) => cmd_uninstall(&plugins),
         Some(Command::Status { plugin }) => cmd_status(&plugin),
         Some(Command::Doctor) => cmd_doctor(),
         Some(Command::Menu) | None => cmd_menu(),
@@ -771,25 +951,36 @@ pub fn main(argv: Option<Vec<String>>) -> anyhow::Result<i32> {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_menu_choice, plugin_needs_update, MenuChoice};
+    use super::{dedup_ids, parse_menu_choice, plugin_needs_update, MenuChoice};
 
     #[test]
     fn menu_choice_keeps_update_one_and_update_all() {
         assert!(matches!(parse_menu_choice("a", 3), MenuChoice::UpdateAll));
         assert!(matches!(parse_menu_choice("A", 3), MenuChoice::UpdateAll));
         assert!(matches!(parse_menu_choice("u", 3), MenuChoice::UpdateHint));
-        assert!(matches!(
-            parse_menu_choice("u 2", 3),
-            MenuChoice::UpdateOne(1)
-        ));
-        assert!(matches!(
-            parse_menu_choice("U2", 3),
-            MenuChoice::UpdateOne(1)
-        ));
+        assert!(matches!(parse_menu_choice("u 2", 3), MenuChoice::Update(v) if v == [1]));
+        assert!(matches!(parse_menu_choice("U2", 3), MenuChoice::Update(v) if v == [1]));
         assert!(matches!(parse_menu_choice("u 9", 3), MenuChoice::Invalid));
-        assert!(matches!(parse_menu_choice("2", 3), MenuChoice::Toggle(1)));
+        assert!(matches!(parse_menu_choice("2", 3), MenuChoice::Toggle(v) if v == [1]));
         assert!(matches!(parse_menu_choice("q", 3), MenuChoice::Quit));
         assert!(matches!(parse_menu_choice("r", 3), MenuChoice::Refresh));
+    }
+
+    #[test]
+    fn menu_choice_accepts_multiple_numbers() {
+        assert!(matches!(parse_menu_choice("1 3", 5), MenuChoice::Toggle(v) if v == [0, 2]));
+        assert!(matches!(parse_menu_choice("1,3, 5", 5), MenuChoice::Toggle(v) if v == [0, 2, 4]));
+        assert!(matches!(parse_menu_choice("2-4", 5), MenuChoice::Toggle(v) if v == [1, 2, 3]));
+        assert!(matches!(parse_menu_choice("1 1", 5), MenuChoice::Toggle(v) if v == [0]));
+        assert!(matches!(parse_menu_choice("u 1 2", 5), MenuChoice::Update(v) if v == [0, 1]));
+        assert!(matches!(parse_menu_choice("1 9", 5), MenuChoice::Invalid));
+        assert!(matches!(parse_menu_choice("4-2", 5), MenuChoice::Invalid));
+    }
+
+    #[test]
+    fn dedup_ids_keeps_order_and_drops_blanks() {
+        let ids = vec!["git".into(), " go ".into(), "".into(), "git".into()];
+        assert_eq!(dedup_ids(&ids), vec!["git", "go"]);
     }
 
     #[test]

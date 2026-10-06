@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-06
+
+### Added
+
+- `devkit install`, `devkit uninstall`, and the new `devkit update` accept
+  several plugin ids, space- or comma-separated (`devkit install git go,node`).
+  Each plugin runs in turn, failures don't stop the rest, and a summary lists
+  what failed (exit code 1 if anything did).
+- `devkit update <ids>` reinstalls a plugin only when a newer release exists;
+  `--all` updates every installed plugin and `--force` reinstalls regardless.
+- The interactive menu accepts several numbers (`1 3 5`, `1,3`, or a range
+  `2-4`) to install/uninstall each, and `u <numbers>` to update several.
+
 ## [0.14.0] - 2026-10-06
 
 ### Added
@@ -390,6 +403,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.15.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.0
 [0.14.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.14.0
 [0.13.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.13.0
 [0.12.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.1

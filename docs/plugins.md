@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.14.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
+DevKit **0.15.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
 
 | ID | OS | Notes |
 |----|----|-------|
@@ -107,7 +107,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.14.0
+Version: 0.15.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -115,7 +115,7 @@ Version: 0.14.0
 12   git              Git                      not_installed  -                2.56.0.windows.1
 32   rust             Rust                     installed      1.98.1           1.99.0 (update available)
 
-Enter a number to install/uninstall, 'u <number>' to update one, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
+Enter number(s) to install/uninstall (e.g. '1 3 5' or '2-4'), 'u <number(s)>' to update, 'a' to update all, 'r' to refresh versions, or 'q' to quit:
 ```
 
 On macOS and Linux the OS line is `OS: macOS` or `OS: Linux`. Chocolatey and MSYS2 are omitted there. A matching install prints `up to date`. A newer release prints `update available`. `u <number>` reinstalls that plugin at the available version. `a` does the same for every row that shows `update available`.
