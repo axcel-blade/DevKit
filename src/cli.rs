@@ -131,6 +131,60 @@ fn perform_install(
     Ok(())
 }
 
+/// Whether a prerequisite is already satisfied: the plugin is installed by
+/// DevKit, or its binary is already on PATH (e.g. a system install).
+fn prerequisite_present(plugin: &dyn Plugin, binary: &str) -> anyhow::Result<bool> {
+    let ctx = context(plugin.id(), None, None)?;
+    Ok(plugin.status(&ctx).state == InstallState::Installed || which::which(binary).is_ok())
+}
+
+/// Install any missing prerequisites of `plugin` (recursively, dependencies
+/// first) before the plugin itself. `visiting` guards against cycles.
+fn install_prerequisites(
+    plugin: &dyn Plugin,
+    visiting: &mut Vec<&'static str>,
+) -> anyhow::Result<()> {
+    let prereqs = plugin.prerequisites();
+    if prereqs.is_empty() {
+        return Ok(());
+    }
+    visiting.push(plugin.id());
+    let registry = default_registry();
+    for &(dep_id, binary) in prereqs {
+        if visiting.contains(&dep_id) {
+            anyhow::bail!("Circular prerequisite: {} -> {dep_id}", plugin.id());
+        }
+        let dep = registry.require(dep_id)?;
+        if prerequisite_present(dep, binary)? {
+            println!(
+                "{} {} needs {}: already available.",
+                theme::dim("Prerequisite:"),
+                plugin.id(),
+                dep_id
+            );
+            continue;
+        }
+        if !dep.supports_os(current_os()) {
+            anyhow::bail!(
+                "{} needs `{binary}`, but {dep_id} cannot be installed on {}. Install it manually first.",
+                plugin.id(),
+                os_label()
+            );
+        }
+        println!(
+            "{} {} needs {}, installing it first.",
+            theme::cyan("Prerequisite:"),
+            plugin.id(),
+            dep_id
+        );
+        install_prerequisites(dep, visiting)?;
+        let dep_ctx = context(dep.id(), None, None)?;
+        perform_install(dep, &dep_ctx, false)?;
+    }
+    visiting.pop();
+    Ok(())
+}
+
 /// Revert a plugin's env_spec and run its uninstall step. Shared by
 /// `cmd_uninstall` and `cmd_menu`.
 fn perform_uninstall(plugin: &dyn Plugin, ctx: &InstallContext) -> anyhow::Result<()> {
@@ -193,6 +247,7 @@ fn cmd_install(
         );
     }
 
+    install_prerequisites(plugin, &mut Vec::new())?;
     perform_install(plugin, &ctx, false)?;
     Ok(0)
 }
@@ -593,7 +648,9 @@ fn cmd_menu() -> anyhow::Result<i32> {
                 let outcome = if rows[index].installed {
                     perform_uninstall(plugin, &ctx)
                 } else {
-                    perform_install(plugin, &ctx, false)
+                    // Install missing prerequisites before the selected plugin.
+                    install_prerequisites(plugin, &mut Vec::new())
+                        .and_then(|_| perform_install(plugin, &ctx, false))
                 };
                 if let Err(e) = outcome {
                     eprintln!("{} {e}", theme::red("Error:"));

@@ -64,6 +64,11 @@ impl Plugin for PmdPlugin {
         "PMD"
     }
 
+    // Needs `java` at runtime; install the jdk plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("jdk", "java")]
+    }
+
     fn description(&self) -> &'static str {
         "Download PMD Source Code Analyzer binary ZIP from GitHub \
          (optional --version) and set PMD_HOME / PATH. Needs Java; use the jdk plugin."

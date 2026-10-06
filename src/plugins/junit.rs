@@ -110,6 +110,11 @@ impl Plugin for JunitPlugin {
         "JUnit"
     }
 
+    // Needs `java` at runtime; install the jdk plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("jdk", "java")]
+    }
+
     fn description(&self) -> &'static str {
         "Download JUnit Platform Console Standalone from Maven Central \
          (optional --version) and set JUNIT_HOME / PATH. Needs Java to run; \

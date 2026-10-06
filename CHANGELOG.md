@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-06
+
 ### Added
+
+- Plugin prerequisites. Before installing a plugin, DevKit checks what it
+  needs and installs any missing prerequisite first: `composer` needs `php`;
+  `junit`, `pmd`, `maven`, `gradle`, and `android` need `jdk`; `flutter`
+  needs `git`. A prerequisite is skipped when DevKit already installed it or
+  its binary is on PATH.
 
 - The interactive menu can update one installed plugin (`u <number>`) or every
   installed plugin with a newer release (`a`). A number still installs or
@@ -382,6 +390,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.14.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.14.0
 [0.13.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.13.0
 [0.12.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.1
 [0.12.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.12.0

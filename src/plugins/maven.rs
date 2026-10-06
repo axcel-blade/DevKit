@@ -41,6 +41,11 @@ impl Plugin for MavenPlugin {
         "Maven"
     }
 
+    // Needs `java` at runtime; install the jdk plugin first if it is missing.
+    fn prerequisites(&self) -> &'static [(&'static str, &'static str)] {
+        &[("jdk", "java")]
+    }
+
     fn description(&self) -> &'static str {
         "Download latest Apache Maven binary ZIP and set MAVEN_HOME / PATH."
     }
