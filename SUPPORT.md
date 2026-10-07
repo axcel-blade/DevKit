@@ -18,7 +18,7 @@
 
 ## What to include in a bug report
 
-- DevKit version (`cargo run --release -- --version`) — current is **0.15.1**
+- DevKit version (`cargo run --release -- --version`) — current is **0.15.2**
 - OS and architecture
 - Command you ran
 - Full error output
