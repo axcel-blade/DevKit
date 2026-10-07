@@ -419,6 +419,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.15.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.2
 [0.15.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.1
 [0.15.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.0
 [0.14.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.14.0
