@@ -16,7 +16,8 @@
   the msvc Rust toolchain needs. `devkit.bat` installs them when missing
   (asks for admin rights): it first adds the C++ tools to an existing Visual
   Studio install, otherwise installs Build Tools via winget, falling back to
-  the `vs_BuildTools.exe` bootstrapper.
+  the `vs_BuildTools.exe` bootstrapper. It needs about 7 GB free on the
+  system drive; installer exit code `0x80070070` means the disk is full.
 - On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` and the
   Makefile install the distro toolchain (`build-essential`, `base-devel`, ...)
   when it is missing.
@@ -71,7 +72,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.3
+Version: 0.15.4
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
