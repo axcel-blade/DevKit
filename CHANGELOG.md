@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.3] - 2026-10-07
+
+### Fixed
+
+- `devkit.bat` no longer fails with "Installer failed with exit code:
+  2147942512" when Visual Studio (e.g. Community) is already installed
+  without the C++ tools. It now adds the MSVC tools and Windows SDK to the
+  existing install through the Visual Studio Installer (`setup.exe modify`)
+  instead of installing a second Build Tools product next to it.
+- When the winget install of Build Tools fails, `devkit.bat` now falls back
+  to the `vs_BuildTools.exe` bootstrapper instead of giving up.
+
 ## [0.15.1] - 2026-10-06
 
 ### Fixed
@@ -419,6 +431,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.15.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.3
 [0.15.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.2
 [0.15.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.1
 [0.15.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.0
