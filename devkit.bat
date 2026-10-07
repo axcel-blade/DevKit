@@ -9,8 +9,10 @@ REM 2. Make sure the MSVC linker (link.exe from Visual Studio Build Tools with
 REM    the "Desktop development with C++" workload) is present. The msvc Rust
 REM    toolchain cannot link anything without it, and several dependencies
 REM    (ring, zstd-sys, lzma-sys, bzip2-sys) also need its C compiler. When
-REM    missing, install the Build Tools through winget, or through Microsoft's
-REM    vs_BuildTools.exe bootstrapper when winget is unavailable.
+REM    missing, first add the C++ tools to an existing Visual Studio install
+REM    (via its setup.exe modify); otherwise install the Build Tools through
+REM    winget, or through Microsoft's vs_BuildTools.exe bootstrapper when
+REM    winget is unavailable or fails.
 REM 3. Rebuild the release binary (a no-op when it is already up to date), so
 REM    a stale binary from an older checkout never hides new features.
 REM 4. Run it. With no arguments (e.g. double-clicking this file) the
@@ -161,11 +163,37 @@ echo Rust's msvc toolchain needs Visual Studio Build Tools with the C++ workload
 echo Installing Visual Studio Build Tools ^(several minutes, asks for admin rights^)...
 set "VS_ARGS=--quiet --wait --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
 
+REM An existing Visual Studio (Community, Professional, Build Tools, ...)
+REM that only lacks the C++ tools: modify it through its own installer
+REM instead of installing a second product next to it, which the VS
+REM installer rejects (e.g. exit code 0x80070070 / 2147942512).
+set "VS_SETUP=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\setup.exe"
+set "VS_EXISTING="
+if exist "%VSWHERE%" (
+    for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -property installationPath`) do set "VS_EXISTING=%%I"
+)
+if defined VS_EXISTING if exist "%VS_SETUP%" (
+    echo Adding the C++ tools to the existing Visual Studio at "!VS_EXISTING!"...
+    REM Start-Process -Verb RunAs raises the UAC prompt; -Wait blocks until done.
+    powershell -NoProfile -NonInteractive -Command ^
+        "$q = [char]34; $a = 'modify --installPath ' + $q + $env:VS_EXISTING + $q + ' --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows11SDK.22621 --includeRecommended --passive --norestart'; $p = Start-Process -FilePath $env:VS_SETUP -Verb RunAs -Wait -PassThru -ArgumentList $a; exit $p.ExitCode"
+    call :has_msvc
+    if not errorlevel 1 (
+        echo Visual Studio C++ tools installed.
+        exit /b 0
+    )
+    echo Modifying the existing Visual Studio did not add the C++ tools; trying Build Tools...
+)
+
+set "WINGET_OK="
 where winget >nul 2>&1
 if not errorlevel 1 (
     winget install --id Microsoft.VisualStudio.2022.BuildTools -e --source winget --accept-package-agreements --accept-source-agreements --override "!VS_ARGS!"
-) else (
-    REM No winget: fall back to Microsoft's Build Tools bootstrapper.
+    if not errorlevel 1 set "WINGET_OK=1"
+)
+REM No winget, or winget failed: fall back to Microsoft's Build Tools bootstrapper.
+call :has_msvc
+if errorlevel 1 if not defined WINGET_OK (
     mkdir "%TEMP%\devkit" >nul 2>nul
     set "VS_BOOT=%TEMP%\devkit\vs_BuildTools.exe"
     powershell -NoProfile -NonInteractive -Command ^

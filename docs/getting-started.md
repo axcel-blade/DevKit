@@ -13,8 +13,10 @@
   works if you export `CARGO_HOME` / `RUSTUP_HOME` first).
 - Windows only: Visual Studio Build Tools with the "Desktop development with
   C++" workload, which provides the MSVC linker (`link.exe`) and C compiler
-  the msvc Rust toolchain needs. `devkit.bat` installs them (winget, or the
-  `vs_BuildTools.exe` bootstrapper; asks for admin rights) when missing.
+  the msvc Rust toolchain needs. `devkit.bat` installs them when missing
+  (asks for admin rights): it first adds the C++ tools to an existing Visual
+  Studio install, otherwise installs Build Tools via winget, falling back to
+  the `vs_BuildTools.exe` bootstrapper.
 - On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` and the
   Makefile install the distro toolchain (`build-essential`, `base-devel`, ...)
   when it is missing.
@@ -69,7 +71,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.2
+Version: 0.15.3
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
