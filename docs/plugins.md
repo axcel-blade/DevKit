@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.15.1** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
+DevKit **0.15.2** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
 
 | ID | OS | Notes |
 |----|----|-------|
@@ -107,7 +107,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.1
+Version: 0.15.2
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1

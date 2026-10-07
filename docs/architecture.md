@@ -1,6 +1,6 @@
 # Architecture
 
-DevKit **0.15.1** is a CLI application with a plugin pipeline.
+DevKit **0.15.2** is a CLI application with a plugin pipeline.
 
 ```text
 target/release/devkit (binary) / devkit.bat / devkit.sh
@@ -66,7 +66,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.1
+Version: 0.15.2
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1

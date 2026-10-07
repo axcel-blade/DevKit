@@ -11,6 +11,10 @@
   `devkit.sh` install rustup stable there when `cargo` is missing. Running
   `cargo run` yourself still needs a toolchain on PATH (the one in `dev/rust`
   works if you export `CARGO_HOME` / `RUSTUP_HOME` first).
+- Windows only: Visual Studio Build Tools with the "Desktop development with
+  C++" workload, which provides the MSVC linker (`link.exe`) and C compiler
+  the msvc Rust toolchain needs. `devkit.bat` installs them (winget, or the
+  `vs_BuildTools.exe` bootstrapper; asks for admin rights) when missing.
 - On Linux / WSL / macOS, a system C linker (`cc`). `devkit.sh` and the
   Makefile install the distro toolchain (`build-essential`, `base-devel`, ...)
   when it is missing.
@@ -65,7 +69,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.1
+Version: 0.15.2
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1

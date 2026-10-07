@@ -1,6 +1,6 @@
 # DevKit
 
-[![Version](https://img.shields.io/badge/version-0.15.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.15.2-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
@@ -31,7 +31,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.1
+Version: 0.15.2
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
