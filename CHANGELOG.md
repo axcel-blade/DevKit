@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.4] - 2026-10-07
+
+### Fixed
+
+- `devkit.bat` now recognizes Visual Studio Installer exit code
+  `0x80070070` (-2147024784 / 2147942512) as ERROR_DISK_FULL (the
+  installer's `SizePreCheckEvaluator` failed) and stops with a clear
+  "not enough free disk space" message, instead of retrying Build Tools,
+  which failed the same way. 0.15.3 had misread this code as a
+  product conflict.
+- `devkit.bat` checks that the system drive has about 7 GB free before
+  installing the C++ Build Tools.
+
 ## [0.15.3] - 2026-10-07
 
 ### Fixed
@@ -431,6 +444,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.15.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.4
 [0.15.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.3
 [0.15.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.2
 [0.15.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.1
