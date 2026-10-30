@@ -27,6 +27,8 @@ pub mod msys2;
 pub mod mysql;
 pub mod ninja;
 pub mod node;
+pub mod node_pm;
+pub mod npm;
 pub mod php;
 pub mod platform_tools;
 pub mod pmd;
@@ -38,6 +40,7 @@ pub mod rust;
 pub mod sqlite;
 pub mod terraform;
 pub mod uv;
+pub mod yarn;
 
 use crate::plugin::Plugin;
 
@@ -68,6 +71,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(mysql::MysqlPlugin),
         Box::new(ninja::NinjaPlugin),
         Box::new(node::NodePlugin),
+        Box::new(npm::NpmPlugin),
         Box::new(php::PhpPlugin),
         Box::new(platform_tools::PlatformToolsPlugin),
         Box::new(pmd::PmdPlugin),
@@ -79,6 +83,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(sqlite::SqlitePlugin),
         Box::new(terraform::TerraformPlugin),
         Box::new(uv::UvPlugin),
+        Box::new(yarn::YarnPlugin),
     ]
 }
 

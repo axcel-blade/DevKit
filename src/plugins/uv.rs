@@ -3,7 +3,7 @@
 use crate::download::install_archive_from_url;
 use crate::platform::{cpu_arch, current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus};
-use crate::plugin_utils::{binary_status, github_latest_release, pick_release_asset};
+use crate::plugin_utils::{binary_status, github_latest_asset};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
 use std::path::PathBuf;
@@ -39,9 +39,8 @@ fn uv_asset_name(host: HostOS, arch: &str) -> Result<&'static str> {
 }
 
 fn resolve_uv_download() -> Result<(String, String)> {
-    let release = github_latest_release("astral-sh", "uv")?;
     let asset = uv_asset_name(current_os(), &cpu_arch())?;
-    pick_release_asset(&release, &[asset])
+    github_latest_asset("astral-sh", "uv", asset)
 }
 
 fn uv_bin(ctx: &InstallContext) -> PathBuf {

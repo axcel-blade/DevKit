@@ -82,9 +82,9 @@ cargo run --release -- doctor
 2. Implement `status`, `install`, `uninstall`, and `env_spec`. Override `supported_os` when the plugin does not run on every desktop OS.
 3. Register the plugin in `crate::plugins::all()` (`src/plugins/mod.rs`).
 4. Add tests in a `#[cfg(test)] mod tests` block at the bottom of the file.
-5. Document the plugin in `README.md` and `docs/plugins.md`.
+5. Document the plugin in `README.md` and `docs/PLUGINS.md`.
 
-See [docs/plugins.md](docs/plugins.md).
+See [docs/PLUGINS.md](docs/PLUGINS.md).
 
 ## Commit messages
 

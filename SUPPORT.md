@@ -2,7 +2,7 @@
 
 ## How to get help
 
-1. Read [README.md](README.md) and [docs/getting-started.md](docs/getting-started.md).
+1. Read [README.md](README.md) and [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 2. Run diagnostics:
 
    ```bash

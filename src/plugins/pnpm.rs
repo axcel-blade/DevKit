@@ -3,7 +3,7 @@
 use crate::download::{download_file, install_archive_from_url};
 use crate::platform::{cpu_arch, current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus};
-use crate::plugin_utils::{binary_status, find_files_named, github_latest_release};
+use crate::plugin_utils::{binary_status, find_files_named, github_latest_asset};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
 use std::path::{Path, PathBuf};
@@ -26,12 +26,11 @@ fn make_executable(_path: &Path) -> Result<()> {
 
 /// Return `(download_url, version_tag)` for the latest pnpm standalone build.
 fn resolve_pnpm_download() -> Result<(String, String)> {
-    let release = github_latest_release("pnpm", "pnpm")?;
-    let tag = release
-        .get("tag_name")
-        .and_then(|v| v.as_str())
-        .unwrap_or("unknown")
-        .to_string();
+    github_latest_asset("pnpm", "pnpm", pnpm_asset_name()?)
+}
+
+/// Standalone pnpm asset name for this OS / CPU arch.
+fn pnpm_asset_name() -> Result<&'static str> {
     let host = current_os();
     let arch = cpu_arch();
     let name = match host {
@@ -58,20 +57,7 @@ fn resolve_pnpm_download() -> Result<(String, String)> {
         }
         HostOS::Other => bail!("pnpm is not supported on this OS: other"),
     };
-    if let Some(assets) = release.get("assets").and_then(|v| v.as_array()) {
-        for asset in assets {
-            if asset.get("name").and_then(|v| v.as_str()) == Some(name) {
-                let url = asset
-                    .get("browser_download_url")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("");
-                if !url.is_empty() {
-                    return Ok((url.to_string(), tag));
-                }
-            }
-        }
-    }
-    bail!("No pnpm asset named {name} in {tag}")
+    Ok(name)
 }
 
 fn pnpm_bin(ctx: &InstallContext) -> PathBuf {
