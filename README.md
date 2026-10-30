@@ -1,11 +1,11 @@
 # DevKit
 
-[![Version](https://img.shields.io/badge/version-0.15.2-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.16.0-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
-[![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](docs/getting-started.md)
-[![Plugins](https://img.shields.io/badge/plugins-35-blueviolet.svg)](docs/plugins.md)
+[![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](docs/GETTING-STARTED.md)
+[![Plugins](https://img.shields.io/badge/plugins-37-blueviolet.svg)](docs/PLUGINS.md)
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -31,7 +31,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.2
+Version: 0.16.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -131,6 +131,7 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 | `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
 | `ninja` | Windows, macOS, Linux | Latest Ninja binary |
 | `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
+| `npm` | Windows, macOS, Linux | Latest standalone npm / npx (needs Node.js) |
 | `php` | Windows, macOS, Linux | PHP NTS (Windows); system wrappers (Unix) |
 | `platform-tools` | Windows, macOS, Linux | Android platform-tools (`adb`) |
 | `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary (`--version`) |
@@ -142,6 +143,7 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 | `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
 | `terraform` | Windows, macOS, Linux | Latest Terraform |
 | `uv` | Windows, macOS, Linux | Latest uv and uvx |
+| `yarn` | Windows, macOS, Linux | Latest Yarn classic (needs Node.js) |
 
 Default install root:
 
@@ -154,9 +156,9 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 
 | Doc | Purpose |
 |-----|---------|
-| [docs/getting-started.md](docs/getting-started.md) | Run the app and the Makefile targets |
-| [docs/plugins.md](docs/plugins.md) | Write a plugin |
-| [docs/architecture.md](docs/architecture.md) | How DevKit works |
+| [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) | Run the app and the Makefile targets |
+| [docs/PLUGINS.md](docs/PLUGINS.md) | Write a plugin |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How DevKit works |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
 | [ROADMAP.md](ROADMAP.md) | Future plans |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |

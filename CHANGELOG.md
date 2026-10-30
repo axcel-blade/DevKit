@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-30
+
+### Added
+
+- `npm` plugin: installs the latest npm from the npm registry into the
+  DevKit folder with `npm` / `npx` wrappers. Needs Node.js (installs the
+  `node` plugin first when `node` is missing).
+- `yarn` plugin: installs the latest Yarn classic from the npm registry
+  with `yarn` / `yarnpkg` wrappers. Needs Node.js.
+- Shared `node_pm` helper module for package managers distributed as npm
+  registry tarballs.
+
+### Changed
+
+- All Markdown filenames are now uppercase (e.g. `docs/PLUGINS.md`,
+  `docs/GETTING-STARTED.md`, `wiki/HOME.md`, issue and discussion
+  templates), and every link points to the new names.
+
+### Fixed
+
+- Installing pnpm no longer fails with "Failed to query GitHub release
+  pnpm/pnpm" when the GitHub API rate limit (60 requests/hour
+  unauthenticated) is used up. pnpm now falls back to the github.com
+  `releases/latest` redirect, which is not rate-limited, via the new shared
+  `github_latest_tag_redirect` helper.
+- Deno, Bun, and uv get the same fallback. All four plugins now resolve
+  their download through the shared `github_latest_asset` helper (API
+  first, redirect fallback second).
+
+## [0.15.4] - 2026-10-07
+
+### Fixed
+
+- `devkit.bat` now recognizes Visual Studio Installer exit code
+  `0x80070070` (-2147024784 / 2147942512) as ERROR_DISK_FULL (the
+  installer's `SizePreCheckEvaluator` failed) and stops with a clear
+  "not enough free disk space" message, instead of retrying Build Tools,
+  which failed the same way. 0.15.3 had misread this code as a
+  product conflict.
+- `devkit.bat` checks that the system drive has about 7 GB free before
+  installing the C++ Build Tools.
+
+## [0.15.3] - 2026-10-07
+
+### Fixed
+
+- `devkit.bat` no longer fails with "Installer failed with exit code:
+  2147942512" when Visual Studio (e.g. Community) is already installed
+  without the C++ tools. It now adds the MSVC tools and Windows SDK to the
+  existing install through the Visual Studio Installer (`setup.exe modify`)
+  instead of installing a second Build Tools product next to it.
+- When the winget install of Build Tools fails, `devkit.bat` now falls back
+  to the `vs_BuildTools.exe` bootstrapper instead of giving up.
+
 ## [0.15.1] - 2026-10-06
 
 ### Fixed
@@ -419,6 +473,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.16.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.16.0
+[0.15.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.4
+[0.15.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.3
 [0.15.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.2
 [0.15.1]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.1
 [0.15.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.0

@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **0.15.2** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
+DevKit **0.16.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
 
 | ID | OS | Notes |
 |----|----|-------|
@@ -9,7 +9,9 @@ DevKit **0.15.2** ships these built-in plugins. The OS column is where the menu 
 | `rust` | Windows, macOS, Linux | rustup stable into `CARGO_HOME` / `RUSTUP_HOME` |
 | `dotnet` | Windows, macOS, Linux | .NET SDK 10.0 LTS ZIP from Microsoft release metadata |
 | `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
+| `npm` | Windows, macOS, Linux | Latest npm tarball from the npm registry + `npm` / `npx` wrappers; needs Node.js |
 | `pnpm` | Windows, macOS, Linux | Latest pnpm standalone ZIP/tar from GitHub |
+| `yarn` | Windows, macOS, Linux | Latest Yarn classic tarball from the npm registry + `yarn` / `yarnpkg` wrappers; needs Node.js |
 | `deno` | Windows, macOS, Linux | Latest Deno ZIP from GitHub |
 | `bun` | Windows, macOS, Linux | Latest Bun ZIP from GitHub |
 | `uv` | Windows, macOS, Linux | Latest uv and uvx archive from GitHub |
@@ -107,7 +109,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.15.2
+Version: 0.16.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -147,6 +149,7 @@ it installs that plugin first, prerequisites of prerequisites included.
 | `android`, `gradle`, `junit`, `maven`, `pmd` | `jdk` (`java`) |
 | `composer` | `php` (`php`) |
 | `flutter` | `git` (`git`) |
+| `npm`, `yarn` | `node` (`node`) |
 
 Updates (`u` / `a`) do not install prerequisites again.
 

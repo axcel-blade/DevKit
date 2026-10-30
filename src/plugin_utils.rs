@@ -31,6 +31,63 @@ pub fn github_release_by_tag(owner: &str, repo: &str, tag: &str) -> Result<Value
     Ok(value)
 }
 
+/// Latest release tag for `owner/repo`, read from github.com's
+/// `releases/latest` redirect. Unlike the REST API this is not subject to
+/// the 60 requests/hour unauthenticated limit, so plugins use it as a
+/// fallback when [`github_latest_release`] fails.
+pub fn github_latest_tag_redirect(owner: &str, repo: &str) -> Result<String> {
+    crate::download::ensure_internet_access()?;
+    let url = format!("https://github.com/{owner}/{repo}/releases/latest");
+    let resp = ureq::get(&url)
+        .set("User-Agent", "DevKit")
+        .call()
+        .with_context(|| format!("Failed to open {url}"))?;
+    // Final URL looks like .../releases/tag/v10.0.0
+    match resp.get_url().rsplit_once("/tag/") {
+        Some((_, tag)) if !tag.is_empty() => Ok(tag.to_string()),
+        _ => bail!("Could not read latest release tag for {owner}/{repo}"),
+    }
+}
+
+/// Return `(download_url, tag)` for the asset named exactly `asset` in the
+/// latest `owner/repo` release.
+///
+/// Tries the GitHub API first; if that fails (e.g. the unauthenticated rate
+/// limit is exhausted), reads the tag from [`github_latest_tag_redirect`] and
+/// builds the standard `releases/download/<tag>/<asset>` URL instead.
+pub fn github_latest_asset(owner: &str, repo: &str, asset: &str) -> Result<(String, String)> {
+    let api = github_latest_release(owner, repo).and_then(|release| {
+        let tag = release
+            .get("tag_name")
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown")
+            .to_string();
+        release
+            .get("assets")
+            .and_then(|v| v.as_array())
+            .into_iter()
+            .flatten()
+            .filter(|a| a.get("name").and_then(|v| v.as_str()) == Some(asset))
+            .find_map(|a| a.get("browser_download_url").and_then(|v| v.as_str()))
+            .filter(|url| !url.is_empty())
+            .map(|url| (url.to_string(), tag.clone()))
+            .with_context(|| format!("No GitHub asset named {asset} in {owner}/{repo} {tag}"))
+    });
+    match api {
+        Ok(found) => Ok(found),
+        Err(api_err) => {
+            let tag = github_latest_tag_redirect(owner, repo).map_err(|fallback_err| {
+                anyhow::anyhow!(
+                    "{api_err:#}
+Fallback lookup also failed: {fallback_err:#}"
+                )
+            })?;
+            let url = format!("https://github.com/{owner}/{repo}/releases/download/{tag}/{asset}");
+            Ok((url, tag))
+        }
+    }
+}
+
 /// Return `(browser_download_url, tag_name)` for the first matching asset name.
 pub fn pick_release_asset(release: &Value, name_substrings: &[&str]) -> Result<(String, String)> {
     let tag = release

@@ -1,10 +1,10 @@
 # Plugins
 
-Built-in plugins in **0.15.0**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
+Built-in plugins in **0.16.0**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
 
 | OS | Plugins |
 |----|---------|
-| Windows, macOS, Linux | `anaconda`, `android`, `android-ndk`, `bun`, `cmake`, `composer`, `deno`, `docker`, `dotnet`, `flutter`, `git`, `go`, `gradle`, `jdk`, `junit`, `kubectl`, `make`, `maven`, `mono`, `mysql`, `ninja`, `node`, `php`, `platform-tools`, `pmd`, `pnpm`, `postgresql`, `python`, `qemu`, `rust`, `sqlite`, `terraform`, `uv` |
+| Windows, macOS, Linux | `anaconda`, `android`, `android-ndk`, `bun`, `cmake`, `composer`, `deno`, `docker`, `dotnet`, `flutter`, `git`, `go`, `gradle`, `jdk`, `junit`, `kubectl`, `make`, `maven`, `mono`, `mysql`, `ninja`, `node`, `npm`, `php`, `platform-tools`, `pmd`, `pnpm`, `postgresql`, `python`, `qemu`, `rust`, `sqlite`, `terraform`, `uv`, `yarn` |
 | Windows | `chocolatey`, `msys2` |
 
 Highlights:
@@ -25,7 +25,7 @@ cargo run --release -- install pmd
 cargo run --release -- install kubectl
 ```
 
-Authoring guide: [docs/plugins.md](../docs/plugins.md).
+Authoring guide: [docs/PLUGINS.md](../docs/PLUGINS.md).
 
 ## Prerequisites
 
