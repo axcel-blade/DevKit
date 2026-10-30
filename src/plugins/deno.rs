@@ -3,7 +3,7 @@
 use crate::download::install_archive_from_url;
 use crate::platform::{cpu_arch, current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus};
-use crate::plugin_utils::{binary_status, github_latest_release, pick_release_asset};
+use crate::plugin_utils::{binary_status, github_latest_asset};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
 use std::path::PathBuf;
@@ -11,33 +11,33 @@ use std::path::PathBuf;
 const MARKER: &str = ".devkit-deno";
 
 fn resolve_deno_download() -> Result<(String, String)> {
-    let release = github_latest_release("denoland", "deno")?;
     let host = current_os();
     let arch = cpu_arch();
-    match host {
+    let asset = match host {
         HostOS::Windows => {
             if arch == "aarch64" {
-                pick_release_asset(&release, &["deno-aarch64-pc-windows-msvc.zip"])
+                "deno-aarch64-pc-windows-msvc.zip"
             } else {
-                pick_release_asset(&release, &["deno-x86_64-pc-windows-msvc.zip"])
+                "deno-x86_64-pc-windows-msvc.zip"
             }
         }
         HostOS::Linux => {
             if arch == "aarch64" {
-                pick_release_asset(&release, &["deno-aarch64-unknown-linux-gnu.zip"])
+                "deno-aarch64-unknown-linux-gnu.zip"
             } else {
-                pick_release_asset(&release, &["deno-x86_64-unknown-linux-gnu.zip"])
+                "deno-x86_64-unknown-linux-gnu.zip"
             }
         }
         HostOS::MacOS => {
             if arch == "aarch64" {
-                pick_release_asset(&release, &["deno-aarch64-apple-darwin.zip"])
+                "deno-aarch64-apple-darwin.zip"
             } else {
-                pick_release_asset(&release, &["deno-x86_64-apple-darwin.zip"])
+                "deno-x86_64-apple-darwin.zip"
             }
         }
         HostOS::Other => bail!("Deno is not supported on this OS: other"),
-    }
+    };
+    github_latest_asset("denoland", "deno", asset)
 }
 
 fn deno_bin(ctx: &InstallContext) -> PathBuf {

@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-30
+
+### Added
+
+- `npm` plugin: installs the latest npm from the npm registry into the
+  DevKit folder with `npm` / `npx` wrappers. Needs Node.js (installs the
+  `node` plugin first when `node` is missing).
+- `yarn` plugin: installs the latest Yarn classic from the npm registry
+  with `yarn` / `yarnpkg` wrappers. Needs Node.js.
+- Shared `node_pm` helper module for package managers distributed as npm
+  registry tarballs.
+
+### Changed
+
+- All Markdown filenames are now uppercase (e.g. `docs/PLUGINS.md`,
+  `docs/GETTING-STARTED.md`, `wiki/HOME.md`, issue and discussion
+  templates), and every link points to the new names.
+
+### Fixed
+
+- Installing pnpm no longer fails with "Failed to query GitHub release
+  pnpm/pnpm" when the GitHub API rate limit (60 requests/hour
+  unauthenticated) is used up. pnpm now falls back to the github.com
+  `releases/latest` redirect, which is not rate-limited, via the new shared
+  `github_latest_tag_redirect` helper.
+- Deno, Bun, and uv get the same fallback. All four plugins now resolve
+  their download through the shared `github_latest_asset` helper (API
+  first, redirect fallback second).
+
 ## [0.15.4] - 2026-10-07
 
 ### Fixed
@@ -444,6 +473,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[0.16.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.16.0
 [0.15.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.4
 [0.15.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.3
 [0.15.2]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.2

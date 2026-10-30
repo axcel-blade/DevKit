@@ -76,4 +76,4 @@ cargo run --release -- install flutter --channel beta
 cargo run --release -- install jdk --version 17
 ```
 
-See [docs/getting-started.md](../docs/getting-started.md) for full details.
+See [docs/GETTING-STARTED.md](../docs/GETTING-STARTED.md) for full details.

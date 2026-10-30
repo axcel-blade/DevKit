@@ -6,7 +6,7 @@ Welcome to the DevKit wiki mirror in-repo.
 
 | Page | Topic |
 |------|-------|
-| [Installation](Installation.md) | How to run the app (`make`, `devkit.bat`, `devkit.sh`) |
-| [Plugins](Plugins.md) | Built-in SDK plugins |
+| [Installation](INSTALLATION.md) | How to run the app (`make`, `devkit.bat`, `devkit.sh`) |
+| [Plugins](PLUGINS.md) | Built-in SDK plugins |
 
 Canonical docs also live under [`docs/`](../docs/).

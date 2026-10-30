@@ -3,9 +3,7 @@
 use crate::download::install_archive_from_url;
 use crate::platform::{cpu_arch, current_os, is_windows, HostOS};
 use crate::plugin::{EnvSpec, InstallContext, InstallResult, Plugin, PluginStatus};
-use crate::plugin_utils::{
-    binary_status, find_files_named, github_latest_release, pick_release_asset,
-};
+use crate::plugin_utils::{binary_status, find_files_named, github_latest_asset};
 use crate::progress::download_progress;
 use anyhow::{bail, Result};
 use std::path::PathBuf;
@@ -13,7 +11,6 @@ use std::path::PathBuf;
 const MARKER: &str = ".devkit-bun";
 
 fn resolve_bun_download() -> Result<(String, String)> {
-    let release = github_latest_release("oven-sh", "bun")?;
     let host = current_os();
     let arch = cpu_arch();
     let needle = match host {
@@ -41,28 +38,8 @@ fn resolve_bun_download() -> Result<(String, String)> {
         HostOS::Other => bail!("Bun is not supported on this OS: other"),
     };
 
-    // Prefer exact asset name (skip -profile / -baseline variants).
-    if let Some(assets) = release.get("assets").and_then(|v| v.as_array()) {
-        for asset in assets {
-            if asset.get("name").and_then(|v| v.as_str()) == Some(needle) {
-                let url = asset
-                    .get("browser_download_url")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("")
-                    .to_string();
-                let tag = release
-                    .get("tag_name")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("unknown")
-                    .to_string();
-                if !url.is_empty() {
-                    return Ok((url, tag));
-                }
-            }
-        }
-    }
-    let stem = needle.trim_end_matches(".zip");
-    pick_release_asset(&release, &[stem, ".zip"])
+    // Exact name skips the -profile / -baseline variants.
+    github_latest_asset("oven-sh", "bun", needle)
 }
 
 /// ZIP often contains bun-<plat>/bun(.exe); after strip or nested search.
