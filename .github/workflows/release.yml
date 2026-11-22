@@ -1,4 +1,4 @@
-name: Release binaries
+﻿name: Release binaries
 
 # Builds devkit for each platform and attaches the archives (plus SHA-256
 # files) to the GitHub release. Runs when a release is published, or
@@ -25,7 +25,7 @@ jobs:
         include:
           - { os: windows-latest, target: x86_64-pc-windows-msvc, ext: zip }
           - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, ext: tar.gz }
-          - { os: macos-13, target: x86_64-apple-darwin, ext: tar.gz }
+          - { os: macos-latest, target: x86_64-apple-darwin, ext: tar.gz }
           - { os: macos-latest, target: aarch64-apple-darwin, ext: tar.gz }
     env:
       TAG: ${{ github.event.release.tag_name || inputs.tag }}
