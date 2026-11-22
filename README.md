@@ -196,7 +196,6 @@ Override with `DEVKIT_HOME`. Open a **new terminal** after install so PATH updat
 | [docs/PLUGINS.md](docs/PLUGINS.md) | Write a plugin |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How DevKit works |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
-| [ROADMAP.md](ROADMAP.md) | Future plans |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
 
 ## Makefile
