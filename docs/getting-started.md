@@ -1,5 +1,43 @@
 # Getting started
 
+## Download a prebuilt binary
+
+Each [release](https://github.com/axcel-blade/DevKit/releases) ships a `devkit` binary for every platform, with a `.sha256` checksum file next to it. The prebuilt binary needs no Rust toolchain, so the requirements below apply only when running from source.
+
+| Platform | File |
+| --- | --- |
+| Windows x64 | `devkit-<version>-x86_64-pc-windows-msvc.zip` |
+| Linux x64 | `devkit-<version>-x86_64-unknown-linux-gnu.tar.gz` |
+| macOS Intel | `devkit-<version>-x86_64-apple-darwin.tar.gz` |
+| macOS Apple Silicon | `devkit-<version>-aarch64-apple-darwin.tar.gz` |
+
+**Windows (PowerShell)**
+
+```powershell
+$v = "v1.0.0"
+$f = "devkit-$v-x86_64-pc-windows-msvc.zip"
+Invoke-WebRequest "https://github.com/axcel-blade/DevKit/releases/download/$v/$f" -OutFile $f
+Expand-Archive $f -DestinationPath devkit
+.\devkit\devkit.exe --version
+```
+
+**macOS / Linux**
+
+```bash
+v=v1.0.0
+target=x86_64-unknown-linux-gnu   # or x86_64-apple-darwin / aarch64-apple-darwin
+f="devkit-$v-$target.tar.gz"
+curl -fLO "https://github.com/axcel-blade/DevKit/releases/download/$v/$f"
+curl -fLO "https://github.com/axcel-blade/DevKit/releases/download/$v/$f.sha256"
+shasum -a 256 -c "$f.sha256"      # Linux: sha256sum -c "$f.sha256"
+tar -xzf "$f"
+./devkit --version
+```
+
+On macOS, a browser download is quarantined by Gatekeeper; clear it with `xattr -d com.apple.quarantine devkit` (not needed when downloading with `curl`). Put the binary on your `PATH` to run `devkit` from anywhere.
+
+Release binaries are built and attached by the `Release binaries` workflow (`.github/workflows/release.yml`) whenever a GitHub release is published.
+
 ## Requirements
 
 - An internet connection for the first run (rustup, crates.io) and for SDK
