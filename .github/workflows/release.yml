@@ -1,0 +1,66 @@
+name: Release binaries
+
+# Builds devkit for each platform and attaches the archives (plus SHA-256
+# files) to the GitHub release. Runs when a release is published, or
+# manually for an existing tag.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and upload (e.g. v1.0.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, ext: zip }
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, ext: tar.gz }
+          - { os: macos-13, target: x86_64-apple-darwin, ext: tar.gz }
+          - { os: macos-latest, target: aarch64-apple-darwin, ext: tar.gz }
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }}
+      - name: Package
+        shell: bash
+        run: |
+          name="devkit-${TAG}-${{ matrix.target }}"
+          dir="target/${{ matrix.target }}/release"
+          mkdir -p dist
+          if [ "${{ matrix.ext }}" = "zip" ]; then
+            7z a "dist/${name}.zip" "./${dir}/devkit.exe" > /dev/null
+          else
+            tar -czf "dist/${name}.tar.gz" -C "${dir}" devkit
+          fi
+          cd dist
+          file="${name}.${{ matrix.ext }}"
+          if command -v sha256sum > /dev/null; then
+            sha256sum "${file}" > "${file}.sha256"
+          else
+            shasum -a 256 "${file}" > "${file}.sha256"
+          fi
+      - name: Upload to release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${TAG}" dist/* --clobber
