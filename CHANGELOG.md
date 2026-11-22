@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-22
+
+### Fixed
+
+- Visual Studio Build Tools install no longer fails with exit code 5002
+  or a locked `vs_BuildTools.exe` when an earlier installer is still
+  running: DevKit waits for running VS installers, retries winget once,
+  and downloads the bootstrapper to a unique filename.
+
 ## [0.16.0] - 2026-10-30
 
 ### Added
@@ -473,6 +482,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[1.0.0]: https://github.com/axcel-blade/DevKit/releases/tag/v1.0.0
 [0.16.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.16.0
 [0.15.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.4
 [0.15.3]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.3
