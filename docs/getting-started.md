@@ -72,7 +72,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 0.16.0
+Version: 1.0.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
