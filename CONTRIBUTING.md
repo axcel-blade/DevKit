@@ -25,15 +25,62 @@ git push -u origin feature/my-change
 
 ### Release workflow
 
-```bash
-git checkout develop
-git checkout -b release/0.x.0
-# bump VERSION, CHANGELOG, docs
-git checkout main
-git merge --no-ff release/0.x.0
-git checkout develop
-git merge --no-ff release/0.x.0
-```
+`main` and `develop` are protected: changes go through pull requests that
+need one approving review and passing CI (the three `test` jobs and
+`Mono MSI layout (Windows)`). Pull requests into `main` can only be
+**squash-merged**.
+
+1. **Prepare the release on a branch from `develop`.**
+
+   ```bash
+   git checkout develop
+   git pull
+   git checkout -b release/vX.Y.Z
+   ```
+
+   Bump the version in `Cargo.toml`, `Cargo.lock` (the `devkit` package
+   entry), `README.md`, `docs/*.md`, and `wiki/*.md`. Move the
+   `## [Unreleased]` notes in `CHANGELOG.md` under a new
+   `## [X.Y.Z] - YYYY-MM-DD` heading and add its link at the bottom.
+   Check that `cargo build --release` prints the new version with
+   `devkit --version`.
+
+2. **Merge the release branch into `develop`.** Open a PR from
+   `release/vX.Y.Z` into `develop` and merge it with a normal merge commit.
+
+3. **Squash-merge `develop` into `main`.** Open a PR from `develop` into
+   `main` titled `Release vX.Y.Z` and use **Squash and merge**.
+
+4. **Publish the GitHub release.** Tag the new `main` commit and publish
+   the release with its notes from `CHANGELOG.md`:
+
+   ```bash
+   git checkout main
+   git pull
+   gh release create vX.Y.Z --target main --title "vX.Y.Z" --notes-file <notes.md>
+   ```
+
+   Publishing triggers the **Release binaries** workflow
+   (`.github/workflows/release.yml`). It builds `devkit` for Windows x64,
+   Linux x64, and macOS Intel and Apple Silicon, then attaches each archive
+   and its `.sha256` file to the release. To rebuild binaries for an
+   existing tag, run the workflow manually from the Actions tab with that
+   tag.
+
+5. **Reset `develop` to `main`.** The squash creates a new commit on
+   `main` that `develop` does not have. Point `develop` at `main` so the
+   branches match and the next release PR starts clean:
+
+   ```bash
+   git fetch origin
+   git push --force-with-lease origin origin/main:refs/heads/develop
+   ```
+
+   This needs admin rights, because `develop` is protected. Merge every open
+   PR into `develop` before the reset; otherwise rebase them onto the new
+   `develop` afterwards.
+
+6. **Clean up.** Delete the `release/vX.Y.Z` branch locally and on GitHub.
 
 ## Makefile
 
@@ -91,12 +138,13 @@ See [docs/PLUGINS.md](docs/PLUGINS.md).
 - Use clear, imperative subjects (e.g. `Add Node.js plugin`).
 - Do **not** add AI or bot co-author trailers (`Co-authored-by: Cursor`, etc.).
 - Keep commits focused; update docs when behavior changes.
-- Bump version in `VERSION` and `Cargo.toml`, and all user-facing markdown
-  for releases. Prefer the plain `VERSION` file (not `VERSION.md`).
+- For releases, bump the version in `Cargo.toml` and all user-facing
+  markdown (see [Release workflow](#release-workflow)).
 
 ## Pull requests
 
 - Target `develop` for features; `main` only for hotfixes/releases.
+  PRs into `main` are squash-merged.
 - Fill out the PR template.
 - Ensure CI (`cargo test` + `cargo run --release -- doctor`) passes.
 
