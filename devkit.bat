@@ -198,21 +198,39 @@ if defined VS_EXISTING if exist "%VS_SETUP%" (
 set "WINGET_OK="
 where winget >nul 2>&1
 if not errorlevel 1 (
+    REM Exit code 5002 means another Visual Studio installer was still
+    REM running (often a bootstrapper left over from an earlier attempt).
+    REM Wait for it to finish, then try once more.
+    call :wait_vs_installers
     winget install --id Microsoft.VisualStudio.2022.BuildTools -e --source winget --accept-package-agreements --accept-source-agreements --override "!VS_ARGS!"
     set "VS_RC=!ERRORLEVEL!"
-    if "!VS_RC!"=="0" set "WINGET_OK=1"
-    REM winget surfaces the installer's disk-full code (0x80070070).
     if "!VS_RC!"=="-2147024784" goto :msvc_disk_full
+    if not "!VS_RC!"=="0" (
+        call :wait_vs_installers
+        call :has_msvc
+        if errorlevel 1 (
+            echo Retrying the Build Tools install...
+            winget install --id Microsoft.VisualStudio.2022.BuildTools -e --source winget --accept-package-agreements --accept-source-agreements --override "!VS_ARGS!"
+            set "VS_RC=!ERRORLEVEL!"
+            if "!VS_RC!"=="-2147024784" goto :msvc_disk_full
+        )
+    )
+    if "!VS_RC!"=="0" set "WINGET_OK=1"
 )
 REM No winget, or winget failed: fall back to Microsoft's Build Tools bootstrapper.
 call :has_msvc
 if errorlevel 1 if not defined WINGET_OK (
+    call :wait_vs_installers
     mkdir "%TEMP%\devkit" >nul 2>nul
-    set "VS_BOOT=%TEMP%\devkit\vs_BuildTools.exe"
+    REM Unique name per run: a bootstrapper from an earlier run may still be
+    REM running and lock a fixed filename ("used by another process").
+    set "VS_BOOT=%TEMP%\devkit\vs_BuildTools_!RANDOM!!RANDOM!.exe"
+    del /f /q "%TEMP%\devkit\vs_BuildTools*.exe" >nul 2>nul
     powershell -NoProfile -NonInteractive -Command ^
-        "Invoke-WebRequest -UseBasicParsing -Uri 'https://aka.ms/vs/17/release/vs_BuildTools.exe' -OutFile '!VS_BOOT!'"
+        "try { Invoke-WebRequest -UseBasicParsing -Uri 'https://aka.ms/vs/17/release/vs_BuildTools.exe' -OutFile $env:VS_BOOT -ErrorAction Stop } catch { Write-Host ('Download failed: ' + $_.Exception.Message); exit 1 }"
     if exist "!VS_BOOT!" (
         "!VS_BOOT!" !VS_ARGS!
+        call :wait_vs_installers
         del /f /q "!VS_BOOT!" >nul 2>nul
     ) else (
         echo Failed to download the Visual Studio Build Tools installer.
@@ -236,6 +254,13 @@ echo Error: not enough free disk space to install the C++ Build Tools ^(0x800700
 echo The Visual Studio installer needs about 7 GB free on %SystemDrive%.
 echo Free up space ^(e.g. Disk Cleanup, empty the Recycle Bin, clear %TEMP%^), then run DevKit again.
 exit /b 1
+
+REM Waits (up to 30 minutes) for running Visual Studio installer processes
+REM to exit, so a new install does not fail with 5002 or a locked file.
+:wait_vs_installers
+powershell -NoProfile -NonInteractive -Command ^
+    "$n = 'vs_BuildTools*','vs_installer','vs_installershell','vs_setup_bootstrapper','vs_bootstrapper*'; $warned = $false; $end = (Get-Date).AddMinutes(30); while ((Get-Date) -lt $end) { $p = Get-Process -Name $n -ErrorAction SilentlyContinue; if (-not $p) { exit 0 }; if (-not $warned) { Write-Host 'Waiting for another Visual Studio installer to finish...'; $warned = $true }; Start-Sleep -Seconds 5 }; Write-Host 'Another Visual Studio installer is still running; close it and run DevKit again.'; exit 1"
+exit /b %ERRORLEVEL%
 
 REM Fails when the system drive has less than ~7 GB free, since the VS
 REM installer caches packages there and its pre-check rejects low space.
