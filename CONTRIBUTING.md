@@ -71,14 +71,19 @@ need one approving review and passing CI (the three `test` jobs and
    `main` that `develop` does not have. Point `develop` at `main` so the
    branches match and the next release PR starts clean:
 
+   `develop`'s protection blocks force pushes, even for admins, so an admin
+   allows them for the reset and turns them straight back off (in
+   **Settings → Branches → develop → Allow force pushes**, or with the API):
+
    ```bash
    git fetch origin
-   git push --force-with-lease origin origin/main:refs/heads/develop
+   # 1. Allow force pushes on develop (Settings, or PUT .../branches/develop/protection)
+   git push --force-with-lease=develop:origin/develop origin origin/main:refs/heads/develop
+   # 2. Turn "Allow force pushes" off again right away
    ```
 
-   This needs admin rights, because `develop` is protected. Merge every open
-   PR into `develop` before the reset; otherwise rebase them onto the new
-   `develop` afterwards.
+   Merge every open PR into `develop` before the reset; otherwise rebase
+   them onto the new `develop` afterwards.
 
 6. **Clean up.** Delete the `release/vX.Y.Z` branch locally and on GitHub.
 
