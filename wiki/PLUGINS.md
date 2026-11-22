@@ -1,6 +1,6 @@
 # Plugins
 
-Built-in plugins in **1.0.0**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
+Built-in plugins in **1.0.1**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
 
 | OS | Plugins |
 |----|---------|

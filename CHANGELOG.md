@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-22
+
+### Added
+
+- Release binaries for Windows x64, Linux x64, and macOS Intel and Apple
+  Silicon, each with a `.sha256` checksum file. The `Release binaries`
+  workflow builds and attaches them whenever a GitHub release is published.
+- Download instructions for the release binaries in the README,
+  `docs/GETTING-STARTED.md`, and `wiki/INSTALLATION.md`.
+- Release process documentation in `CONTRIBUTING.md`.
+
+### Fixed
+
+- Broken links to `docs/` and `wiki/` pages: the files are now stored with
+  the uppercase names the links use.
+- Removed links to `ROADMAP.md` and `TODO.md`, which no longer exist.
+- Wiki pages showed version 0.15.0.
+
 ## [1.0.0] - 2026-11-22
 
 ### Fixed
@@ -482,6 +500,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[1.0.1]: https://github.com/axcel-blade/DevKit/releases/tag/v1.0.1
 [1.0.0]: https://github.com/axcel-blade/DevKit/releases/tag/v1.0.0
 [0.16.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.16.0
 [0.15.4]: https://github.com/axcel-blade/DevKit/releases/tag/v0.15.4

@@ -1,6 +1,6 @@
 # DevKit Wiki
 
-**Version 1.0.0**
+**Version 1.0.1**
 
 Welcome to the DevKit wiki mirror in-repo.
 
