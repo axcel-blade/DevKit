@@ -1,6 +1,6 @@
 # Installation
 
-**DevKit 1.0.1**
+**DevKit 1.1.0**
 
 ## Download a prebuilt binary
 
@@ -16,7 +16,7 @@ Each [release](https://github.com/axcel-blade/DevKit/releases) ships a `devkit` 
 **Windows (PowerShell)**
 
 ```powershell
-$v = "v1.0.1"
+$v = "v1.1.0"
 $f = "devkit-$v-x86_64-pc-windows-msvc.zip"
 Invoke-WebRequest "https://github.com/axcel-blade/DevKit/releases/download/$v/$f" -OutFile $f
 Expand-Archive $f -DestinationPath devkit
@@ -26,7 +26,7 @@ Expand-Archive $f -DestinationPath devkit
 **macOS / Linux**
 
 ```bash
-v=v1.0.1
+v=v1.1.0
 target=x86_64-unknown-linux-gnu   # or x86_64-apple-darwin / aarch64-apple-darwin
 f="devkit-$v-$target.tar.gz"
 curl -fLO "https://github.com/axcel-blade/DevKit/releases/download/$v/$f"
@@ -95,7 +95,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 1.0.1
+Version: 1.1.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
