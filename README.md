@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](docs/GETTING-STARTED.md)
-[![Plugins](https://img.shields.io/badge/plugins-37-blueviolet.svg)](docs/PLUGINS.md)
+[![Plugins](https://img.shields.io/badge/plugins-40-blueviolet.svg)](docs/PLUGINS.md)
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -160,11 +160,13 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 | `jdk` | Windows, macOS, Linux | Eclipse Temurin JDK (default 25; `--version`) |
 | `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone (`--version`) |
 | `kubectl` | Windows, macOS, Linux | Latest stable kubectl |
+| `llvm` | Windows, macOS, Linux | Latest LLVM / Clang toolchain |
 | `make` | Windows, macOS, Linux | GNU Make 4.4.1 Chocolatey package (Windows, no admin); system wrappers (Unix) |
 | `maven` | Windows, macOS, Linux | Latest Apache Maven |
 | `mono` | Windows, macOS, Linux | Mono 6.12 (Win/macOS); system wrappers (Linux) |
 | `msys2` | Windows | Portable MSYS2 base runtime |
 | `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
+| `nasm` | Windows, macOS, Linux | Latest NASM (Windows/macOS); system wrappers (Linux) |
 | `ninja` | Windows, macOS, Linux | Latest Ninja binary |
 | `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
 | `npm` | Windows, macOS, Linux | Latest standalone npm / npx (needs Node.js) |
@@ -179,6 +181,7 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 | `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
 | `terraform` | Windows, macOS, Linux | Latest Terraform |
 | `uv` | Windows, macOS, Linux | Latest uv and uvx |
+| `vscode` | Windows, macOS, Linux | Portable Visual Studio Code (stable) |
 | `yarn` | Windows, macOS, Linux | Latest Yarn classic (needs Node.js) |
 
 Default install root:
