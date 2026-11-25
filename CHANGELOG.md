@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-25
+
+### Added
+
+- `vscode` plugin: portable Visual Studio Code (stable) with the `code` CLI
+  on PATH and `VSCODE_HOME` set. Windows and Linux run in portable mode.
+- `llvm` plugin: latest LLVM / Clang toolchain from llvm-project GitHub
+  releases for Windows, Linux, and Apple Silicon macOS; sets `LLVM_HOME`.
+  Intel macOS has no upstream build and is pointed at Homebrew.
+- `nasm` plugin: latest NASM assembler from nasm.us on Windows and macOS;
+  system NASM wrappers on Linux; sets `NASM_HOME`.
+
 ## [1.0.1] - 2026-11-22
 
 ### Added
@@ -500,6 +512,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial project scaffold from auto-gen-py-project
 
+[1.1.0]: https://github.com/axcel-blade/DevKit/releases/tag/v1.1.0
 [1.0.1]: https://github.com/axcel-blade/DevKit/releases/tag/v1.0.1
 [1.0.0]: https://github.com/axcel-blade/DevKit/releases/tag/v1.0.0
 [0.16.0]: https://github.com/axcel-blade/DevKit/releases/tag/v0.16.0
