@@ -1,10 +1,10 @@
 # Plugins
 
-Built-in plugins in **1.0.1**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
+Built-in plugins in **1.1.0**. The menu (`make bat` / `make sh`) lists only the rows available on the current OS. `devkit install` refuses the others and prints the reason.
 
 | OS | Plugins |
 |----|---------|
-| Windows, macOS, Linux | `anaconda`, `android`, `android-ndk`, `bun`, `cmake`, `composer`, `deno`, `docker`, `dotnet`, `flutter`, `git`, `go`, `gradle`, `jdk`, `junit`, `kubectl`, `make`, `maven`, `mono`, `mysql`, `ninja`, `node`, `npm`, `php`, `platform-tools`, `pmd`, `pnpm`, `postgresql`, `python`, `qemu`, `rust`, `sqlite`, `terraform`, `uv`, `yarn` |
+| Windows, macOS, Linux | `anaconda`, `android`, `android-ndk`, `bun`, `cmake`, `composer`, `deno`, `docker`, `dotnet`, `flutter`, `git`, `go`, `gradle`, `jdk`, `junit`, `kubectl`, `llvm`, `make`, `maven`, `mono`, `mysql`, `nasm`, `ninja`, `node`, `npm`, `php`, `platform-tools`, `pmd`, `pnpm`, `postgresql`, `python`, `qemu`, `rust`, `sqlite`, `terraform`, `uv`, `vscode`, `yarn` |
 | Windows | `chocolatey`, `msys2` |
 
 Highlights:

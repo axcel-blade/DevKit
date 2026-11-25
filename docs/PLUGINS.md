@@ -1,6 +1,6 @@
 # Plugins
 
-DevKit **1.0.1** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
+DevKit **1.1.0** ships these built-in plugins. The OS column is where the menu lists the plugin and where `devkit install` accepts it.
 
 | ID | OS | Notes |
 |----|----|-------|
@@ -23,6 +23,9 @@ DevKit **1.0.1** ships these built-in plugins. The OS column is where the menu l
 | `pmd` | Windows, macOS, Linux | PMD Source Code Analyzer binary ZIP from GitHub; `--version` optional |
 | `cmake` | Windows, macOS, Linux | Latest Kitware CMake binary |
 | `ninja` | Windows, macOS, Linux | Latest ninja-build binary ZIP |
+| `llvm` | Windows, macOS, Linux | Latest LLVM / Clang `.tar.xz` from llvm-project GitHub (no Intel macOS build) |
+| `nasm` | Windows, macOS, Linux | Latest NASM ZIP from nasm.us (Windows/macOS); system wrappers on Linux |
+| `vscode` | Windows, macOS, Linux | Portable Visual Studio Code stable; `code` CLI on PATH |
 | `make` | Windows, macOS, Linux | Chocolatey `make` 4.4.1 package unpacked into the DevKit folder on Windows (no elevated `choco`); system wrappers on Unix |
 | `chocolatey` | Windows | Latest Chocolatey CLI unpacked into the DevKit folder; sets user `ChocolateyInstall` |
 | `git` | Windows, macOS, Linux | MinGit on Windows; system wrappers on Unix |
@@ -109,7 +112,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 1.0.1
+Version: 1.1.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1

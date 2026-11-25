@@ -20,11 +20,13 @@ pub mod gradle;
 pub mod jdk;
 pub mod junit;
 pub mod kubectl;
+pub mod llvm;
 pub mod make;
 pub mod maven;
 pub mod mono;
 pub mod msys2;
 pub mod mysql;
+pub mod nasm;
 pub mod ninja;
 pub mod node;
 pub mod node_pm;
@@ -40,6 +42,7 @@ pub mod rust;
 pub mod sqlite;
 pub mod terraform;
 pub mod uv;
+pub mod vscode;
 pub mod yarn;
 
 use crate::plugin::Plugin;
@@ -64,11 +67,13 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(jdk::JdkPlugin),
         Box::new(junit::JunitPlugin),
         Box::new(kubectl::KubectlPlugin),
+        Box::new(llvm::LlvmPlugin),
         Box::new(make::MakePlugin),
         Box::new(maven::MavenPlugin),
         Box::new(mono::MonoPlugin),
         Box::new(msys2::Msys2Plugin),
         Box::new(mysql::MysqlPlugin),
+        Box::new(nasm::NasmPlugin),
         Box::new(ninja::NinjaPlugin),
         Box::new(node::NodePlugin),
         Box::new(npm::NpmPlugin),
@@ -83,6 +88,7 @@ pub fn all() -> Vec<Box<dyn Plugin>> {
         Box::new(sqlite::SqlitePlugin),
         Box::new(terraform::TerraformPlugin),
         Box::new(uv::UvPlugin),
+        Box::new(vscode::VscodePlugin),
         Box::new(yarn::YarnPlugin),
     ]
 }

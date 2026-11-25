@@ -1,11 +1,11 @@
 # DevKit
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![CI](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml/badge.svg)](https://github.com/axcel-blade/DevKit/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE.md)
 [![Rust](https://img.shields.io/badge/rust-2021_edition-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](docs/GETTING-STARTED.md)
-[![Plugins](https://img.shields.io/badge/plugins-37-blueviolet.svg)](docs/PLUGINS.md)
+[![Plugins](https://img.shields.io/badge/plugins-40-blueviolet.svg)](docs/PLUGINS.md)
 
 DevKit is a **CLI application** that sets up developer environments on Windows, macOS, and Linux: download an SDK, install it under a machine `dev` folder, and configure PATH / environment variables through plugins.
 
@@ -25,7 +25,7 @@ Each [release](https://github.com/axcel-blade/DevKit/releases) ships a `devkit` 
 **Windows (PowerShell)**
 
 ```powershell
-$v = "v1.0.1"
+$v = "v1.1.0"
 $f = "devkit-$v-x86_64-pc-windows-msvc.zip"
 Invoke-WebRequest "https://github.com/axcel-blade/DevKit/releases/download/$v/$f" -OutFile $f
 Expand-Archive $f -DestinationPath devkit
@@ -35,7 +35,7 @@ Expand-Archive $f -DestinationPath devkit
 **macOS / Linux**
 
 ```bash
-v=v1.0.1
+v=v1.1.0
 target=x86_64-unknown-linux-gnu   # or x86_64-apple-darwin / aarch64-apple-darwin
 f="devkit-$v-$target.tar.gz"
 curl -fLO "https://github.com/axcel-blade/DevKit/releases/download/$v/$f"
@@ -67,7 +67,7 @@ Checking for available versions ...
 
 DevKit
 OS: Windows
-Version: 1.0.1
+Version: 1.1.0
 #    ID               NAME                     STATUS         INSTALLED        AVAILABLE
 --------------------------------------------------------------------------------------------------------
 1    anaconda         Anaconda                 not_installed  -                2026.07-1
@@ -160,11 +160,13 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 | `jdk` | Windows, macOS, Linux | Eclipse Temurin JDK (default 25; `--version`) |
 | `junit` | Windows, macOS, Linux | JUnit Platform Console Standalone (`--version`) |
 | `kubectl` | Windows, macOS, Linux | Latest stable kubectl |
+| `llvm` | Windows, macOS, Linux | Latest LLVM / Clang toolchain |
 | `make` | Windows, macOS, Linux | GNU Make 4.4.1 Chocolatey package (Windows, no admin); system wrappers (Unix) |
 | `maven` | Windows, macOS, Linux | Latest Apache Maven |
 | `mono` | Windows, macOS, Linux | Mono 6.12 (Win/macOS); system wrappers (Linux) |
 | `msys2` | Windows | Portable MSYS2 base runtime |
 | `mysql` | Windows, macOS, Linux | MySQL 8.4 LTS portable |
+| `nasm` | Windows, macOS, Linux | Latest NASM (Windows/macOS); system wrappers (Linux) |
 | `ninja` | Windows, macOS, Linux | Latest Ninja binary |
 | `node` | Windows, macOS, Linux | Latest Node.js LTS (npm / npx) |
 | `npm` | Windows, macOS, Linux | Latest standalone npm / npx (needs Node.js) |
@@ -179,6 +181,7 @@ is where the menu lists that plugin and where `devkit install` accepts it.
 | `sqlite` | Windows, macOS, Linux | Official sqlite-tools CLI |
 | `terraform` | Windows, macOS, Linux | Latest Terraform |
 | `uv` | Windows, macOS, Linux | Latest uv and uvx |
+| `vscode` | Windows, macOS, Linux | Portable Visual Studio Code (stable) |
 | `yarn` | Windows, macOS, Linux | Latest Yarn classic (needs Node.js) |
 
 Default install root:
