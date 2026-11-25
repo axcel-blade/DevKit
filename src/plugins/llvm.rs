@@ -106,10 +106,7 @@ impl Plugin for LlvmPlugin {
         progress.done();
         let binary = clang_bin(ctx);
         if !binary.is_file() {
-            bail!(
-                "LLVM extracted but clang not found at {}",
-                binary.display()
-            );
+            bail!("LLVM extracted but clang not found at {}", binary.display());
         }
         std::fs::write(ctx.install_dir.join(MARKER), format!("{version}\n"))?;
         Ok(InstallResult::new(
